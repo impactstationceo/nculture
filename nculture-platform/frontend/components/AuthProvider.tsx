@@ -18,7 +18,7 @@ interface AuthContextType {
   viewMode: string | null;
   currentRole: string | null;
   currentPage: string;
-  authMode: string;
+  authMode: 'login' | 'signup' | 'institution_login' | 'institution_signup';
   showAuthModal: boolean;
   showUpgradeModal: boolean;
   upgradeReason: any;
@@ -26,13 +26,13 @@ interface AuthContextType {
   setUserPlan: React.Dispatch<React.SetStateAction<string>>;
   setUserEnterpriseTier: React.Dispatch<React.SetStateAction<any>>;
   setInstitution: React.Dispatch<React.SetStateAction<any>>;
-  setAuthMode: React.Dispatch<React.SetStateAction<string>>;
+  setAuthMode: React.Dispatch<React.SetStateAction<'login' | 'signup' | 'institution_login' | 'institution_signup'>>;
   setShowAuthModal: React.Dispatch<React.SetStateAction<boolean>>;
   setShowUpgradeModal: React.Dispatch<React.SetStateAction<boolean>>;
   setUpgradeReason: React.Dispatch<React.SetStateAction<any>>;
   setUser: React.Dispatch<React.SetStateAction<any>>;
   addLedgerEntry: (entry: any) => void;
-  handleAuthClick: (mode?: string) => void;
+  handleAuthClick: (mode?: 'login' | 'signup' | 'institution_login' | 'institution_signup') => void;
   handleLogin: (userData: any) => Promise<void>;
   handleLogout: () => void;
   handleShowUpgradeModal: (reason: any) => void;
@@ -89,7 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [institution, setInstitution] = useState(INSTITUTION_DATA);
   
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authMode, setAuthMode] = useState('login');
+  const [authMode, setAuthMode] = useState<'login' | 'signup' | 'institution_login' | 'institution_signup'>('login');
   const [pendingAction, setPendingAction] = useState<null | (() => void)>(null);
 
   const [wallet, setWallet] = useState({ balance: 1000 });
@@ -225,7 +225,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const handleAuthClick = (mode = 'login') => {
+  const handleAuthClick = (mode: 'login' | 'signup' | 'institution_login' | 'institution_signup' = 'login') => {
     setAuthMode(mode);
     setShowAuthModal(true);
   };

@@ -599,7 +599,7 @@ const AssessmentListPage = ({ onEnterStudio }: { onEnterStudio: (test: any) => v
                       <td className="px-5 py-4 text-sm text-neutral-600">{test.scheduledAt}</td>
                       <td className="px-5 py-4 text-sm text-neutral-600">{test.submitted}/{test.participants}명</td>
                       <td className="px-5 py-4">
-                        <span className={`text-sm font-semibold ${test.avgScore >= 80 ? 'text-emerald-600' : 'text-amber-600'}`}>
+                        <span className={`text-sm font-semibold ${(test.avgScore ?? 0) >= 80 ? 'text-emerald-600' : 'text-amber-600'}`}>
                           {test.avgScore}점
                         </span>
                       </td>

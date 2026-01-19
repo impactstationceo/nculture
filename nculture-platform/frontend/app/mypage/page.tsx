@@ -556,7 +556,7 @@ const MyPage = ({ wallet, userPlan, setUserPlan, setWallet, creditLedger, userEn
               <tab.icon className="w-4 h-4" />
               {tab.label}
             </button>
-          ))}
+            ))}
         </div>
 
         {/* 대시보드 탭 - 역할별 대시보드 */}
@@ -2024,17 +2024,6 @@ const MyPage = ({ wallet, userPlan, setUserPlan, setWallet, creditLedger, userEn
                         : 'border-neutral-200 hover:border-neutral-300'
                   }`}
                 >
-              return (
-                <div 
-                  key={planId}
-                  className={`border rounded-xl p-4 transition-all flex flex-col h-full ${
-                    isCurrentPlan 
-                      ? 'border-indigo-500 bg-indigo-50' 
-                      : isEnterprise
-                        ? 'border-violet-300 bg-gradient-to-br from-violet-50 to-indigo-50'
-                        : 'border-neutral-200 hover:border-neutral-300'
-                  }`}
-                >
                   {/* 헤더 */}
                   <div className="flex items-center justify-between mb-2">
                     <span className={`font-semibold ${isEnterprise ? 'text-violet-900' : 'text-neutral-900'}`}>{p.name}</span>
@@ -3054,39 +3043,6 @@ const MyPage = ({ wallet, userPlan, setUserPlan, setWallet, creditLedger, userEn
                     <div className="px-4 py-2.5 bg-neutral-50 rounded-xl text-neutral-500">
                       {profileForm.bio || '소개글이 없습니다'}
                     </div>
-                  )}
-                </div>
-              </div>
-            </div>
-                    )}
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-neutral-700 mb-1.5">소속</label>
-                    {isEditingProfile ? (
-                      <input
-                        type="text"
-                        value={profileForm.institution}
-                        onChange={(e) => setProfileForm(prev => ({ ...prev, institution: e.target.value }))}
-                        placeholder="회사/학교"
-                        className="w-full px-4 py-2.5 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      />
-                    ) : (
-                      <div className="px-4 py-2.5 bg-neutral-50 rounded-xl text-neutral-900">{user?.institution || '-'}</div>
-                    )}
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-1.5">자기소개</label>
-                  {isEditingProfile ? (
-                    <textarea
-                      value={profileForm.bio}
-                      onChange={(e) => setProfileForm(prev => ({ ...prev, bio: e.target.value }))}
-                      placeholder="간단한 자기소개를 작성해주세요"
-                      rows={3}
-                      className="w-full px-4 py-2.5 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
-                    />
-                  ) : (
-                    <div className="px-4 py-2.5 bg-neutral-50 rounded-xl text-neutral-900 min-h-[80px]">{profileForm.bio || '-'}</div>
                   )}
                 </div>
               </div>
