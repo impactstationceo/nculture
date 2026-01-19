@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Play, ChevronRight, ChevronLeft, ChevronDown, Save, TrendingUp, BarChart3, CheckCircle, Clock, Zap, Sparkles, Video, Target, Award, BookOpen, ArrowRight, RefreshCw, Eye, Copy, Lightbulb, MessageSquare, X, Send, Upload, Check, User, AlertTriangle, Activity, FileText, Download, Bell, Users, Shield, History, AlertCircle, Radio, PenTool, MousePointer, Monitor, Volume2, VideoOff, Maximize2, Search, Image, Star, Headphones, Settings, Plus } from 'lucide-react';
 
@@ -12745,12 +12747,38 @@ const DashboardPage = ({ user, currentRole, wallet, onStartSession, setCurrentPa
 };
 
 // ============= App =============
-export default function App() {
-  const [currentPage, setCurrentPage] = useState('main');
-  const [currentSession, setCurrentSession] = useState(1);
-  const [currentLiveClass, setCurrentLiveClass] = useState(null);
-  const [currentCourse, setCurrentCourse] = useState(null);
-  const [currentTest, setCurrentTest] = useState(null);
+export default function App({
+  initialPage = 'main',
+  initialSession = 1,
+  initialLiveClass = null,
+  initialCourse = null,
+  initialTest = null,
+} = {}) {
+  const [currentPage, setCurrentPage] = useState(initialPage);
+  const [currentSession, setCurrentSession] = useState(initialSession);
+  const [currentLiveClass, setCurrentLiveClass] = useState(initialLiveClass);
+  const [currentCourse, setCurrentCourse] = useState(initialCourse);
+  const [currentTest, setCurrentTest] = useState(initialTest);
+  
+  useEffect(() => {
+    setCurrentPage(initialPage);
+  }, [initialPage]);
+  
+  useEffect(() => {
+    setCurrentSession(initialSession);
+  }, [initialSession]);
+  
+  useEffect(() => {
+    setCurrentLiveClass(initialLiveClass);
+  }, [initialLiveClass]);
+  
+  useEffect(() => {
+    setCurrentCourse(initialCourse);
+  }, [initialCourse]);
+  
+  useEffect(() => {
+    setCurrentTest(initialTest);
+  }, [initialTest]);
   
   // 인증 상태 - 테스트 계정으로 기본 로그인 (교육자)
   const [isLoggedIn, setIsLoggedIn] = useState(true);
