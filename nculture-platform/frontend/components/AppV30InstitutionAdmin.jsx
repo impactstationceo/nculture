@@ -12747,6 +12747,15 @@ const DashboardPage = ({ user, currentRole, wallet, onStartSession, setCurrentPa
 };
 
 // ============= App =============
+/**
+ * @param {{
+ *  initialPage?: string,
+ *  initialSession?: number,
+ *  initialLiveClass?: number | null,
+ *  initialCourse?: string | null,
+ *  initialTest?: any,
+ * }} props
+ */
 export default function App({
   initialPage = 'main',
   initialSession = 1,
