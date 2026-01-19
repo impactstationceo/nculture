@@ -113,20 +113,20 @@ const MediaGalleryPage = () => {
   });
 
   return (
-    <div className="min-h-screen bg-white pt-16">
+    <div className="min-h-screen bg-[#F9FAFB] pt-20">
       <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-indigo-50 to-white" />
-        <div className="max-w-7xl mx-auto px-8 py-12 relative">
-          <h1 className="text-4xl font-bold text-neutral-900 mb-3">갤러리</h1>
-          <p className="text-neutral-500 text-lg">수강생들이 만든 우수 작품을 만나보세요</p>
+        <div className="absolute inset-0 bg-gradient-to-b from-[#E8F3FF] to-[#F9FAFB]" />
+        <div className="max-w-screen-xl mx-auto px-4 md:px-6 lg:px-8 py-12 relative">
+          <h1 className="text-4xl font-bold text-[#191F28] mb-3">갤러리</h1>
+          <p className="text-[#6B7684] text-lg">수강생들이 만든 우수 작품을 만나보세요</p>
         </div>
       </div>
 
-      <div className="border-b border-neutral-200 bg-white/80 backdrop-blur-sm sticky top-16 z-10">
-        <div className="max-w-7xl mx-auto px-8 py-4">
+      <div className="border-b border-[#E5E8EB] bg-white/90 backdrop-blur-sm sticky top-16 z-10">
+        <div className="max-w-screen-xl mx-auto px-4 md:px-6 lg:px-8 py-4">
           <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
-            <span className="text-neutral-500 text-sm font-medium flex-shrink-0">Style</span>
-            <div className="h-4 w-px bg-neutral-300 flex-shrink-0" />
+            <span className="text-[#6B7684] text-sm font-medium flex-shrink-0">Style</span>
+            <div className="h-4 w-px bg-[#E5E8EB] flex-shrink-0" />
             {styles.map(style => (
               <button
                 key={style.id}
@@ -134,7 +134,7 @@ const MediaGalleryPage = () => {
                 className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all ${
                   activeStyle === style.id
                     ? `bg-gradient-to-r ${style.color} text-white shadow-lg`
-                    : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                    : 'bg-[#F2F4F6] text-[#6B7684] hover:bg-[#E5E8EB]'
                 }`}
               >
                 {style.label}
@@ -144,7 +144,7 @@ const MediaGalleryPage = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-8 py-6">
+      <div className="max-w-screen-xl mx-auto px-4 md:px-6 lg:px-8 py-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex gap-2">
             {categories.map(cat => (
@@ -153,15 +153,15 @@ const MediaGalleryPage = () => {
                 onClick={() => setActiveCategory(cat.id)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   activeCategory === cat.id
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                    ? 'bg-[#3182F6] text-white'
+                    : 'bg-[#F2F4F6] text-[#6B7684] hover:bg-[#E5E8EB]'
                 }`}
               >
                 {cat.label}
               </button>
             ))}
           </div>
-          <div className="text-sm text-neutral-500">
+          <div className="text-sm text-[#6B7684]">
             {filteredWorks.length}개의 작품
           </div>
         </div>
@@ -171,7 +171,7 @@ const MediaGalleryPage = () => {
             <div
               key={work.id}
               onClick={() => setSelectedWork(work)}
-              className={`group relative rounded-xl overflow-hidden bg-neutral-100 cursor-pointer transition-all hover:scale-[1.02] hover:shadow-xl ${
+              className={`group relative rounded-xl overflow-hidden bg-white border border-[#E5E8EB] cursor-pointer transition-all hover:shadow-md ${
                 index % 5 === 0 ? 'row-span-2' : ''
               }`}
             >
@@ -187,20 +187,20 @@ const MediaGalleryPage = () => {
                   </div>
                 )}
                 {work.featured && (
-                  <div className="absolute top-3 right-3 px-2 py-1 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full">
-                    <span className="text-xs font-medium text-white">추천</span>
+                  <div className="absolute top-3 right-3 px-2 py-1 bg-[#E8F3FF] rounded-full">
+                    <span className="text-xs font-medium text-[#3182F6]">추천</span>
                   </div>
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
                   <h3 className="text-white font-semibold mb-1">{work.title}</h3>
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 bg-indigo-600 rounded-full flex items-center justify-center">
-                        <span className="text-xs text-white">{work.creator.charAt(0)}</span>
-                      </div>
-                      <span className="text-sm text-neutral-300">{work.creator}</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 bg-[#3182F6] rounded-full flex items-center justify-center">
+                      <span className="text-xs text-white">{work.creator.charAt(0)}</span>
                     </div>
-                    <div className="flex items-center gap-1 text-neutral-400">
+                    <span className="text-sm text-white/80">{work.creator}</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-white/70">
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" />
                       </svg>
@@ -214,7 +214,7 @@ const MediaGalleryPage = () => {
         </div>
 
         <div className="flex justify-center mt-10">
-          <button className="px-8 py-3 bg-neutral-800 text-white rounded-xl hover:bg-neutral-700 transition-colors flex items-center gap-2">
+          <button className="px-8 py-3 bg-[#3182F6] text-white rounded-xl hover:bg-[#1B64DA] transition-colors flex items-center gap-2">
             더 많은 작품 보기
             <ChevronDown className="w-4 h-4" />
           </button>
@@ -222,9 +222,9 @@ const MediaGalleryPage = () => {
       </div>
 
       {selectedWork && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-8" onClick={() => setSelectedWork(null)}>
-          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex" onClick={e => e.stopPropagation()}>
-            <div className="w-1/2 bg-neutral-900 relative">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-8" onClick={() => setSelectedWork(null)}>
+          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex border border-[#E5E8EB]" onClick={e => e.stopPropagation()}>
+            <div className="w-1/2 bg-[#191F28] relative">
               <img 
                 src={selectedWork.thumbnail} 
                 alt={selectedWork.title}
@@ -243,9 +243,9 @@ const MediaGalleryPage = () => {
               <div className="flex justify-end mb-4">
                 <button 
                   onClick={() => setSelectedWork(null)}
-                  className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+                  className="p-2 hover:bg-[#F2F4F6] rounded-lg transition-colors"
                 >
-                  <X className="w-5 h-5 text-neutral-500" />
+                  <X className="w-5 h-5 text-[#6B7684]" />
                 </button>
               </div>
               
@@ -256,55 +256,55 @@ const MediaGalleryPage = () => {
                   } text-white`}>
                     {styles.find(s => s.id === selectedWork.style)?.label || selectedWork.style}
                   </span>
-                  <span className="px-2 py-1 bg-neutral-100 text-neutral-600 text-xs rounded-full">
+                  <span className="px-2 py-1 bg-[#F2F4F6] text-[#6B7684] text-xs rounded-full">
                     {selectedWork.type === 'video' ? '영상' : '이미지'}
                   </span>
                 </div>
-                <h2 className="text-2xl font-bold text-neutral-900">{selectedWork.title}</h2>
+                <h2 className="text-2xl font-bold text-[#191F28]">{selectedWork.title}</h2>
               </div>
               
-              <div className="flex items-center gap-3 mb-6 pb-6 border-b border-neutral-200">
-                <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-full flex items-center justify-center">
+              <div className="flex items-center gap-3 mb-6 pb-6 border-b border-[#E5E8EB]">
+                <div className="w-12 h-12 bg-[#3182F6] rounded-full flex items-center justify-center">
                   <span className="text-lg font-medium text-white">{selectedWork.creator.charAt(0)}</span>
                 </div>
                 <div>
-                  <div className="font-medium text-neutral-900">{selectedWork.creator}</div>
-                  <div className="text-sm text-neutral-500">{selectedWork.course}</div>
+                  <div className="font-medium text-[#191F28]">{selectedWork.creator}</div>
+                  <div className="text-sm text-[#6B7684]">{selectedWork.course}</div>
                 </div>
               </div>
               
               <div className="mb-6">
-                <h3 className="text-sm font-semibold text-neutral-900 mb-2 flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-indigo-500" />
+                <h3 className="text-sm font-semibold text-[#191F28] mb-2 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-[#3182F6]" />
                   사용된 프롬프트
                 </h3>
-                <div className="bg-neutral-50 rounded-xl p-4">
-                  <p className="text-sm text-neutral-700 leading-relaxed">{selectedWork.prompt}</p>
+                <div className="bg-[#F9FAFB] rounded-xl p-4 border border-[#E5E8EB]">
+                  <p className="text-sm text-[#333D4B] leading-relaxed">{selectedWork.prompt}</p>
                 </div>
               </div>
               
               <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="bg-neutral-50 rounded-xl p-4">
-                  <div className="text-xs text-neutral-500 mb-1">사용 모델</div>
-                  <div className="font-medium text-neutral-900">{selectedWork.model}</div>
+                <div className="bg-[#F9FAFB] rounded-xl p-4 border border-[#E5E8EB]">
+                  <div className="text-xs text-[#8B95A1] mb-1">사용 모델</div>
+                  <div className="font-medium text-[#191F28]">{selectedWork.model}</div>
                 </div>
-                <div className="bg-neutral-50 rounded-xl p-4">
-                  <div className="text-xs text-neutral-500 mb-1">사용 크레딧</div>
-                  <div className="font-medium text-amber-600">{selectedWork.creditsUsed} 크레딧</div>
+                <div className="bg-[#F9FAFB] rounded-xl p-4 border border-[#E5E8EB]">
+                  <div className="text-xs text-[#8B95A1] mb-1">사용 크레딧</div>
+                  <div className="font-medium text-[#FF9100]">{selectedWork.creditsUsed} 크레딧</div>
                 </div>
               </div>
               
-              <div className="flex items-center justify-between py-4 border-t border-neutral-200">
+              <div className="flex items-center justify-between py-4 border-t border-[#E5E8EB]">
                 <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-1 text-neutral-600">
-                    <svg className="w-5 h-5 text-rose-500" fill="currentColor" viewBox="0 0 20 20">
+                  <div className="flex items-center gap-1 text-[#6B7684]">
+                    <svg className="w-5 h-5 text-[#F44336]" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" />
                     </svg>
                     <span className="font-medium">{selectedWork.likes}</span>
                   </div>
-                  <div className="text-sm text-neutral-500">{selectedWork.createdAt}</div>
+                  <div className="text-sm text-[#6B7684]">{selectedWork.createdAt}</div>
                 </div>
-                <button className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors">
+                <button className="px-4 py-2 bg-[#3182F6] text-white text-sm font-semibold rounded-lg hover:bg-[#1B64DA] transition-colors">
                   이 스타일로 만들기
                 </button>
               </div>

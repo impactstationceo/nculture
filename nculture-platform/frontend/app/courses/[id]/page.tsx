@@ -46,7 +46,7 @@ export default function CourseDetailPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white pt-24 pb-16">
+    <div className="min-h-screen bg-[#F9FAFB] pt-20 pb-16">
       <Header
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
@@ -61,10 +61,10 @@ export default function CourseDetailPage() {
         onRoleSwitch={handleRoleSwitch}
       />
 
-      <div className="max-w-6xl mx-auto px-8">
+      <div className="max-w-screen-xl mx-auto px-4 md:px-6 lg:px-8">
         <button 
           onClick={() => router.push('/curriculum')}
-          className="flex items-center gap-2 text-neutral-500 hover:text-neutral-900 mb-8 transition-colors"
+          className="flex items-center gap-2 text-[#6B7684] hover:text-[#191F28] mb-8 transition-colors"
         >
           <ChevronRight className="w-4 h-4 rotate-180" />
           <span className="text-sm">전체 클래스</span>
@@ -75,13 +75,13 @@ export default function CourseDetailPage() {
             <img 
               src={course.thumbnail} 
               alt={course.title} 
-              className="w-full aspect-video object-cover rounded-2xl"
+              className="w-full aspect-video object-cover rounded-2xl border border-[#E5E8EB]"
             />
           </div>
           <div className="flex-1">
-            <h1 className="text-3xl font-bold text-neutral-900 mb-3">{course.title}</h1>
-            <p className="text-neutral-600 mb-4">{course.description}</p>
-            <div className="flex items-center gap-4 text-sm text-neutral-500 mb-6">
+            <h1 className="text-3xl font-bold text-[#191F28] mb-3">{course.title}</h1>
+            <p className="text-[#6B7684] mb-4">{course.description}</p>
+            <div className="flex items-center gap-4 text-sm text-[#6B7684] mb-6">
               <div className="flex items-center gap-2">
                 <User className="w-4 h-4" />
                 {course.instructor}
@@ -93,7 +93,7 @@ export default function CourseDetailPage() {
             </div>
             <button 
               onClick={() => handleStartSession(course.sessions[0].id)}
-              className="px-8 py-3 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 transition-colors"
+              className="px-8 py-3 bg-[#3182F6] text-white font-semibold rounded-xl hover:bg-[#1B64DA] transition-colors"
             >
               {isLoggedIn ? '학습 시작하기' : '로그인하고 시작하기'}
             </button>
@@ -101,23 +101,23 @@ export default function CourseDetailPage() {
         </div>
 
         <div>
-          <h2 className="text-xl font-bold text-neutral-900 mb-6">커리큘럼 ({course.sessions.length}개 세션)</h2>
+          <h2 className="text-xl font-bold text-[#191F28] mb-6">커리큘럼 ({course.sessions.length}개 세션)</h2>
           <div className="space-y-4">
             {course.sessions.map((session: any, index: number) => (
               <div 
                 key={session.id}
-                className="bg-white border border-neutral-200 rounded-xl p-5 hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer group"
+                className="bg-white border border-[#E5E8EB] rounded-2xl p-5 hover:shadow-md transition-all cursor-pointer group"
                 onClick={() => handleStartSession(session.id)}
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center text-sm font-bold text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                  <div className="w-10 h-10 bg-[#E8F3FF] rounded-lg flex items-center justify-center text-sm font-bold text-[#3182F6] group-hover:bg-[#3182F6] group-hover:text-white transition-colors">
                     {index + 1}
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-neutral-900 mb-1">{session.title}</h3>
-                    <p className="text-sm text-neutral-500">{session.summary}</p>
+                    <h3 className="font-semibold text-[#191F28] mb-1">{session.title}</h3>
+                    <p className="text-sm text-[#6B7684]">{session.summary}</p>
                   </div>
-                  <ChevronRight className="w-5 h-5 text-neutral-400 group-hover:text-indigo-600 transition-colors" />
+                  <ChevronRight className="w-5 h-5 text-[#8B95A1] group-hover:text-[#3182F6] transition-colors" />
                 </div>
               </div>
             ))}

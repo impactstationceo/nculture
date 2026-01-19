@@ -166,8 +166,8 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLo
 
   const renderRoleSelection = () => (
     <div className="p-6">
-      <h3 className="text-lg font-semibold text-neutral-900 mb-2">어떤 목적으로 가입하시나요?</h3>
-      <p className="text-sm text-neutral-500 mb-6">가입 후에도 설정에서 변경할 수 있습니다.</p>
+      <h3 className="text-lg font-semibold text-[#191F28] mb-2">어떤 목적으로 가입하시나요?</h3>
+      <p className="text-sm text-[#6B7684] mb-6">가입 후에도 설정에서 변경할 수 있습니다.</p>
       
       <div className="space-y-3">
         <button
@@ -175,15 +175,15 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLo
             setSelectedRole('student');
             setSignupStep(2);
           }}
-          className="w-full p-4 border-2 border-neutral-200 rounded-xl hover:border-emerald-400 hover:bg-emerald-50 transition-all text-left group"
+          className="w-full p-4 border border-[#E5E8EB] rounded-xl hover:border-[#3182F6] hover:bg-[#E8F3FF] transition-all text-left group"
         >
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center text-2xl group-hover:bg-emerald-200 transition-colors">
+            <div className="w-12 h-12 bg-[#F2F4F6] rounded-xl flex items-center justify-center text-2xl group-hover:bg-[#E8F3FF] transition-colors">
               👨‍🎓
             </div>
             <div>
-              <div className="font-semibold text-neutral-900">수강생으로 가입</div>
-              <div className="text-sm text-neutral-500">AI 클래스를 수강하고 실습하고 싶어요</div>
+              <div className="font-semibold text-[#191F28]">수강생으로 가입</div>
+              <div className="text-sm text-[#6B7684]">AI 클래스를 수강하고 실습하고 싶어요</div>
             </div>
           </div>
         </button>
@@ -193,15 +193,15 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLo
             setSelectedRole('instructor');
             setSignupStep(2);
           }}
-          className="w-full p-4 border-2 border-neutral-200 rounded-xl hover:border-violet-400 hover:bg-violet-50 transition-all text-left group"
+          className="w-full p-4 border border-[#E5E8EB] rounded-xl hover:border-[#3182F6] hover:bg-[#E8F3FF] transition-all text-left group"
         >
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-violet-100 rounded-xl flex items-center justify-center text-2xl group-hover:bg-violet-200 transition-colors">
+            <div className="w-12 h-12 bg-[#F2F4F6] rounded-xl flex items-center justify-center text-2xl group-hover:bg-[#E8F3FF] transition-colors">
               👨‍🏫
             </div>
             <div>
-              <div className="font-semibold text-neutral-900">교육자로 가입</div>
-              <div className="text-sm text-neutral-500">강의를 만들고 학생들을 관리하고 싶어요</div>
+              <div className="font-semibold text-[#191F28]">교육자로 가입</div>
+              <div className="text-sm text-[#6B7684]">강의를 만들고 학생들을 관리하고 싶어요</div>
             </div>
           </div>
         </button>
@@ -210,9 +210,9 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLo
       <div className="mt-6 text-center">
         <button
           onClick={() => setMode('login')}
-          className="text-sm text-neutral-500 hover:text-neutral-700"
+          className="text-sm text-[#6B7684] hover:text-[#191F28]"
         >
-          이미 계정이 있으신가요? <span className="text-indigo-600 font-medium">로그인</span>
+          이미 계정이 있으신가요? <span className="text-[#3182F6] font-medium">로그인</span>
         </button>
       </div>
     </div>
@@ -222,49 +222,49 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLo
     <div className="p-6">
       <button
         onClick={() => setSignupStep(1)}
-        className="mb-4 text-sm text-neutral-500 hover:text-neutral-700 flex items-center gap-1"
+        className="mb-4 text-sm text-[#6B7684] hover:text-[#191F28] flex items-center gap-1"
       >
         ← 역할 다시 선택
       </button>
       
       <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium mb-4 ${
         selectedRole === 'instructor' 
-          ? 'bg-violet-50 text-violet-700' 
-          : 'bg-emerald-50 text-emerald-700'
+          ? 'bg-[#E8F3FF] text-[#3182F6]' 
+          : 'bg-[#E8F9EF] text-[#00C853]'
       }`}>
         {selectedRole === 'instructor' ? '👨‍🏫 교육자' : '👨‍🎓 수강생'}으로 가입
       </div>
 
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-neutral-700 mb-1">이름</label>
+          <label className="block text-sm font-medium text-[#333D4B] mb-1">이름</label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full bg-[#F2F4F6] border-none rounded-xl py-3.5 px-4 text-[15px] text-[#191F28] placeholder-[#8B95A1] focus:outline-none focus:ring-2 focus:ring-[#3182F6] transition-all"
             placeholder="홍길동"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-neutral-700 mb-1">이메일</label>
+          <label className="block text-sm font-medium text-[#333D4B] mb-1">이메일</label>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full bg-[#F2F4F6] border-none rounded-xl py-3.5 px-4 text-[15px] text-[#191F28] placeholder-[#8B95A1] focus:outline-none focus:ring-2 focus:ring-[#3182F6] transition-all"
             placeholder="hello@example.com"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-neutral-700 mb-1">비밀번호</label>
+          <label className="block text-sm font-medium text-[#333D4B] mb-1">비밀번호</label>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full bg-[#F2F4F6] border-none rounded-xl py-3.5 px-4 text-[15px] text-[#191F28] placeholder-[#8B95A1] focus:outline-none focus:ring-2 focus:ring-[#3182F6] transition-all"
             placeholder="8자 이상"
             minLength={8}
           />
@@ -275,17 +275,17 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLo
             type="checkbox"
             checked={agreeTerms}
             onChange={(e) => setAgreeTerms(e.target.checked)}
-            className="w-5 h-5 rounded border-neutral-300 text-indigo-600 focus:ring-indigo-500 mt-0.5"
+            className="w-5 h-5 rounded border-[#E5E8EB] text-[#3182F6] focus:ring-[#3182F6] mt-0.5"
           />
-          <span className="text-sm text-neutral-600">
-            <span className="text-indigo-600 hover:underline cursor-pointer">이용약관</span> 및{' '}
-            <span className="text-indigo-600 hover:underline cursor-pointer">개인정보처리방침</span>에 동의합니다
+          <span className="text-sm text-[#333D4B]">
+            <span className="text-[#3182F6] hover:underline cursor-pointer">이용약관</span> 및{' '}
+            <span className="text-[#3182F6] hover:underline cursor-pointer">개인정보처리방침</span>에 동의합니다
           </span>
         </label>
 
         {selectedRole === 'instructor' && (
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-            <p className="text-sm text-amber-800">
+          <div className="bg-[#FFF4E5] border border-[#FFE1B5] rounded-xl p-4">
+            <p className="text-sm text-[#FF9100]">
               ⚠️ 교육자 계정은 관리자 승인 후 이용 가능합니다.
             </p>
           </div>
@@ -293,7 +293,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLo
 
         <button
           onClick={handleLogin}
-          className="w-full py-3 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 transition-colors"
+          className="w-full py-3 bg-[#3182F6] text-white font-semibold rounded-xl hover:bg-[#1B64DA] transition-colors"
         >
           가입하기
         </button>
@@ -302,9 +302,9 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLo
       <div className="mt-6 text-center">
         <button
           onClick={() => setMode('login')}
-          className="text-sm text-neutral-500 hover:text-neutral-700"
+          className="text-sm text-[#6B7684] hover:text-[#191F28]"
         >
-          이미 계정이 있으신가요? <span className="text-indigo-600 font-medium">로그인</span>
+          이미 계정이 있으신가요? <span className="text-[#3182F6] font-medium">로그인</span>
         </button>
       </div>
     </div>
@@ -312,44 +312,44 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLo
 
   const renderLoginForm = () => (
     <div className="p-6">
-      <h3 className="text-lg font-semibold text-neutral-900 mb-6">로그인</h3>
+      <h3 className="text-lg font-semibold text-[#191F28] mb-6">로그인</h3>
 
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-neutral-700 mb-1">이메일</label>
+          <label className="block text-sm font-medium text-[#333D4B] mb-1">이메일</label>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full bg-[#F2F4F6] border-none rounded-xl py-3.5 px-4 text-[15px] text-[#191F28] placeholder-[#8B95A1] focus:outline-none focus:ring-2 focus:ring-[#3182F6] transition-all"
             placeholder="hello@example.com"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-neutral-700 mb-1">비밀번호</label>
+          <label className="block text-sm font-medium text-[#333D4B] mb-1">비밀번호</label>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full bg-[#F2F4F6] border-none rounded-xl py-3.5 px-4 text-[15px] text-[#191F28] placeholder-[#8B95A1] focus:outline-none focus:ring-2 focus:ring-[#3182F6] transition-all"
             placeholder="••••••••"
           />
         </div>
 
-        <label className="flex items-center gap-2 text-sm text-neutral-600">
+        <label className="flex items-center gap-2 text-sm text-[#333D4B]">
           <input
             type="checkbox"
             checked={rememberEmail}
             onChange={(e) => setRememberEmail(e.target.checked)}
-            className="w-4 h-4 rounded border-neutral-300 text-indigo-600 focus:ring-indigo-500"
+            className="w-4 h-4 rounded border-[#E5E8EB] text-[#3182F6] focus:ring-[#3182F6]"
           />
           아이디 저장
         </label>
 
         <button
           onClick={handleLogin}
-          className="w-full py-3 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 transition-colors"
+          className="w-full py-3 bg-[#3182F6] text-white font-semibold rounded-xl hover:bg-[#1B64DA] transition-colors"
         >
           로그인
         </button>
@@ -361,15 +361,15 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLo
             setMode('signup');
             setSignupStep(1);
           }}
-          className="text-sm text-neutral-500 hover:text-neutral-700"
+          className="text-sm text-[#6B7684] hover:text-[#191F28]"
         >
-          계정이 없으신가요? <span className="text-indigo-600 font-medium">회원가입</span>
+          계정이 없으신가요? <span className="text-[#3182F6] font-medium">회원가입</span>
         </button>
       </div>
 
-      <div className="mt-6 p-4 bg-neutral-50 rounded-xl">
-        <p className="text-xs text-neutral-500 mb-2">🧪 테스트 계정 (데모 모드)</p>
-        <div className="text-xs text-neutral-600 space-y-1">
+      <div className="mt-6 p-4 bg-[#F9FAFB] rounded-xl border border-[#E5E8EB]">
+        <p className="text-xs text-[#6B7684] mb-2">🧪 테스트 계정 (데모 모드)</p>
+        <div className="text-xs text-[#333D4B] space-y-1">
           <p>• 기관관리자: admin@test.com / 아무 비밀번호</p>
           <p>• 교육자: test@test.com / 아무 비밀번호</p>
           <p>• 수강생: 아무 이메일 / 아무 비밀번호</p>
@@ -379,11 +379,11 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLo
   );
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto relative">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto relative">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+          className="absolute top-4 right-4 p-2 text-[#8B95A1] hover:text-[#333D4B] hover:bg-[#F2F4F6] rounded-lg transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
