@@ -66,6 +66,32 @@ export const createResult = (index = 0) => {
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 };
 
+type AIServiceCategory = 'video' | 'image' | 'text';
+
+type AIServiceTier = {
+  id: string;
+  name: string;
+  description: string;
+  specs: Record<string, string | boolean>;
+  pricing?: {
+    multiplier: number;
+    base?: number;
+  };
+  pricing_multiplier?: number;
+  maxResolution?: string;
+  maxDurationSec?: number;
+  audioSupported?: boolean;
+};
+
+type AIService = {
+  id: string;
+  name: string;
+  category: AIServiceCategory;
+  description: string;
+  icon: string;
+  tiers: AIServiceTier[];
+};
+
 // ============= 크레딧 계산 =============
 export const parseDurationSec = (durationStr: string) => {
   const match = durationStr.match(/(\d+)/);
@@ -81,7 +107,7 @@ export const getResolutionFactor = (resolution: string) => {
   }
 };
 
-export const calculateCredits = (tierId: string, durationStr: string, resolution: string, audioOn: boolean, services: any[]) => {
+export const calculateCredits = (tierId: string, durationStr: string, resolution: string, audioOn: boolean, services: AIService[]) => {
   const baseCost = 2;
   const durationSec = parseDurationSec(durationStr);
   const durationCost = durationSec * 1;
@@ -90,7 +116,7 @@ export const calculateCredits = (tierId: string, durationStr: string, resolution
   
   let tierMultiplier = 1.0;
   for (const service of services) {
-    const tier = service.tiers?.find((t: any) => t.id === tierId);
+    const tier = service.tiers?.find((t) => t.id === tierId);
     if (tier) {
       // pricing 객체 또는 직접 multiplier 모두 지원
       tierMultiplier = tier.pricing?.multiplier || tier.pricing_multiplier || 1.0;
@@ -153,7 +179,7 @@ export const CURRICULUM: Record<string, any> = {
 };
 
 // ============= AI 서비스 Mock 데이터 =============
-export const AI_SERVICES = [
+export const AI_SERVICES: AIService[] = [
   {
     id: 'sora',
     name: 'OpenAI Sora',
