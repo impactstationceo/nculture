@@ -22,7 +22,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
     clearPendingAction,
   } = useAuth();
 
-  const legacyPages = ['/mypage', '/institution'];
+  const legacyPages = ['/mypage'];
   const isLegacyRoute = legacyPages.some((prefix) => pathname.startsWith(prefix));
 
   return (
