@@ -12,7 +12,7 @@ const CourseCard = ({ course, onClick }: { course: any; onClick: () => void }) =
   
   return (
     <div 
-      className="bg-white rounded-2xl overflow-hidden border border-[#E5E8EB] hover:shadow-md transition-all cursor-pointer group"
+      className="bg-white rounded-3xl overflow-hidden border border-[#E5E8EB] shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all cursor-pointer group"
       onClick={onClick}
     >
       <div className="relative">
@@ -28,7 +28,7 @@ const CourseCard = ({ course, onClick }: { course: any; onClick: () => void }) =
           {serviceIcons.map((icon, i) => (
             <div 
               key={i}
-              className="w-8 h-8 bg-white/80 backdrop-blur-sm rounded-lg flex items-center justify-center text-sm border border-[#E5E8EB]"
+              className="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-lg flex items-center justify-center text-sm border border-[#E5E8EB] shadow-sm"
             >
               {icon}
             </div>
@@ -38,14 +38,14 @@ const CourseCard = ({ course, onClick }: { course: any; onClick: () => void }) =
         <div className="absolute top-3 right-3 w-12 h-12 border border-[#E5E8EB] rounded-lg" />
       </div>
       
-      <div className="p-4">
-        <h3 className="text-base font-semibold text-[#191F28] mb-2 line-clamp-2 group-hover:text-[#3182F6] transition-colors">
+      <div className="p-5">
+        <h3 className="text-lg font-semibold text-[#191F28] mb-2 line-clamp-2 group-hover:text-[#3182F6] transition-colors tracking-tight">
           {course.title}
         </h3>
         
         <div className="text-lg font-bold text-[#191F28] mb-1">무료</div>
         
-        <div className="flex items-center gap-1 text-sm text-[#6B7684] mb-3">
+        <div className="flex items-center gap-1 text-sm text-[#6B7684] mb-4">
           <span className="text-[#FF9100]">★</span>
           <span>후기 {12 + course.totalSessions * 3}개</span>
         </div>
@@ -99,12 +99,12 @@ export default function CurriculumPage() {
       />
 
       <div className="max-w-screen-xl mx-auto px-4 md:px-6 lg:px-8">
-        <div className="mb-12">
-          <h1 className="text-4xl font-bold text-[#191F28] mb-3">클래스</h1>
+        <div className="mb-10 bg-white border border-[#E5E8EB] rounded-3xl p-8 shadow-sm">
+          <h1 className="text-4xl font-bold text-[#191F28] mb-2 tracking-tight">클래스</h1>
           <p className="text-[#6B7684]">체계적인 AI 콘텐츠 창작 학습 과정</p>
         </div>
 
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-3 gap-8">
           {courses.map((course: any) => (
             <CourseCard
               key={course.id}

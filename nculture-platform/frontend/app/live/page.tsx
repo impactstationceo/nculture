@@ -36,7 +36,7 @@ const LiveClassCard = ({ liveClass, onJoin, isLoggedIn, onAuthClick }: any) => {
   };
 
   return (
-    <div className="bg-white rounded-2xl overflow-hidden border border-[#E5E8EB] hover:shadow-md transition-all">
+    <div className="bg-white rounded-3xl overflow-hidden border border-[#E5E8EB] shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all">
       <div className="relative">
         <img 
           src={liveClass.thumbnail} 
@@ -57,7 +57,7 @@ const LiveClassCard = ({ liveClass, onJoin, isLoggedIn, onAuthClick }: any) => {
           <span className="text-sm text-[#8B95A1]">{liveClass.startTime}</span>
           <button 
             onClick={handleClick}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium shadow-sm transition-colors ${
               liveClass.status === 'live' 
                 ? 'bg-[#F44336] text-white hover:bg-[#D32F2F]' 
                 : liveClass.status === 'upcoming'
@@ -112,12 +112,12 @@ export default function LivePage() {
       />
 
       <div className="max-w-screen-xl mx-auto px-4 md:px-6 lg:px-8">
-        <div className="mb-12">
-          <h1 className="text-4xl font-bold text-[#191F28] mb-3">라이브</h1>
+        <div className="mb-10 bg-white border border-[#E5E8EB] rounded-3xl p-8 shadow-sm">
+          <h1 className="text-4xl font-bold text-[#191F28] mb-2 tracking-tight">라이브</h1>
           <p className="text-[#6B7684]">실시간 AI 실습 클래스에 참여하세요</p>
         </div>
 
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-3 gap-8">
           {liveClasses.map((liveClass) => (
             <LiveClassCard
               key={liveClass.id}
@@ -129,25 +129,28 @@ export default function LivePage() {
           ))}
         </div>
 
-        <div className="mt-16 bg-[#E8F3FF] rounded-2xl p-10">
-          <h3 className="text-2xl font-bold text-[#191F28] mb-6">라이브란?</h3>
+        <div className="mt-16 bg-white border border-[#E5E8EB] rounded-3xl p-10 shadow-sm">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-2xl font-bold text-[#191F28]">라이브란?</h3>
+            <span className="text-sm text-[#6B7684]">실시간 참여형 실습 클래스</span>
+          </div>
           <div className="grid grid-cols-3 gap-8">
             <div>
-              <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center mb-4 border border-[#E5E8EB]">
+              <div className="w-14 h-14 bg-[#E8F3FF] rounded-xl flex items-center justify-center mb-4 border border-[#D1E5FF]">
                 <Video className="w-7 h-7 text-[#3182F6]" />
               </div>
               <h4 className="font-semibold text-[#191F28] mb-2">실시간 시연</h4>
               <p className="text-sm text-[#6B7684] leading-relaxed">강사가 AI 도구를 실시간으로 사용하는 모습을 직접 확인</p>
             </div>
             <div>
-              <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center mb-4 border border-[#E5E8EB]">
+              <div className="w-14 h-14 bg-[#E8F3FF] rounded-xl flex items-center justify-center mb-4 border border-[#D1E5FF]">
                 <Zap className="w-7 h-7 text-[#3182F6]" />
               </div>
               <h4 className="font-semibold text-[#191F28] mb-2">동시 실습</h4>
               <p className="text-sm text-[#6B7684] leading-relaxed">강사 프롬프트를 받아 함께 생성하며 학습</p>
             </div>
             <div>
-              <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center mb-4 border border-[#E5E8EB]">
+              <div className="w-14 h-14 bg-[#E8F3FF] rounded-xl flex items-center justify-center mb-4 border border-[#D1E5FF]">
                 <MessageSquare className="w-7 h-7 text-[#3182F6]" />
               </div>
               <h4 className="font-semibold text-[#191F28] mb-2">즉시 질문</h4>

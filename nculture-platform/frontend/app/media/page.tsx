@@ -117,12 +117,14 @@ const MediaGalleryPage = () => {
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-[#E8F3FF] to-[#F9FAFB]" />
         <div className="max-w-screen-xl mx-auto px-4 md:px-6 lg:px-8 py-12 relative">
-          <h1 className="text-4xl font-bold text-[#191F28] mb-3">갤러리</h1>
-          <p className="text-[#6B7684] text-lg">수강생들이 만든 우수 작품을 만나보세요</p>
+          <div className="bg-white/90 backdrop-blur-md border border-[#E5E8EB] rounded-3xl p-8 shadow-sm">
+            <h1 className="text-4xl font-bold text-[#191F28] mb-3">갤러리</h1>
+            <p className="text-[#6B7684] text-lg">수강생들이 만든 우수 작품을 만나보세요</p>
+          </div>
         </div>
       </div>
 
-      <div className="border-b border-[#E5E8EB] bg-white/90 backdrop-blur-sm sticky top-16 z-10">
+      <div className="border-b border-[#E5E8EB] bg-white/95 backdrop-blur-sm sticky top-16 z-10 shadow-sm">
         <div className="max-w-screen-xl mx-auto px-4 md:px-6 lg:px-8 py-4">
           <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
             <span className="text-[#6B7684] text-sm font-medium flex-shrink-0">Style</span>
@@ -166,12 +168,12 @@ const MediaGalleryPage = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
           {filteredWorks.map((work, index) => (
             <div
               key={work.id}
               onClick={() => setSelectedWork(work)}
-              className={`group relative rounded-xl overflow-hidden bg-white border border-[#E5E8EB] cursor-pointer transition-all hover:shadow-md ${
+              className={`group relative rounded-2xl overflow-hidden bg-white border border-[#E5E8EB] cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1 ${
                 index % 5 === 0 ? 'row-span-2' : ''
               }`}
             >
@@ -223,7 +225,7 @@ const MediaGalleryPage = () => {
 
       {selectedWork && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-8" onClick={() => setSelectedWork(null)}>
-          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex border border-[#E5E8EB]" onClick={e => e.stopPropagation()}>
+          <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex border border-[#E5E8EB] shadow-xl" onClick={e => e.stopPropagation()}>
             <div className="w-1/2 bg-[#191F28] relative">
               <img 
                 src={selectedWork.thumbnail} 

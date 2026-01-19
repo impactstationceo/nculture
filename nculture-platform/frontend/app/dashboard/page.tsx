@@ -11,9 +11,9 @@ const DashboardPageContent = ({ user, currentRole, setCurrentPage }: any) => {
   
   if (user?.role === 'instructor' && isPending) {
     return (
-      <div className="min-h-screen bg-neutral-50 pt-16">
-        <div className="max-w-2xl mx-auto px-8 py-16">
-          <div className="bg-white rounded-2xl border border-neutral-200 p-8 text-center">
+      <div className="min-h-screen bg-[#F9FAFB] pt-20">
+        <div className="max-w-3xl mx-auto px-4 md:px-6 py-16">
+          <div className="bg-white rounded-3xl border border-neutral-200 p-8 text-center shadow-sm">
             <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <Clock className="w-10 h-10 text-amber-600" />
             </div>
@@ -22,7 +22,7 @@ const DashboardPageContent = ({ user, currentRole, setCurrentPage }: any) => {
               교육자 계정 승인을 기다리고 있습니다.<br />
               관리자 승인 후 클래스 생성 및 학생 관리 기능을 이용할 수 있습니다.
             </p>
-            <div className="bg-neutral-50 rounded-xl p-4 mb-6">
+            <div className="bg-neutral-50 rounded-2xl p-4 mb-6">
               <div className="text-sm text-neutral-500 mb-2">예상 승인 소요 시간</div>
               <div className="text-lg font-semibold text-neutral-900">영업일 기준 1-2일</div>
             </div>
@@ -36,7 +36,7 @@ const DashboardPageContent = ({ user, currentRole, setCurrentPage }: any) => {
             </div>
           </div>
           
-          <div className="mt-8 bg-white rounded-2xl border border-neutral-200 p-6">
+          <div className="mt-8 bg-white rounded-3xl border border-neutral-200 p-6 shadow-sm">
             <h3 className="font-semibold text-neutral-900 mb-4">승인 대기 중에도 이용 가능한 기능</h3>
             <div className="space-y-3">
               <div className="flex items-center gap-3 text-sm text-neutral-600">
@@ -66,9 +66,9 @@ const DashboardPageContent = ({ user, currentRole, setCurrentPage }: any) => {
   
   if (isInstructor) {
     return (
-      <div className="min-h-screen bg-neutral-50 pt-16">
-        <div className="max-w-2xl mx-auto px-8 py-16">
-          <div className="bg-white rounded-2xl border border-neutral-200 p-8 text-center">
+      <div className="min-h-screen bg-[#F9FAFB] pt-20">
+        <div className="max-w-3xl mx-auto px-4 md:px-6 py-16">
+          <div className="bg-white rounded-3xl border border-neutral-200 p-8 text-center shadow-sm">
             <div className="w-20 h-20 bg-violet-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <User className="w-10 h-10 text-violet-600" />
             </div>
@@ -79,7 +79,7 @@ const DashboardPageContent = ({ user, currentRole, setCurrentPage }: any) => {
             </p>
             <button
               onClick={() => setCurrentPage && setCurrentPage('mypage')}
-              className="px-6 py-3 bg-violet-600 text-white font-medium rounded-xl hover:bg-violet-700 transition-colors"
+              className="px-6 py-3 bg-[#3182F6] text-white font-medium rounded-xl shadow-sm hover:bg-[#1B64DA] transition-colors"
             >
               마이페이지로 이동 →
             </button>
@@ -90,9 +90,9 @@ const DashboardPageContent = ({ user, currentRole, setCurrentPage }: any) => {
   }
   
   return (
-    <div className="min-h-screen bg-neutral-50 pt-16">
-      <div className="max-w-2xl mx-auto px-8 py-16">
-        <div className="bg-white rounded-2xl border border-neutral-200 p-8 text-center">
+    <div className="min-h-screen bg-[#F9FAFB] pt-20">
+      <div className="max-w-3xl mx-auto px-4 md:px-6 py-16">
+        <div className="bg-white rounded-3xl border border-neutral-200 p-8 text-center shadow-sm">
           <div className="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <User className="w-10 h-10 text-indigo-600" />
           </div>
@@ -103,7 +103,7 @@ const DashboardPageContent = ({ user, currentRole, setCurrentPage }: any) => {
           </p>
           <button
             onClick={() => setCurrentPage && setCurrentPage('mypage')}
-            className="px-6 py-3 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 transition-colors"
+            className="px-6 py-3 bg-[#3182F6] text-white font-medium rounded-xl shadow-sm hover:bg-[#1B64DA] transition-colors"
           >
             마이페이지로 이동 →
           </button>
