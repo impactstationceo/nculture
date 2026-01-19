@@ -1,217 +1,264 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { auth, isSupabaseConfigured } from '@/lib/supabase';
-
-// 데모 세션 저장 키
-const DEMO_SESSION_KEY = 'nculture_demo_session';
-
-interface User {
-  id: string;
-  email: string;
-  name: string;
-  role: 'student' | 'instructor' | 'institution_admin' | 'platform_admin';
-  status: 'pending' | 'approved' | 'rejected';
-  isSupabaseUser?: boolean;
-  plan?: string;
-}
-
-interface Wallet {
-  balance: number;
-  monthlyLimit?: number;
-  used?: number;
-}
+import { createContext, useContext, useEffect, useMemo, useState, ReactNode } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { INSTITUTION_DATA, PRICING_PLANS } from '@/lib/data';
 
 interface AuthContextType {
-  user: User | null;
-  profile: User | null;
-  wallet: Wallet;
+  user: any;
   isLoggedIn: boolean;
   isLoading: boolean;
-  isInstructor: boolean;
-  isAdmin: boolean;
-  login: (userData: User) => void;
-  logout: () => Promise<void>;
-  updateCredits: (amount: number) => void;
-  updatePlan: (plan: string) => void;
+  wallet: { balance: number };
+  creditLedger: any[];
+  userPlan: string;
+  userEnterpriseTier: any;
+  institution: any;
+  viewMode: string | null;
+  currentRole: string | null;
+  currentPage: string;
+  authMode: string;
+  showAuthModal: boolean;
+  showUpgradeModal: boolean;
+  upgradeReason: any;
+  setWallet: React.Dispatch<React.SetStateAction<{ balance: number }>>;
+  setUserPlan: React.Dispatch<React.SetStateAction<string>>;
+  setUserEnterpriseTier: React.Dispatch<React.SetStateAction<any>>;
+  setInstitution: React.Dispatch<React.SetStateAction<any>>;
+  setAuthMode: React.Dispatch<React.SetStateAction<string>>;
+  setShowAuthModal: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowUpgradeModal: React.Dispatch<React.SetStateAction<boolean>>;
+  setUpgradeReason: React.Dispatch<React.SetStateAction<any>>;
+  addLedgerEntry: (entry: any) => void;
+  handleAuthClick: (mode?: string) => void;
+  handleLogin: (userData: any) => void;
+  handleLogout: () => void;
+  handleShowUpgradeModal: (reason: any) => void;
+  handlePlanUpgrade: (newPlanId: string, enterpriseTier?: any) => void;
+  handleToggleRole: () => void;
+  handleRoleSwitch: (newViewMode: string | null) => void;
+  setCurrentPage: (page: string) => void;
+  requireAuth: (action: () => void) => void;
+  clearPendingAction: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const protectedPages = ['session', 'liveroom', 'assessment', 'dashboard', 'mypage', 'institution'];
+
+const pageToPath: Record<string, string> = {
+  main: '/',
+  curriculum: '/curriculum',
+  live: '/live',
+  assessment: '/assessment',
+  media: '/media',
+  dashboard: '/dashboard',
+  mypage: '/mypage',
+  institution: '/institution',
+};
+
+const pathToPage = (path: string) => {
+  if (path === '/') return 'main';
+  if (path.startsWith('/curriculum')) return 'curriculum';
+  if (path.startsWith('/courses/')) return 'courseDetail';
+  if (path.startsWith('/session/')) return 'session';
+  if (path === '/live') return 'live';
+  if (path.startsWith('/live/')) return 'liveroom';
+  if (path.startsWith('/assessment')) return 'assessment';
+  if (path.startsWith('/media')) return 'media';
+  if (path.startsWith('/dashboard')) return 'dashboard';
+  if (path.startsWith('/mypage')) return 'mypage';
+  if (path.startsWith('/institution')) return 'institution';
+  return 'main';
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [wallet, setWallet] = useState<Wallet>({ balance: 0 });
-  const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
+  const pathname = usePathname();
+  const [currentPage, setCurrentPageState] = useState('main');
+  const [currentSession] = useState(1);
+  const [currentLiveClass] = useState<any>(null);
+  const [currentCourse] = useState<any>(null);
+  const [currentTest] = useState<any>(null);
+  
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [user, setUser] = useState({ 
+    id: 'user_001',
+    email: 'test@test.com', 
+    name: '테스트',
+    role: 'instructor',
+    status: 'approved',
+    institutionId: null
+  });
+  const [viewMode, setViewMode] = useState<string | null>(null);
+  const [institution, setInstitution] = useState(INSTITUTION_DATA);
+  
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState('login');
+  const [pendingAction, setPendingAction] = useState<null | (() => void)>(null);
 
-  // 초기 세션 확인
+  const [wallet, setWallet] = useState({ balance: 1000 });
+  const [creditLedger, setCreditLedger] = useState<any[]>([]);
+  const [userPlan, setUserPlan] = useState('pro');
+  const [userEnterpriseTier, setUserEnterpriseTier] = useState<any>(null);
+  
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [upgradeReason, setUpgradeReason] = useState<any>(null);
+
+  const [isLoading] = useState(false);
+
+  const currentRole = useMemo(() => viewMode || user?.role || null, [viewMode, user]);
+
   useEffect(() => {
-    const initAuth = async () => {
-      try {
-        // 1. Supabase 세션 확인
-        if (isSupabaseConfigured) {
-          const currentUser = await auth.getUser();
-          if (currentUser) {
-            const profileData = await auth.getProfile();
-            const userData: User = {
-              id: currentUser.id,
-              email: currentUser.email || '',
-              name: profileData?.name || currentUser.email?.split('@')[0] || 'User',
-              role: profileData?.role || 'student',
-              status: profileData?.status || 'approved',
-              isSupabaseUser: true,
-              plan: profileData?.plan || 'free',
-            };
-            setUser(userData);
-            setWallet({ balance: profileData?.credits || 100 });
-            setIsLoading(false);
-            return;
-          }
-        }
+    setCurrentPageState(pathToPage(pathname || '/'));
+  }, [pathname]);
 
-        // 2. 데모 세션 확인 (로컬 스토리지)
-        if (typeof window !== 'undefined') {
-          const savedSession = localStorage.getItem(DEMO_SESSION_KEY);
-          if (savedSession) {
-            try {
-              const sessionData = JSON.parse(savedSession);
-              // 24시간 이내 세션만 유효
-              const savedAt = new Date(sessionData.savedAt);
-              const now = new Date();
-              const hoursDiff = (now.getTime() - savedAt.getTime()) / (1000 * 60 * 60);
-              
-              if (hoursDiff < 24) {
-                setUser(sessionData);
-                setWallet({ balance: sessionData.credits || 100 });
-              } else {
-                localStorage.removeItem(DEMO_SESSION_KEY);
-              }
-            } catch (e) {
-              localStorage.removeItem(DEMO_SESSION_KEY);
-            }
-          }
-        }
-      } catch (err) {
-        console.error('Auth init error:', err);
-      } finally {
-        setIsLoading(false);
+  const addLedgerEntry = (entry: any) => {
+    setCreditLedger(prev => [entry, ...prev]);
+  };
+
+  const handleShowUpgradeModal = (reason: any) => {
+    setUpgradeReason(reason);
+    setShowUpgradeModal(true);
+  };
+
+  const handlePlanUpgrade = (newPlanId: string, enterpriseTier: any = null) => {
+    if (newPlanId === 'enterprise' && enterpriseTier) {
+      setUserPlan('enterprise');
+      setUserEnterpriseTier(enterpriseTier);
+      setWallet({ balance: enterpriseTier.monthlyCredits || 999999 });
+    } else {
+      const newPlan = PRICING_PLANS[newPlanId];
+      if (newPlan) {
+        setUserPlan(newPlanId);
+        setUserEnterpriseTier(null);
+        setWallet({ balance: newPlan.monthlyCredits });
       }
-    };
-
-    initAuth();
-  }, []);
-
-  const login = useCallback((userData: User) => {
-    const userWithDefaults: User = {
-      ...userData,
-      id: userData.id || `demo_${Date.now()}`,
-      plan: userData.plan || 'free',
-    };
-    
-    setUser(userWithDefaults);
-    setWallet({ balance: 100 });
-
-    // 데모 모드인 경우 로컬 스토리지에 세션 저장
-    if (!userData.isSupabaseUser && typeof window !== 'undefined') {
-      localStorage.setItem(DEMO_SESSION_KEY, JSON.stringify({
-        ...userWithDefaults,
-        credits: 100,
-        savedAt: new Date().toISOString(),
-      }));
     }
-  }, []);
+    setShowUpgradeModal(false);
+    setUpgradeReason(null);
+  };
 
-  const logout = useCallback(async () => {
-    try {
-      await auth.signOut();
-    } catch (e) {
-      // ignore
-    }
-    
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem(DEMO_SESSION_KEY);
-    }
-    
-    setUser(null);
-    setWallet({ balance: 0 });
-  }, []);
+  const handleAuthClick = (mode = 'login') => {
+    setAuthMode(mode);
+    setShowAuthModal(true);
+  };
 
-  const updateCredits = useCallback((amount: number) => {
-    setWallet(prev => {
-      const newBalance = prev.balance + amount;
-      
-      // 데모 세션 업데이트
-      if (typeof window !== 'undefined') {
-        const savedSession = localStorage.getItem(DEMO_SESSION_KEY);
-        if (savedSession) {
-          try {
-            const sessionData = JSON.parse(savedSession);
-            sessionData.credits = newBalance;
-            localStorage.setItem(DEMO_SESSION_KEY, JSON.stringify(sessionData));
-          } catch (e) {}
-        }
-      }
-      
-      return { ...prev, balance: newBalance };
+  const handleLogin = (userData: any) => {
+    setUser({
+      id: 'user_' + Date.now(),
+      email: userData.email,
+      name: userData.name,
+      role: userData.role || 'instructor',
+      status: userData.status || 'approved',
+      institutionId: userData.institutionId || null
     });
-  }, []);
-
-  const updatePlan = useCallback((plan: string) => {
-    if (!user) return;
+    setIsLoggedIn(true);
+    setShowAuthModal(false);
+    setViewMode(null);
     
-    const plans: Record<string, { credits: number; monthlyLimit: number }> = {
-      free: { credits: 50, monthlyLimit: 50 },
-      basic: { credits: 500, monthlyLimit: 500 },
-      pro: { credits: 2000, monthlyLimit: 2000 },
-      max: { credits: 5000, monthlyLimit: 5000 },
-    };
-    
-    const planData = plans[plan] || plans.free;
-    
-    setUser(prev => prev ? { ...prev, plan } : null);
-    setWallet(prev => ({ 
-      ...prev, 
-      balance: planData.credits,
-      monthlyLimit: planData.monthlyLimit,
-    }));
-    
-    // 데모 세션 업데이트
-    if (typeof window !== 'undefined') {
-      const savedSession = localStorage.getItem(DEMO_SESSION_KEY);
-      if (savedSession) {
-        try {
-          const sessionData = JSON.parse(savedSession);
-          sessionData.plan = plan;
-          sessionData.credits = planData.credits;
-          localStorage.setItem(DEMO_SESSION_KEY, JSON.stringify(sessionData));
-        } catch (e) {}
-      }
+    if (pendingAction) {
+      pendingAction();
+      setPendingAction(null);
     }
-  }, [user]);
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setIsLoggedIn(false);
+    setViewMode(null);
+    setCurrentPageState('main');
+    router.push('/');
+  };
+
+  const requireAuth = (action: () => void) => {
+    if (!isLoggedIn) {
+      setPendingAction(() => action);
+      setAuthMode('login');
+      setShowAuthModal(true);
+      return;
+    }
+    action();
+  };
+
+  const clearPendingAction = () => {
+    setPendingAction(null);
+  };
+
+  const handleToggleRole = () => {
+    if (user?.role === 'instructor' && user?.status === 'approved') {
+      setViewMode(prev => prev === 'student' ? null : 'student');
+    } else if (user?.role === 'institution_admin') {
+      setViewMode(prev => {
+        if (!prev) return 'instructor';
+        if (prev === 'instructor') return 'student';
+        return null;
+      });
+    }
+  };
+  
+  const handleRoleSwitch = (newViewMode: string | null) => {
+    setViewMode(newViewMode);
+  };
+
+  const setCurrentPage = (page: string) => {
+    const path = pageToPath[page];
+    if (!path) {
+      setCurrentPageState(page);
+      return;
+    }
+    if (protectedPages.includes(page) && !isLoggedIn) {
+      setPendingAction(() => () => router.push(path));
+      setAuthMode('login');
+      setShowAuthModal(true);
+      return;
+    }
+    setCurrentPageState(page);
+    router.push(path);
+  };
 
   const value: AuthContextType = {
     user,
-    profile: user, // alias
-    wallet,
-    isLoggedIn: !!user,
+    isLoggedIn,
     isLoading,
-    isInstructor: user?.role === 'instructor',
-    isAdmin: user?.role === 'institution_admin' || user?.role === 'platform_admin',
-    login,
-    logout,
-    updateCredits,
-    updatePlan,
+    wallet,
+    creditLedger,
+    userPlan,
+    userEnterpriseTier,
+    institution,
+    viewMode,
+    currentRole,
+    currentPage,
+    authMode,
+    showAuthModal,
+    showUpgradeModal,
+    upgradeReason,
+    setWallet,
+    setUserPlan,
+    setUserEnterpriseTier,
+    setInstitution,
+    setAuthMode,
+    setShowAuthModal,
+    setShowUpgradeModal,
+    setUpgradeReason,
+    addLedgerEntry,
+    handleAuthClick,
+    handleLogin,
+    handleLogout,
+    handleShowUpgradeModal,
+    handlePlanUpgrade,
+    handleToggleRole,
+    handleRoleSwitch,
+    setCurrentPage,
+    requireAuth,
+    clearPendingAction,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;

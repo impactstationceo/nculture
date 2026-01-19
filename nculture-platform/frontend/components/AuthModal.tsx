@@ -2,28 +2,58 @@
 
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { auth, isSupabaseConfigured } from '@/lib/supabase';
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
-  initialMode?: 'login' | 'signup';
+  initialMode?: 'login' | 'signup' | 'institution_login' | 'institution_signup';
   onLogin: (userData: any) => void;
 }
 
 export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLogin }: AuthModalProps) {
-  const [mode, setMode] = useState<'login' | 'signup'>(initialMode);
+  const [mode, setMode] = useState(initialMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [agreeTerms, setAgreeTerms] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<'student' | 'instructor' | null>(null);
+  const [rememberEmail, setRememberEmail] = useState(false);
+  
+  const [selectedRole, setSelectedRole] = useState<null | 'student' | 'instructor'>(null);
   const [signupStep, setSignupStep] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [authMethod, setAuthMethod] = useState<null | 'email' | 'code' | 'none'>(null);
+  const [institutionEmail, setInstitutionEmail] = useState('');
+  const [institutionCode, setInstitutionCode] = useState('');
+  const [institutionName, setInstitutionName] = useState('');
+  
+  const [instRegStep, setInstRegStep] = useState(1);
+  const [instRegData, setInstRegData] = useState({
+    institutionName: '',
+    businessNumber: '',
+    adminName: '',
+    adminEmail: '',
+    adminPhone: '',
+    expectedUsers: '',
+    purpose: ''
+  });
+
+  useEffect(() => {
+    try {
+      const savedEmail = localStorage.getItem('nculture_saved_email');
+      const savedRemember = localStorage.getItem('nculture_remember_email');
+      if (savedEmail && savedRemember === 'true') {
+        setEmail(savedEmail);
+        setRememberEmail(true);
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, []);
 
   useEffect(() => {
     setMode(initialMode);
+    if (initialMode === 'institution_login' || initialMode === 'institution_signup') {
+      setInstRegStep(1);
+    }
   }, [initialMode]);
 
   useEffect(() => {
@@ -33,128 +63,101 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLo
       setAgreeTerms(false);
       setSelectedRole(null);
       setSignupStep(1);
-      setError(null);
+      setAuthMethod(null);
+      setInstitutionEmail('');
+      setInstitutionCode('');
+      setInstitutionName('');
+      setInstRegStep(1);
+      setInstRegData({
+        institutionName: '',
+        businessNumber: '',
+        adminName: '',
+        adminEmail: '',
+        adminPhone: '',
+        expectedUsers: '',
+        purpose: ''
+      });
+      if (!rememberEmail) {
+        setEmail('');
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, rememberEmail]);
 
   if (!isOpen) return null;
 
-  const handleLogin = async () => {
-    if (!email || !password) {
-      setError('이메일과 비밀번호를 입력해주세요');
-      return;
-    }
+  const isInstitutionMode = mode === 'institution_login' || mode === 'institution_signup';
 
-    setLoading(true);
-    setError(null);
-
+  const handleSaveEmail = (shouldSave: boolean, emailValue: string) => {
     try {
-      // 1. Supabase가 설정되어 있으면 실제 로그인 시도
-      if (isSupabaseConfigured) {
-        try {
-          const result = await auth.signIn(email, password);
-          if (result?.user) {
-            // 실제 Supabase 로그인 성공
-            const profile = await auth.getProfile();
-            onLogin({
-              id: result.user.id,
-              email: result.user.email,
-              name: profile?.name || result.user.email?.split('@')[0],
-              role: profile?.role || 'student',
-              status: profile?.status || 'approved',
-              isSupabaseUser: true,
-            });
-            return;
-          }
-        } catch (supabaseError: any) {
-          console.log('Supabase login failed, trying demo mode:', supabaseError.message);
-          // Supabase 실패 시 데모 모드로 진행
-        }
+      if (shouldSave && emailValue) {
+        localStorage.setItem('nculture_saved_email', emailValue);
+        localStorage.setItem('nculture_remember_email', 'true');
+      } else {
+        localStorage.removeItem('nculture_saved_email');
+        localStorage.removeItem('nculture_remember_email');
       }
-
-      // 2. 데모 모드 (Supabase 미설정 또는 로그인 실패 시)
-      const isTestInstructor = email.toLowerCase() === 'test@test.com';
-      const isTestAdmin = email.toLowerCase() === 'admin@test.com';
-      
-      onLogin({ 
-        id: `demo_${Date.now()}`,
-        email, 
-        name: email.split('@')[0],
-        role: isTestAdmin ? 'institution_admin' : isTestInstructor ? 'instructor' : 'student',
-        status: 'approved',
-        isSupabaseUser: false,
-      });
-    } catch (err: any) {
-      setError(err.message || '로그인에 실패했습니다');
-    } finally {
-      setLoading(false);
+    } catch (e) {
+      // ignore
     }
   };
 
-  const handleSignup = async () => {
-    if (!email || !password || !name || !agreeTerms) {
-      setError('모든 필드를 입력하고 이용약관에 동의해주세요');
-      return;
-    }
-
-    if (password.length < 6) {
-      setError('비밀번호는 6자 이상이어야 합니다');
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      // 1. Supabase가 설정되어 있으면 실제 회원가입 시도
-      if (isSupabaseConfigured) {
-        try {
-          const result = await auth.signUp(email, password, name);
-          if (result?.user) {
-            // 이메일 인증이 필요할 수 있음
-            if (result.user.identities?.length === 0) {
-              setError('이미 가입된 이메일입니다. 로그인해주세요.');
-              return;
-            }
-            
-            onLogin({
-              id: result.user.id,
-              email: result.user.email,
-              name,
-              role: selectedRole || 'student',
-              status: selectedRole === 'instructor' ? 'pending' : 'approved',
-              isSupabaseUser: true,
-              needsEmailVerification: !result.session,
-            });
-            return;
-          }
-        } catch (supabaseError: any) {
-          console.log('Supabase signup failed, using demo mode:', supabaseError.message);
-          // 이미 가입된 이메일인 경우 명확히 표시
-          if (supabaseError.message?.includes('already registered')) {
-            setError('이미 가입된 이메일입니다. 로그인해주세요.');
-            return;
-          }
-        }
-      }
-
-      // 2. 데모 모드
-      onLogin({ 
-        id: `demo_${Date.now()}`,
-        email, 
-        name,
-        role: selectedRole || 'student',
-        status: selectedRole === 'instructor' ? 'pending' : 'approved',
-        isSupabaseUser: false,
-      });
-    } catch (err: any) {
-      setError(err.message || '회원가입에 실패했습니다');
-    } finally {
-      setLoading(false);
-    }
+  const isInstitutionEmail = (emailValue: string) => {
+    const institutionDomains = ['ac.kr', 'edu', 'edu.kr', 'school.kr', 'university.edu'];
+    return institutionDomains.some(domain => emailValue.toLowerCase().endsWith(domain));
   };
 
-  // 역할 선택 화면
+  const isValidInstitutionCode = (code: string) => {
+    return code.startsWith('NC-') || code.startsWith('EDU-');
+  };
+
+  const determineApprovalStatus = () => {
+    if (selectedRole === 'student') return 'approved';
+    if (authMethod === 'email' && isInstitutionEmail(institutionEmail)) return 'approved';
+    if (authMethod === 'code' && isValidInstitutionCode(institutionCode)) return 'approved';
+    return 'pending';
+  };
+
+  const handleLogin = () => {
+    if (mode === 'login') {
+      if (email && password) {
+        handleSaveEmail(rememberEmail, email);
+        const isTestInstructor = email.toLowerCase() === 'test@test.com';
+        onLogin({ 
+          email, 
+          name: email.split('@')[0],
+          role: isTestInstructor ? 'instructor' : 'student',
+          status: 'approved'
+        });
+      }
+    } else if (mode === 'institution_login') {
+      if (email && password) {
+        handleSaveEmail(rememberEmail, email);
+        onLogin({ 
+          email, 
+          name: email.split('@')[0],
+          role: 'institution_admin',
+          status: 'approved',
+          institutionId: 'inst_001'
+        });
+      }
+    } else {
+      if (email && password && name && agreeTerms) {
+        const status = determineApprovalStatus();
+        onLogin({ 
+          email, 
+          name,
+          role: selectedRole,
+          status,
+          institution: institutionName || null
+        });
+      }
+    }
+  };
+  
+  const handleInstitutionRegister = () => {
+    setInstRegStep(2);
+  };
+
   const renderRoleSelection = () => (
     <div className="p-6">
       <h3 className="text-lg font-semibold text-neutral-900 mb-2">어떤 목적으로 가입하시나요?</h3>
@@ -209,7 +212,6 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLo
     </div>
   );
 
-  // 회원가입 폼
   const renderSignupForm = () => (
     <div className="p-6">
       <button
@@ -283,18 +285,11 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLo
           </div>
         )}
 
-        {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
-            {error}
-          </div>
-        )}
-
         <button
-          onClick={handleSignup}
-          disabled={loading || !email || !password || !name || !agreeTerms}
-          className="w-full py-3 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 disabled:bg-neutral-300 disabled:cursor-not-allowed transition-colors"
+          onClick={handleLogin}
+          className="w-full py-3 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 transition-colors"
         >
-          {loading ? '처리 중...' : '가입하기'}
+          가입하기
         </button>
       </div>
       
@@ -309,7 +304,6 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLo
     </div>
   );
 
-  // 로그인 폼
   const renderLoginForm = () => (
     <div className="p-6">
       <h3 className="text-lg font-semibold text-neutral-900 mb-6">로그인</h3>
@@ -337,18 +331,21 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLo
           />
         </div>
 
-        {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
-            {error}
-          </div>
-        )}
+        <label className="flex items-center gap-2 text-sm text-neutral-600">
+          <input
+            type="checkbox"
+            checked={rememberEmail}
+            onChange={(e) => setRememberEmail(e.target.checked)}
+            className="w-4 h-4 rounded border-neutral-300 text-indigo-600 focus:ring-indigo-500"
+          />
+          아이디 저장
+        </label>
 
         <button
           onClick={handleLogin}
-          disabled={loading || !email || !password}
-          className="w-full py-3 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 disabled:bg-neutral-300 disabled:cursor-not-allowed transition-colors"
+          className="w-full py-3 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 transition-colors"
         >
-          {loading ? '로그인 중...' : '로그인'}
+          로그인
         </button>
       </div>
       
@@ -364,7 +361,6 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLo
         </button>
       </div>
 
-      {/* 테스트 계정 안내 */}
       <div className="mt-6 p-4 bg-neutral-50 rounded-xl">
         <p className="text-xs text-neutral-500 mb-2">🧪 테스트 계정 (데모 모드)</p>
         <div className="text-xs text-neutral-600 space-y-1">
