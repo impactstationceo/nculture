@@ -10,6 +10,18 @@ import { CURRICULUM, AI_SERVICES, calculateCredits } from '@/lib/data';
 import { useAuth } from '@/components/AuthProvider';
 import AuthModal from '@/components/AuthModal';
 
+type AiTier = (typeof AI_SERVICES)[number]['tiers'][number];
+type VideoTier = AiTier & {
+  maxResolution: string;
+  maxDurationSec: number;
+  audioSupported: boolean;
+};
+
+const isVideoTier = (tier: AiTier): tier is VideoTier =>
+  typeof (tier as VideoTier).maxResolution === 'string' &&
+  typeof (tier as VideoTier).maxDurationSec === 'number' &&
+  typeof (tier as VideoTier).audioSupported === 'boolean';
+
 export default function SessionPage() {
   const params = useParams();
   const router = useRouter();
@@ -186,6 +198,7 @@ export default function SessionPage() {
   }
 
   const videoServices = AI_SERVICES.filter(s => s.category === 'video');
+  const videoTier = isVideoTier(selectedTier) ? selectedTier : null;
 
   return (
     <div className="min-h-screen bg-neutral-900 text-white">
@@ -330,7 +343,7 @@ export default function SessionPage() {
                 >
                   <option value="720p">720p</option>
                   <option value="1080p">1080p</option>
-                  {selectedTier.maxResolution === '4K' && <option value="4K">4K</option>}
+                  {videoTier?.maxResolution === '4K' && <option value="4K">4K</option>}
                 </select>
               </div>
 
@@ -343,12 +356,12 @@ export default function SessionPage() {
                 >
                   <option value="5s">5초</option>
                   <option value="10s">10초</option>
-                  {(selectedTier.maxDurationSec || 10) >= 15 && <option value="15s">15초</option>}
-                  {(selectedTier.maxDurationSec || 10) >= 20 && <option value="20s">20초</option>}
+                  {(videoTier?.maxDurationSec ?? 10) >= 15 && <option value="15s">15초</option>}
+                  {(videoTier?.maxDurationSec ?? 10) >= 20 && <option value="20s">20초</option>}
                 </select>
               </div>
 
-              {selectedTier.audioSupported && (
+              {videoTier?.audioSupported && (
                 <div>
                   <label className="text-xs text-neutral-500 block mb-1">오디오</label>
                   <button
