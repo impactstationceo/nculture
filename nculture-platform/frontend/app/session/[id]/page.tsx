@@ -10,6 +10,32 @@ import { CURRICULUM, AI_SERVICES, calculateCredits } from '@/lib/data';
 import { useAuth } from '@/components/AuthProvider';
 import AuthModal from '@/components/AuthModal';
 
+type VideoTier = {
+  id: string;
+  name: string;
+  description: string;
+  specs: {
+    resolution: string;
+    duration: string;
+    audio: boolean;
+  };
+  pricing: {
+    multiplier: number;
+  };
+  maxResolution: string;
+  maxDurationSec: number;
+  audioSupported: boolean;
+};
+
+type VideoService = {
+  id: string;
+  name: string;
+  category: 'video';
+  description: string;
+  icon: string;
+  tiers: VideoTier[];
+};
+
 export default function SessionPage() {
   const params = useParams();
   const router = useRouter();
@@ -19,8 +45,11 @@ export default function SessionPage() {
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   // AI 설정 상태
-  const [selectedService, setSelectedService] = useState(AI_SERVICES[0]);
-  const [selectedTier, setSelectedTier] = useState(AI_SERVICES[0].tiers[0]);
+  const videoServices = AI_SERVICES.filter(
+    (service): service is VideoService => service.category === 'video'
+  );
+  const [selectedService, setSelectedService] = useState<VideoService>(videoServices[0]);
+  const [selectedTier, setSelectedTier] = useState<VideoTier>(videoServices[0].tiers[0]);
   const [prompt, setPrompt] = useState('');
   const [duration, setDuration] = useState('5s');
   const [resolution, setResolution] = useState('720p');
@@ -184,8 +213,6 @@ export default function SessionPage() {
       </div>
     );
   }
-
-  const videoServices = AI_SERVICES.filter(s => s.category === 'video');
 
   return (
     <div className="min-h-screen bg-neutral-900 text-white">
