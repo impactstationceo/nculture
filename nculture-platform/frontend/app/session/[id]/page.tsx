@@ -22,9 +22,9 @@ type VideoTier = {
   pricing: {
     multiplier: number;
   };
-  maxResolution: string;
-  maxDurationSec: number;
-  audioSupported: boolean;
+  maxResolution?: string;
+  maxDurationSec?: number;
+  audioSupported?: boolean;
 };
 
 type VideoService = {
@@ -57,6 +57,17 @@ export default function SessionPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedResults, setGeneratedResults] = useState<any[]>([]);
   const [showServiceDropdown, setShowServiceDropdown] = useState(false);
+
+  useEffect(() => {
+    const maxResolution = selectedTier?.maxResolution;
+    if (maxResolution === '720p' && resolution !== '720p') {
+      setResolution('720p');
+      return;
+    }
+    if (maxResolution !== '4K' && resolution === '4K') {
+      setResolution('1080p');
+    }
+  }, [selectedTier, resolution]);
 
   // 현재 세션 찾기
   const findSession = () => {
@@ -356,8 +367,10 @@ export default function SessionPage() {
                   className="bg-neutral-700 border-none rounded-lg px-3 py-1.5 text-sm"
                 >
                   <option value="720p">720p</option>
-                  <option value="1080p">1080p</option>
-                  {selectedTier.maxResolution === '4K' && <option value="4K">4K</option>}
+                  {(selectedTier?.maxResolution ?? '1080p') !== '720p' && (
+                    <option value="1080p">1080p</option>
+                  )}
+                  {selectedTier?.maxResolution === '4K' && <option value="4K">4K</option>}
                 </select>
               </div>
 
