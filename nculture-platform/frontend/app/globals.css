@@ -11,6 +11,9 @@
 html,
 body {
   min-height: 100vh;
+  color: #191F28;
+  background-color: #FFFFFF;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* Custom scrollbar */
@@ -24,12 +27,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #d1d5db;
+  background: #E5E8EB;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
+  background: #8B95A1;
 }
 
 /* Animation */
@@ -98,32 +101,32 @@ body {
 
 /* Gradient text */
 .gradient-text {
-  @apply bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent;
+  @apply bg-gradient-to-r from-[#3182F6] to-[#1B64DA] bg-clip-text text-transparent;
 }
 
 /* Button styles */
 .btn-primary {
-  @apply px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:bg-neutral-300 disabled:cursor-not-allowed;
+  @apply px-4 py-2 bg-[#3182F6] text-white rounded-xl hover:bg-[#1B64DA] transition-colors disabled:bg-[#E5E8EB] disabled:text-[#8B95A1] disabled:cursor-not-allowed;
 }
 
 .btn-secondary {
-  @apply px-4 py-2 border border-neutral-200 text-neutral-700 rounded-lg hover:bg-neutral-50 transition-colors;
+  @apply px-4 py-2 bg-[#F2F4F6] text-[#333D4B] rounded-xl hover:bg-[#E5E8EB] transition-colors;
 }
 
 .btn-ghost {
-  @apply px-4 py-2 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors;
+  @apply px-4 py-2 text-[#6B7684] hover:text-[#191F28] hover:bg-[#F2F4F6] rounded-lg transition-colors;
 }
 
 /* Input styles */
 .input-base {
-  @apply w-full px-4 py-3 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all;
+  @apply w-full px-4 py-3 bg-[#F2F4F6] border-none rounded-xl text-[15px] text-[#191F28] placeholder-[#8B95A1] focus:outline-none focus:ring-2 focus:ring-[#3182F6] transition-all;
 }
 
 /* Modal backdrop */
 .modal-backdrop {
-  @apply fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4;
+  @apply fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4;
 }
 
 .modal-content {
-  @apply bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto;
+  @apply bg-white rounded-2xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto;
 }

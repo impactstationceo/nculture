@@ -40,6 +40,31 @@ export const createAvatar = (name: string, bgColor = '#6366f1') => {
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 };
 
+export const createScreen = (status = 'active', bgColor = '#1e293b') => {
+  const statusIcons: Record<string, string> = {
+    active: `<rect x="100" y="60" width="200" height="120" rx="8" fill="#334155"/>
+      <rect x="115" y="75" width="80" height="10" rx="2" fill="#6366f1"/>
+      <rect x="115" y="95" width="170" height="6" rx="2" fill="#475569"/>
+      <rect x="115" y="110" width="140" height="6" rx="2" fill="#475569"/>
+      <rect x="115" y="125" width="160" height="6" rx="2" fill="#475569"/>
+      <rect x="115" y="145" width="60" height="20" rx="4" fill="#6366f1"/>
+      <circle cx="350" cy="190" r="20" fill="#22c55e" opacity="0.2"/>
+      <circle cx="350" cy="190" r="10" fill="#22c55e"/>`,
+    away: `<rect x="100" y="60" width="200" height="120" rx="8" fill="#334155"/>
+      <circle cx="200" cy="120" r="25" fill="#475569"/>
+      <rect x="195" y="105" width="10" height="20" rx="2" fill="#64748b"/>
+      <circle cx="200" cy="140" r="4" fill="#64748b"/>
+      <circle cx="350" cy="190" r="20" fill="#f59e0b" opacity="0.2"/>
+      <circle cx="350" cy="190" r="10" fill="#f59e0b"/>`,
+  };
+  
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+    <rect width="400" height="300" fill="${bgColor}"/>
+    ${statusIcons[status] || statusIcons.active}
+  </svg>`;
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+};
+
 export const createResult = (index = 0) => {
   const colors = ['#6366f1', '#0891b2', '#7c3aed', '#059669', '#dc2626'];
   const bgColor = colors[index % colors.length];
@@ -64,42 +89,6 @@ export const createResult = (index = 0) => {
     <text x="300" y="300" font-family="system-ui" font-size="14" fill="rgba(255,255,255,0.4)" text-anchor="middle">AI Generated</text>
   </svg>`;
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;
-};
-
-// ============= 크레딧 계산 =============
-export const parseDurationSec = (durationStr: string) => {
-  const match = durationStr.match(/(\d+)/);
-  return match ? parseInt(match[1], 10) : 5;
-};
-
-export const getResolutionFactor = (resolution: string) => {
-  switch (resolution) {
-    case '4K': return 6;
-    case '1080p': return 2;
-    case '720p': 
-    default: return 0;
-  }
-};
-
-export const calculateCredits = (tierId: string, durationStr: string, resolution: string, audioOn: boolean, services: any[]) => {
-  const baseCost = 2;
-  const durationSec = parseDurationSec(durationStr);
-  const durationCost = durationSec * 1;
-  const resolutionCost = getResolutionFactor(resolution);
-  const audioCost = audioOn ? 2 : 0;
-  
-  let tierMultiplier = 1.0;
-  for (const service of services) {
-    const tier = service.tiers?.find((t: any) => t.id === tierId);
-    if (tier) {
-      // pricing 객체 또는 직접 multiplier 모두 지원
-      tierMultiplier = tier.pricing?.multiplier || tier.pricing_multiplier || 1.0;
-      break;
-    }
-  }
-  
-  const total = (baseCost + durationCost + resolutionCost + audioCost) * tierMultiplier;
-  return Math.ceil(total);
 };
 
 // ============= Mock 커리큘럼 데이터 =============
@@ -128,11 +117,11 @@ export const CURRICULUM: Record<string, any> = {
     thumbnail: createPlaceholder('creative', '#7c3aed'),
     description: "이미지, 영상, 음성까지 AI 창작 도구 완전 정복",
     sessions: [
-      { id: 7, title: "AI 콘텐츠 창작 개론", summary: "AI 창작 도구의 이해와 활용 범위", concepts: ["생성형 AI의 종류", "창작 도구 비교", "활용 사례 분석"], examples: [{ label: "이미지 기초", prompt: "일출 시간의 고요한 산속 호수, 수정처럼 맑은 반영, 소나무 숲, 4K 포토리얼리스틱 품질" }] },
-      { id: 8, title: "이미지 생성 AI 마스터", summary: "Midjourney, DALL-E, Stable Diffusion", concepts: ["프롬프트 엔지니어링", "스타일 제어", "고급 파라미터 활용"], examples: [{ label: "Midjourney", prompt: "절벽 위의 고대 판타지 성, 극적인 폭풍 구름, 번개, 웅장한 스케일, --ar 16:9 --v 6 --style raw" }] },
-      { id: 9, title: "영상 생성 AI 활용", summary: "SORA, Runway, Pika Labs 실습", concepts: ["텍스트 to 비디오", "이미지 to 비디오", "영상 편집 AI"], examples: [{ label: "텍스트 to 비디오", prompt: "일몰 시간에 바위 해안에 부딪히는 파도, 부드러운 달리 무브먼트, 날아가는 바닷새들, 골든아워 촬영" }] },
-      { id: 10, title: "음성 및 음악 AI", summary: "AI 보이스와 음악 생성", concepts: ["TTS 기술", "음악 생성 AI", "사운드 디자인"], examples: [{ label: "나레이션", prompt: "깊고 따뜻한 남성 목소리, 다큐멘터리 내레이터 스타일, 차분하고 권위 있는 톤, 명확한 발음, 약간의 리버브" }] },
-      { id: 11, title: "AI 콘텐츠 통합 제작", summary: "멀티모달 AI 활용 프로젝트", concepts: ["워크플로우 설계", "도구 간 연동", "최종 아웃풋 완성"], examples: [{ label: "통합 프로젝트", prompt: "30초 친환경 브랜드 영상: 자연 이미지 + 부드러운 전환 + 밝은 어쿠스틱 음악 + 은은한 텍스트 오버레이" }] }
+      { id: 7, title: "AI 콘텐츠 창작 개론", summary: "AI 창작 도구의 이해와 활용 범위", concepts: ["생성형 AI의 종류", "창작 도구 비교", "활용 사례 분석"], examples: [{ label: "이미지 기초", prompt: "일출 시간의 고요한 산속 호수, 수정처럼 맑은 반영, 소나무 숲, 4K 포토리얼리스틱 품질" }, { label: "스타일 탐색", prompt: "밤의 미래형 도쿄 도시 풍경, 사이버펑크 네온 미학, 날아다니는 자동차, 비에 젖은 거리" }] },
+      { id: 8, title: "이미지 생성 AI 마스터", summary: "Midjourney, DALL-E, Stable Diffusion", concepts: ["프롬프트 엔지니어링", "스타일 제어", "고급 파라미터 활용"], examples: [{ label: "Midjourney", prompt: "절벽 위의 고대 판타지 성, 극적인 폭풍 구름, 번개, 웅장한 스케일, --ar 16:9 --v 6 --style raw" }, { label: "포토리얼", prompt: "현대적인 북유럽 스타일 카페 인테리어, 자연 원목과 식물, 큰 창문으로 들어오는 아침 햇살, 건축 사진" }] },
+      { id: 9, title: "영상 생성 AI 활용", summary: "SORA, Runway, Pika Labs 실습", concepts: ["텍스트 to 비디오", "이미지 to 비디오", "영상 편집 AI"], examples: [{ label: "텍스트 to 비디오", prompt: "일몰 시간에 바위 해안에 부딪히는 파도, 부드러운 달리 무브먼트, 날아가는 바닷새들, 골든아워 촬영" }, { label: "이미지 to 비디오", prompt: "이 풍경 사진을 애니메이션으로: 잔디 사이로 부는 부드러운 바람, 천천히 흘러가는 구름, 멀리서 나는 새들" }] },
+      { id: 10, title: "음성 및 음악 AI", summary: "AI 보이스와 음악 생성", concepts: ["TTS 기술", "음악 생성 AI", "사운드 디자인"], examples: [{ label: "나레이션", prompt: "깊고 따뜻한 남성 목소리, 다큐멘터리 내레이터 스타일, 차분하고 권위 있는 톤, 명확한 발음, 약간의 리버브" }, { label: "배경음악", prompt: "로파이 힙합 인스트루멘탈, 부드러운 피아노 코드, 바이닐 잡음, 여유로운 오후 공부 분위기, 90 BPM" }] },
+      { id: 11, title: "AI 콘텐츠 통합 제작", summary: "멀티모달 AI 활용 프로젝트", concepts: ["워크플로우 설계", "도구 간 연동", "최종 아웃풋 완성"], examples: [{ label: "통합 프로젝트", prompt: "30초 친환경 브랜드 영상: 자연 이미지 + 부드러운 전환 + 밝은 어쿠스틱 음악 + 은은한 텍스트 오버레이" }, { label: "숏폼 광고", prompt: "15초 세로형 인스타그램 스킨케어 광고, ASMR 텍스처 샷, 부드러운 파스텔 색상, 트렌디한 전자음악" }] }
     ]
   },
   course3: {
@@ -143,23 +132,24 @@ export const CURRICULUM: Record<string, any> = {
     thumbnail: createPlaceholder('robot', '#059669'),
     description: "AI 아바타부터 버추얼 인플루언서까지 디지털 휴먼의 모든 것",
     sessions: [
-      { id: 12, title: "디지털 휴먼 개론", summary: "디지털 휴먼의 이해와 활용 분야", concepts: ["디지털 휴먼 정의", "기술 발전 역사", "산업별 활용 사례"], examples: [{ label: "친근한 아바타", prompt: "친근한 젊은 아시아 여성 아바타, 다가가기 쉬운 미소, 캐주얼한 현대적 의상, 중립적인 스튜디오 배경, 고객 서비스 스타일" }] },
-      { id: 13, title: "AI 아바타 제작", summary: "나만의 디지털 휴먼 만들기", concepts: ["외형 디자인", "음성 설정", "개성 부여하기"], examples: [{ label: "외형 설정", prompt: "한국인 여성 아바타, 어깨 길이 검은 머리, 자연스러운 화장, 따뜻한 갈색 눈, 25-30세, 친근한 인플루언서 룩" }] },
-      { id: 14, title: "디지털 휴먼 애니메이션", summary: "자연스러운 움직임과 표정", concepts: ["모션 캡처 기술", "표정 애니메이션", "립싱크 기술"], examples: [{ label: "설명 제스처", prompt: "자연스러운 손동작으로 설명하는 아바타, 열린 손바닥 움직임, 가끔 끄덕임, 카메라와 시선 유지" }] },
-      { id: 15, title: "실시간 디지털 휴먼", summary: "라이브 스트리밍과 인터랙션", concepts: ["실시간 렌더링", "인터랙티브 대화", "방송 활용"], examples: [{ label: "라이브 호스트", prompt: "실시간 채팅에 반응하는 버추얼 호스트, 댓글을 소리 내어 읽고, 놀람과 웃음으로 반응, 시청자와 적극적인 소통" }] },
-      { id: 16, title: "디지털 휴먼 비즈니스", summary: "상업적 활용과 미래 전망", concepts: ["마케팅 활용", "버추얼 인플루언서", "메타버스 연계"], examples: [{ label: "인플루언서 콘텐츠", prompt: "새 테크 제품을 언박싱하는 버추얼 인플루언서, 진정한 호기심 표현, 기능 시연, 라이프스타일 브랜드 통합" }] }
+      { id: 12, title: "디지털 휴먼 개론", summary: "디지털 휴먼의 이해와 활용 분야", concepts: ["디지털 휴먼 정의", "기술 발전 역사", "산업별 활용 사례"], examples: [{ label: "친근한 아바타", prompt: "친근한 젊은 아시아 여성 아바타, 다가가기 쉬운 미소, 캐주얼한 현대적 의상, 중립적인 스튜디오 배경, 고객 서비스 스타일" }, { label: "전문가 아바타", prompt: "네이비 정장을 입은 전문직 남성 아바타, 자신감 있는 자세, 단정한 외모, 기업 프레젠테이션 세팅" }] },
+      { id: 13, title: "AI 아바타 제작", summary: "나만의 디지털 휴먼 만들기", concepts: ["외형 디자인", "음성 설정", "개성 부여하기"], examples: [{ label: "외형 설정", prompt: "한국인 여성 아바타, 어깨 길이 검은 머리, 자연스러운 화장, 따뜻한 갈색 눈, 25-30세, 친근한 인플루언서 룩" }, { label: "음성 페르소나", prompt: "밝고 에너지 넘치는 여성 목소리, 20대 초반 한국어 억양, 친근한 대화체, 명확한 발음, 목소리에 미소가 담긴" }] },
+      { id: 14, title: "디지털 휴먼 애니메이션", summary: "자연스러운 움직임과 표정", concepts: ["모션 캡처 기술", "표정 애니메이션", "립싱크 기술"], examples: [{ label: "설명 제스처", prompt: "자연스러운 손동작으로 설명하는 아바타, 열린 손바닥 움직임, 가끔 끄덕임, 카메라와 시선 유지" }, { label: "감정 전환", prompt: "따뜻한 환영 미소에서 진지한 사려 깊은 표정으로 전환하는 아바타, 미묘한 눈썹 움직임, 현실적인 타이밍" }] },
+      { id: 15, title: "실시간 디지털 휴먼", summary: "라이브 스트리밍과 인터랙션", concepts: ["실시간 렌더링", "인터랙티브 대화", "방송 활용"], examples: [{ label: "라이브 호스트", prompt: "실시간 채팅에 반응하는 버추얼 호스트, 댓글을 소리 내어 읽고, 놀람과 웃음으로 반응, 시청자와 적극적인 소통" }, { label: "실시간 반응", prompt: "후원 알림에 흥분된 표정으로 반응하는 아바타, 박수치며, 진심 어린 감사 인사" }] },
+      { id: 16, title: "디지털 휴먼 비즈니스", summary: "상업적 활용과 미래 전망", concepts: ["마케팅 활용", "버추얼 인플루언서", "메타버스 연계"], examples: [{ label: "인플루언서 콘텐츠", prompt: "새 테크 제품을 언박싱하는 버추얼 인플루언서, 진정한 호기심 표현, 기능 시연, 라이프스타일 브랜드 통합" }, { label: "AI 상담원", prompt: "친근한 디지털 휴먼 고객 서비스 상담원, 경청하는 자세, 이해한다는 듯이 끄덕임, 전문적이고 도움이 되는 태도" }] }
     ]
   }
 };
 
 // ============= AI 서비스 Mock 데이터 =============
-export const AI_SERVICES = [
+export const AI_SERVICES: any[] = [
+  // ============= 영상 생성 서비스 =============
   {
     id: 'sora',
     name: 'OpenAI Sora',
     category: 'video',
     description: '사운드 포함 멀티샷 영상 생성',
-    icon: '🎬',
+    icon: '🎵',
     tiers: [
       { id: 'sora-2', name: 'Sora 2', description: '표준 품질', specs: { resolution: '720p', duration: '5-10초', audio: true }, pricing: { multiplier: 1.0 }, maxResolution: '720p', maxDurationSec: 10, audioSupported: true },
       { id: 'sora-2-pro', name: 'Sora 2 Pro', description: '고품질', specs: { resolution: '1080p', duration: '5-15초', audio: true }, pricing: { multiplier: 1.5 }, maxResolution: '1080p', maxDurationSec: 15, audioSupported: true },
@@ -199,6 +189,7 @@ export const AI_SERVICES = [
       { id: 'minimax-quality', name: '퀄리티', description: '최고 품질', specs: { resolution: '1080p', duration: '5-12초', audio: true }, pricing: { multiplier: 1.0 }, maxResolution: '1080p', maxDurationSec: 12, audioSupported: true }
     ]
   },
+  // ============= 이미지 생성 서비스 =============
   {
     id: 'dalle',
     name: 'DALL·E 3',
@@ -222,6 +213,17 @@ export const AI_SERVICES = [
     ]
   },
   {
+    id: 'stable-diffusion',
+    name: 'Stable Diffusion 3',
+    category: 'image',
+    description: '빠르고 다양한 스타일 지원',
+    icon: '🖼️',
+    tiers: [
+      { id: 'sd3-turbo', name: 'Turbo', description: '빠른 생성', specs: { resolution: '1024x1024', style: '다양함' }, pricing: { multiplier: 0.6, base: 5 } },
+      { id: 'sd3-ultra', name: 'Ultra', description: '최고 품질', specs: { resolution: '2048x2048', style: '정교함' }, pricing: { multiplier: 1.0, base: 8 } }
+    ]
+  },
+  {
     id: 'flux',
     name: 'Flux',
     category: 'image',
@@ -232,6 +234,18 @@ export const AI_SERVICES = [
       { id: 'flux-pro', name: 'Pro', description: '프로페셔널', specs: { resolution: '1440x1440', style: '전문가용' }, pricing: { multiplier: 1.2, base: 10 } }
     ]
   },
+  {
+    id: 'ideogram',
+    name: 'Ideogram',
+    category: 'image',
+    description: '텍스트가 포함된 이미지에 특화',
+    icon: '📝',
+    tiers: [
+      { id: 'ideogram-v2', name: 'v2.0', description: '텍스트 특화', specs: { resolution: '1024x1024', style: '타이포그래피' }, pricing: { multiplier: 0.8, base: 7 } },
+      { id: 'ideogram-v2-turbo', name: 'v2.0 Turbo', description: '빠른 텍스트', specs: { resolution: '1024x1024', style: '빠른 타이포' }, pricing: { multiplier: 0.6, base: 5 } }
+    ]
+  },
+  // ============= 텍스트 생성 서비스 =============
   {
     id: 'gpt4',
     name: 'GPT-4o',
@@ -252,6 +266,39 @@ export const AI_SERVICES = [
     tiers: [
       { id: 'claude-sonnet', name: 'Sonnet', description: '균형 잡힌 성능', specs: { context: '200K', speed: '빠름' }, pricing: { multiplier: 0.8, base: 2 } },
       { id: 'claude-opus', name: 'Opus', description: '최고 성능', specs: { context: '200K', speed: '보통' }, pricing: { multiplier: 1.5, base: 5 } }
+    ]
+  },
+  {
+    id: 'gemini',
+    name: 'Gemini Pro',
+    category: 'text',
+    description: '구글의 최신 멀티모달 AI',
+    icon: '💎',
+    tiers: [
+      { id: 'gemini-pro', name: 'Pro', description: '표준 모델', specs: { context: '1M', speed: '빠름' }, pricing: { multiplier: 0.7, base: 2 } },
+      { id: 'gemini-ultra', name: 'Ultra', description: '최고 성능', specs: { context: '1M', speed: '보통' }, pricing: { multiplier: 1.2, base: 4 } }
+    ]
+  },
+  {
+    id: 'llama',
+    name: 'Llama 3.1',
+    category: 'text',
+    description: '오픈소스 기반 강력한 모델',
+    icon: '🦙',
+    tiers: [
+      { id: 'llama-70b', name: '70B', description: '대형 모델', specs: { context: '128K', speed: '보통' }, pricing: { multiplier: 0.5, base: 2 } },
+      { id: 'llama-405b', name: '405B', description: '초대형 모델', specs: { context: '128K', speed: '느림' }, pricing: { multiplier: 1.0, base: 3 } }
+    ]
+  },
+  {
+    id: 'mistral',
+    name: 'Mistral Large',
+    category: 'text',
+    description: '유럽 기반 고성능 모델',
+    icon: '🌬️',
+    tiers: [
+      { id: 'mistral-medium', name: 'Medium', description: '중형 모델', specs: { context: '32K', speed: '빠름' }, pricing: { multiplier: 0.4, base: 1 } },
+      { id: 'mistral-large', name: 'Large', description: '대형 모델', specs: { context: '128K', speed: '보통' }, pricing: { multiplier: 0.8, base: 3 } }
     ]
   }
 ];
@@ -288,6 +335,12 @@ export const LIVE_CLASSES = [
     startTime: "완료",
     duration: "2시간"
   }
+];
+
+export const LIVE_CHAT_MESSAGES = [
+  { id: 1, user: "강사", message: "안녕하세요! 오늘은 SORA를 활용한 시네마틱 영상 제작을 배워보겠습니다.", isInstructor: true, time: "14:02" },
+  { id: 2, user: "학습자42", message: "질문있습니다! 프롬프트 길이는 어느정도가 적당한가요?", isInstructor: false, time: "14:05" },
+  { id: 3, user: "강사", message: "좋은 질문입니다. 50-100 단어 정도가 적당합니다.", isInstructor: true, time: "14:06" }
 ];
 
 // ============= 기관 Mock 데이터 =============
@@ -345,6 +398,292 @@ export const CREDIT_DISTRIBUTION_HISTORY = [
   { id: 3, date: '2024-06-10', type: 'recharge', target: '기관 크레딧 풀', amount: 30000, note: '월간 충전', admin: '기관관리자' },
   { id: 4, date: '2024-06-05', type: 'allocate', target: '박지영 (교육자)', amount: 1500, note: '워크숍 준비', admin: '기관관리자' },
   { id: 5, date: '2024-06-01', type: 'recall', target: '비활성 수강생 3명', amount: -600, note: '미사용 크레딧 회수', admin: '기관관리자' }
+];
+
+// ============= 요금제 정의 =============
+export const PRICING_PLANS: any = {
+  free: {
+    id: 'free',
+    name: 'Free',
+    monthlyPrice: 0,
+    yearlyPrice: 0,
+    monthlyCredits: 50,
+    features: {
+      maxResolution: '720p',
+      allowedTiers: ['standard'],
+      concurrentJobs: 1,
+      classAccess: 'sample',
+      liveAccess: false,
+    },
+    description: '서비스 체험용',
+    detailedFeatures: [
+      '클래스 샘플 1회차',
+      '라이브 참여 불가',
+      'AI 생성 720p',
+      '동시생성 1개'
+    ]
+  },
+  basic: {
+    id: 'basic',
+    name: 'Basic',
+    monthlyPrice: 15000,
+    yearlyPrice: 144000,
+    monthlyCredits: 500,
+    features: {
+      maxResolution: '720p',
+      allowedTiers: ['standard'],
+      concurrentJobs: 2,
+      classAccess: 'credit',
+      liveAccess: false,
+    },
+    description: '개인 학습자용',
+    detailedFeatures: [
+      '클래스 수강',
+      '라이브 참여 불가',
+      'AI 생성 720p',
+      '동시생성 2개'
+    ]
+  },
+  pro: {
+    id: 'pro',
+    name: 'Pro',
+    monthlyPrice: 45000,
+    yearlyPrice: 432000,
+    monthlyCredits: 2000,
+    features: {
+      maxResolution: '1080p',
+      allowedTiers: ['standard', 'pro'],
+      concurrentJobs: 5,
+      classAccess: 'credit',
+      liveAccess: 'credit',
+    },
+    description: '크리에이터용',
+    popular: true,
+    detailedFeatures: [
+      '클래스 수강',
+      '라이브 참여',
+      'AI 생성 1080p',
+      '동시생성 5개'
+    ]
+  },
+  max: {
+    id: 'max',
+    name: 'Max',
+    monthlyPrice: 99000,
+    yearlyPrice: 948000,
+    monthlyCredits: 5000,
+    features: {
+      maxResolution: '1080p',
+      allowedTiers: ['standard', 'pro', 'max'],
+      concurrentJobs: 8,
+      classAccess: 'credit',
+      liveAccess: 'credit',
+    },
+    description: '전문가용',
+    detailedFeatures: [
+      '클래스 수강',
+      '라이브 참여',
+      'AI 생성 1080p',
+      '동시생성 8개'
+    ]
+  },
+  enterprise: {
+    id: 'enterprise',
+    name: 'Enterprise',
+    monthlyPrice: 299000,
+    yearlyPrice: 2880000,
+    monthlyCredits: 10000,
+    features: {
+      maxResolution: '1080p',
+      allowedTiers: ['standard', 'pro', 'max'],
+      concurrentJobs: 8,
+      classAccess: 'credit',
+      liveAccess: 'credit',
+      prioritySupport: true,
+      dedicatedManager: true,
+      customAPI: true,
+    },
+    description: '기업/기관용',
+    detailedFeatures: [
+      '클래스 수강',
+      '라이브 참여',
+      'AI 생성 1080p',
+      '동시생성 8개',
+    ],
+    enterpriseFeatures: [
+      '전담 계정 매니저',
+      '우선 기술 지원 (24시간 이내 응답)',
+      'SLA 99.9% 가동률 보장',
+      '팀 시트 협의',
+      'API 액세스 및 커스텀 통합',
+      '월간 사용량 리포트',
+      '볼륨 디스카운트 협의 가능'
+    ],
+    tiers: [
+      {
+        id: 'enterprise-team',
+        name: 'Team',
+        monthlyPrice: 299000,
+        yearlyPrice: 2880000,
+        monthlyCredits: 10000,
+        teamSeats: 5,
+        concurrentJobs: 10,
+        description: '소규모 팀용'
+      },
+      {
+        id: 'enterprise-business',
+        name: 'Business',
+        monthlyPrice: 599000,
+        yearlyPrice: 5760000,
+        monthlyCredits: 25000,
+        teamSeats: 15,
+        concurrentJobs: 20,
+        description: '성장하는 비즈니스용',
+        popular: true
+      },
+      {
+        id: 'enterprise-scale',
+        name: 'Scale',
+        monthlyPrice: 1190000,
+        yearlyPrice: 11400000,
+        monthlyCredits: 60000,
+        teamSeats: 50,
+        concurrentJobs: 50,
+        description: '대규모 조직용'
+      },
+      {
+        id: 'enterprise-unlimited',
+        name: 'Unlimited',
+        monthlyPrice: null,
+        yearlyPrice: null,
+        monthlyCredits: 'unlimited',
+        teamSeats: 'unlimited',
+        concurrentJobs: 100,
+        description: '맞춤 견적'
+      }
+    ]
+  }
+};
+
+// 크레딧 소모 정책
+export const CREDIT_COSTS: any = {
+  class: {
+    range: { min: 1500, max: 3000 },
+  },
+  live: {
+    participation: { min: 800, max: 1500 },
+    replay: { min: 600, max: 1200 },
+    replayParticipant: 0
+  },
+  ai: {
+    video: { min: 15, max: 80 },
+    image: { min: 8, max: 25 },
+    text: { min: 2, max: 10 }
+  }
+};
+
+// 티어 레벨 매핑 (standard < pro < max)
+export const TIER_LEVELS: Record<string, number> = {
+  standard: 1,
+  pro: 2,
+  max: 3
+};
+
+// ============= 평가·모니터링 Mock 데이터 =============
+export const ASSESSMENT_PARTICIPANTS = [
+  {
+    id: 1,
+    name: "김민준",
+    status: "active",
+    lastActivity: "2분 전",
+    promptCount: 8,
+    generationCount: 5,
+    submitted: false,
+    anomaly: null,
+    avatar: createAvatar("김", "#6366f1")
+  },
+  {
+    id: 2,
+    name: "이서연",
+    status: "active",
+    lastActivity: "방금",
+    promptCount: 12,
+    generationCount: 9,
+    submitted: true,
+    anomaly: null,
+    avatar: createAvatar("이", "#0891b2")
+  },
+  {
+    id: 3,
+    name: "박지호",
+    status: "idle",
+    lastActivity: "8분 전",
+    promptCount: 3,
+    generationCount: 2,
+    submitted: false,
+    anomaly: "long_idle",
+    avatar: createAvatar("박", "#7c3aed")
+  },
+  {
+    id: 4,
+    name: "최수아",
+    status: "active",
+    lastActivity: "1분 전",
+    promptCount: 15,
+    generationCount: 14,
+    submitted: false,
+    anomaly: "rapid_submit",
+    avatar: createAvatar("최", "#059669")
+  },
+  {
+    id: 5,
+    name: "정예준",
+    status: "away",
+    lastActivity: "15분 전",
+    promptCount: 1,
+    generationCount: 0,
+    submitted: false,
+    anomaly: "away",
+    avatar: createAvatar("정", "#dc2626")
+  },
+  {
+    id: 6,
+    name: "강하은",
+    status: "active",
+    lastActivity: "30초 전",
+    promptCount: 6,
+    generationCount: 4,
+    submitted: false,
+    anomaly: null,
+    avatar: createAvatar("강", "#ea580c")
+  }
+];
+
+export const SESSION_TIMELINE = [
+  { id: 1, time: "14:00:00", action: "session_start", description: "평가 세션 시작" },
+  { id: 2, time: "14:02:15", action: "prompt_write", description: "프롬프트 작성: '해변을 걷는 여성...'" },
+  { id: 3, time: "14:03:30", action: "prompt_edit", description: "프롬프트 수정: 조명 키워드 추가" },
+  { id: 4, time: "14:04:00", action: "generation", description: "영상 생성 요청 (Sora 2 Pro)" },
+  { id: 5, time: "14:06:45", action: "generation_complete", description: "영상 생성 완료" },
+  { id: 6, time: "14:07:20", action: "prompt_write", description: "프롬프트 작성: '도시의 야경...'" },
+  { id: 7, time: "14:08:10", action: "generation", description: "영상 생성 요청 (Veo Standard)" },
+  { id: 8, time: "14:10:30", action: "generation_complete", description: "영상 생성 완료" },
+  { id: 9, time: "14:11:00", action: "save", description: "결과물 저장" }
+];
+
+export const EVALUATION_RESULTS = [
+  { id: 1, name: "김민준", submitted: true, generationCount: 5, editCount: 12, score: 85, status: "graded" },
+  { id: 2, name: "이서연", submitted: true, generationCount: 9, editCount: 18, score: 92, status: "graded" },
+  { id: 3, name: "박지호", submitted: true, generationCount: 2, editCount: 5, score: 68, status: "graded" },
+  { id: 4, name: "최수아", submitted: true, generationCount: 14, editCount: 8, score: null, status: "review" },
+  { id: 5, name: "정예준", submitted: false, generationCount: 0, editCount: 1, score: null, status: "pending" },
+  { id: 6, name: "강하은", submitted: true, generationCount: 4, editCount: 9, score: 78, status: "graded" }
+];
+
+export const ASSESSMENTS_LIST = [
+  { id: 1, title: "1회차 실습 평가", date: "2025-01-15", participants: 24, status: "completed" },
+  { id: 2, title: "2회차 프롬프트 테스트", date: "2025-01-17", participants: 22, status: "ongoing" },
+  { id: 3, title: "중간 프로젝트", date: "2025-01-20", participants: 0, status: "scheduled" }
 ];
 
 // 카테고리별 서비스 필터링

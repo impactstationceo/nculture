@@ -1,6 +1,7 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import Providers from '@/components/Providers';
+import AppShell from '@/components/AppShell';
 
 export const metadata: Metadata = {
   title: 'nCulture - AI 콘텐츠 교육 플랫폼',
@@ -16,7 +17,9 @@ export default function RootLayout({
     <html lang="ko">
       <body className="bg-white min-h-screen">
         <Providers>
-          {children}
+          <AppShell>
+            {children}
+          </AppShell>
         </Providers>
       </body>
     </html>
