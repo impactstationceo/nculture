@@ -51,7 +51,7 @@ export default function SessionPage() {
     AI_SERVICES
   );
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!isLoggedIn) {
       setShowAuthModal(true);
       return;
