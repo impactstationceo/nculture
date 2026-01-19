@@ -70,43 +70,51 @@ export default function CourseDetailPage() {
           <span className="text-sm">전체 클래스</span>
         </button>
 
-        <div className="flex gap-8 mb-12">
-          <div className="w-96 flex-shrink-0">
-            <img 
-              src={course.thumbnail} 
-              alt={course.title} 
-              className="w-full aspect-video object-cover rounded-2xl border border-[#E5E8EB]"
-            />
-          </div>
-          <div className="flex-1">
-            <h1 className="text-3xl font-bold text-[#191F28] mb-3">{course.title}</h1>
-            <p className="text-[#6B7684] mb-4">{course.description}</p>
-            <div className="flex items-center gap-4 text-sm text-[#6B7684] mb-6">
-              <div className="flex items-center gap-2">
-                <User className="w-4 h-4" />
-                {course.instructor}
-              </div>
-              <div className="flex items-center gap-2">
-                <BookOpen className="w-4 h-4" />
-                총 {course.totalSessions}세션
+        <div className="bg-white border border-[#E5E8EB] rounded-3xl p-8 md:p-10 shadow-sm mb-12">
+          <div className="flex gap-8">
+            <div className="w-96 flex-shrink-0">
+              <div className="w-full aspect-video rounded-2xl border border-[#E5E8EB] bg-[#F2F4F6] overflow-hidden">
+                <img 
+                  src={course.thumbnail} 
+                  alt={course.title} 
+                  className="w-full h-full object-cover"
+                />
               </div>
             </div>
-            <button 
-              onClick={() => handleStartSession(course.sessions[0].id)}
-              className="px-8 py-3 bg-[#3182F6] text-white font-semibold rounded-xl hover:bg-[#1B64DA] transition-colors"
-            >
-              {isLoggedIn ? '학습 시작하기' : '로그인하고 시작하기'}
-            </button>
+            <div className="flex-1">
+              <h1 className="text-3xl md:text-4xl font-bold text-[#191F28] mb-3 tracking-tight">
+                {course.title}
+              </h1>
+              <p className="text-[#6B7684] leading-relaxed mb-5">{course.description}</p>
+              <div className="flex items-center gap-4 text-sm text-[#8B95A1] mb-7">
+                <div className="flex items-center gap-2">
+                  <User className="w-4 h-4" />
+                  {course.instructor}
+                </div>
+                <div className="flex items-center gap-2">
+                  <BookOpen className="w-4 h-4" />
+                  총 {course.totalSessions}세션
+                </div>
+              </div>
+              <button 
+                onClick={() => handleStartSession(course.sessions[0].id)}
+                className="px-8 py-3 bg-[#3182F6] text-white font-semibold rounded-xl shadow-sm hover:bg-[#1B64DA] transition-colors"
+              >
+                {isLoggedIn ? '학습 시작하기' : '로그인하고 시작하기'}
+              </button>
+            </div>
           </div>
         </div>
 
         <div>
-          <h2 className="text-xl font-bold text-[#191F28] mb-6">커리큘럼 ({course.sessions.length}개 세션)</h2>
+          <h2 className="text-xl font-semibold text-[#191F28] mb-5">
+            커리큘럼 ({course.sessions.length}개 세션)
+          </h2>
           <div className="space-y-4">
             {course.sessions.map((session: any, index: number) => (
               <div 
                 key={session.id}
-                className="bg-white border border-[#E5E8EB] rounded-2xl p-5 hover:shadow-md transition-all cursor-pointer group"
+                className="bg-white border border-[#E5E8EB] rounded-2xl p-5 hover:shadow-sm transition-shadow cursor-pointer group"
                 onClick={() => handleStartSession(session.id)}
               >
                 <div className="flex items-center gap-4">
