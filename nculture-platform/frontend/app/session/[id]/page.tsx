@@ -46,8 +46,8 @@ export default function SessionPage() {
 
   // AI 설정 상태
   const videoServices = AI_SERVICES.filter(
-    (service): service is VideoService => service.category === 'video'
-  );
+    (service) => service.category === 'video'
+  ) as VideoService[];
   const [selectedService, setSelectedService] = useState<VideoService>(videoServices[0]);
   const [selectedTier, setSelectedTier] = useState<VideoTier>(videoServices[0].tiers[0]);
   const [prompt, setPrompt] = useState('');
