@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Header from '@/components/Header';
 import { useAuth } from '@/components/AuthProvider';
+import { getMediaGallery } from '@/lib/api';
+import { isSupabaseConfigured } from '@/lib/supabase';
 import { Play, ChevronDown, X, Sparkles } from 'lucide-react';
 
 const MediaGalleryPage = () => {
@@ -30,7 +32,7 @@ const MediaGalleryPage = () => {
     { id: 'minimalist', label: 'Minimalist', color: 'from-slate-400 to-slate-600' },
   ];
 
-  const works = [
+  const demoWorks = [
     { id: 1, title: '도시의 밤', creator: '김민준', course: 'AI 영상 생성', style: 'cinematic', type: 'video', likes: 234, thumbnail: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=400', featured: true, prompt: '네온 불빛이 반짝이는 밤의 도시 거리, 비 온 뒤 젖은 아스팔트에 반사되는 조명들, 시네마틱한 분위기, 4K', model: 'Sora Pro', createdAt: '2025-01-15', creditsUsed: 12 },
     { id: 2, title: '꿈의 정원', creator: '이서연', course: 'AI 이미지 생성', style: 'surreal', type: 'image', likes: 189, thumbnail: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=400', featured: true, prompt: '공중에 떠 있는 섬 위의 환상적인 정원, 거대한 꽃들과 빛나는 나비들, 초현실적인 분위기', model: 'Midjourney', createdAt: '2025-01-14', creditsUsed: 8 },
     { id: 3, title: '미래 도시', creator: '박지호', course: 'AI 영상 생성', style: 'cinematic', type: 'video', likes: 312, thumbnail: 'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=400', featured: false, prompt: '2150년의 서울, 하늘을 나는 자동차들과 홀로그램 광고판, 미래지향적인 건축물', model: 'Runway Gen-3', createdAt: '2025-01-13', creditsUsed: 15 },
@@ -63,6 +65,44 @@ const MediaGalleryPage = () => {
     { id: 30, title: '벚꽃 아래', creator: '최서아', course: 'AI 이미지 생성', style: 'anime', type: 'image', likes: 523, thumbnail: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?w=400', featured: true, prompt: '벚꽃이 흩날리는 학교 운동장, 교복 입은 소녀가 서 있는 장면, 애니메이션 스타일', model: 'Midjourney', createdAt: '2024-12-17', creditsUsed: 8 },
     { id: 31, title: '사이버펑크 도쿄', creator: '정유나', course: 'AI 영상 생성', style: 'anime', type: 'video', likes: 445, thumbnail: 'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=400', featured: true, prompt: '네온 불빛이 가득한 미래의 도쿄 거리, 사이버펑크 애니메이션 스타일', model: 'Kling Pro', createdAt: '2024-12-16', creditsUsed: 12 },
   ];
+
+  const [works, setWorks] = useState(demoWorks);
+
+  const mapMediaItem = (item: any) => ({
+    id: item?.id,
+    title: item?.title || '작품',
+    creator: item?.creator || item?.user_name || item?.user?.name || '익명',
+    course: item?.course || item?.course_title || 'AI 생성',
+    style: item?.style || 'cinematic',
+    type: item?.type || item?.media_type || 'image',
+    likes: item?.likes || 0,
+    thumbnail: item?.thumbnail_url || item?.url || item?.thumbnail || '',
+    featured: !!item?.featured,
+    prompt: item?.prompt || '',
+    model: item?.ai_service || item?.ai_service_name || '',
+    createdAt: item?.created_at ? new Date(item.created_at).toISOString().slice(0, 10) : item?.createdAt || '',
+    creditsUsed: item?.credits_used || item?.creditsUsed || 0
+  });
+
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+    let isActive = true;
+
+    getMediaGallery()
+      .then((data) => {
+        if (!isActive) return;
+        if (Array.isArray(data) && data.length > 0) {
+          setWorks(data.map(mapMediaItem));
+        }
+      })
+      .catch((error) => {
+        console.error('Failed to load media gallery:', error);
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
 
   const filteredWorks = works.filter(work => {
     if (activeCategory === 'featured') return work.featured;

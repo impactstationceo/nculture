@@ -1,18 +1,39 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ChevronRight, User, BookOpen } from 'lucide-react';
 import Header from '@/components/Header';
 import { CURRICULUM } from '@/lib/data';
+import { getCourse } from '@/lib/api';
 import { useAuth } from '@/components/AuthProvider';
 
 export default function CourseDetailPage() {
   const params = useParams();
   const router = useRouter();
   const courseId = Array.isArray(params.id) ? params.id[0] : params.id;
-  const course = (CURRICULUM as any)[courseId || ''];
+  const [course, setCourse] = useState<any>((CURRICULUM as any)[courseId || '']);
 
   const { isLoggedIn, user, viewMode, currentRole, wallet, userPlan, handleAuthClick, handleLogout, setCurrentPage, handleRoleSwitch, currentPage } = useAuth();
+
+  useEffect(() => {
+    if (!courseId) return;
+    let isActive = true;
+
+    getCourse(courseId)
+      .then((data) => {
+        if (isActive && data) {
+          setCourse(data);
+        }
+      })
+      .catch((error) => {
+        console.error('Failed to load course:', error);
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, [courseId]);
 
   if (!course) return null;
 

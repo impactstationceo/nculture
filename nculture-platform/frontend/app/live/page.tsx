@@ -1,9 +1,11 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Video, Zap, MessageSquare } from 'lucide-react';
 import Header from '@/components/Header';
 import { LIVE_CLASSES } from '@/lib/data';
+import { getLiveClasses } from '@/lib/api';
 import { useAuth } from '@/components/AuthProvider';
 
 const LiveClassCard = ({ liveClass, onJoin, isLoggedIn, onAuthClick }: any) => {
@@ -74,6 +76,24 @@ const LiveClassCard = ({ liveClass, onJoin, isLoggedIn, onAuthClick }: any) => {
 export default function LivePage() {
   const router = useRouter();
   const { isLoggedIn, user, viewMode, currentRole, wallet, userPlan, handleAuthClick, handleLogout, setCurrentPage, handleRoleSwitch, currentPage } = useAuth();
+  const [liveClasses, setLiveClasses] = useState<any[]>(LIVE_CLASSES);
+
+  useEffect(() => {
+    let isActive = true;
+    getLiveClasses()
+      .then((data) => {
+        if (isActive && Array.isArray(data)) {
+          setLiveClasses(data);
+        }
+      })
+      .catch((error) => {
+        console.error('Failed to load live classes:', error);
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-white pt-24 pb-16">
@@ -98,7 +118,7 @@ export default function LivePage() {
         </div>
 
         <div className="grid grid-cols-3 gap-6">
-          {LIVE_CLASSES.map((liveClass) => (
+          {liveClasses.map((liveClass) => (
             <LiveClassCard
               key={liveClass.id}
               liveClass={liveClass}

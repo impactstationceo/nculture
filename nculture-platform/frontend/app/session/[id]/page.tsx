@@ -5,6 +5,8 @@ import { useParams } from 'next/navigation';
 import Header from '@/components/Header';
 import { useAuth } from '@/components/AuthProvider';
 import { AI_SERVICES, CURRICULUM, createResult, PRICING_PLANS } from '@/lib/data';
+import { getAIServices, generateAI, deductCredits } from '@/lib/api';
+import { isSupabaseConfigured } from '@/lib/supabase';
 import { apiReserveCredits, apiGenerateJob, apiCaptureCredits, apiRefundCredits, calculateCredits, checkPlanLimits, getTierLevel, generatePracticeEvaluation } from '@/lib/utils';
 import { 
   Play,
@@ -670,10 +672,11 @@ const generateImage = (prompt: string, sessionId: number) => {
 };
 
 // ============= Session Page =============
-const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, userPlan, onShowUpgradeModal, user, currentRole }: any) => {
+const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, userPlan, onShowUpgradeModal, user, currentRole, isLoggedIn, onAuthClick }: any) => {
   const [activeTab, setActiveTab] = useState('create');
   const [selectedService, setSelectedService] = useState('sora');
   const [selectedTier, setSelectedTier] = useState('sora-2');
+  const [services, setServices] = useState<any[]>(AI_SERVICES);
   const [prompt, setPrompt] = useState('');
   const [enhance, setEnhance] = useState(false);
   const [duration, setDuration] = useState('10s');
@@ -692,6 +695,23 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
   const [modelPickerOpen, setModelPickerOpen] = useState(false);
   const [notification, setNotification] = useState<any>(null);
   const [runningJobs, setRunningJobs] = useState(0);
+
+  useEffect(() => {
+    let isActive = true;
+    getAIServices()
+      .then((data) => {
+        if (isActive && Array.isArray(data) && data.length > 0) {
+          setServices(data);
+        }
+      })
+      .catch((error) => {
+        console.error('Failed to load AI services:', error);
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
   
   const notificationRef = useRef<HTMLDivElement | null>(null);
   
@@ -791,7 +811,7 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
 
   if (!currentSession) return null;
 
-  const currentServiceData = AI_SERVICES.find((s: any) => s.id === selectedService);
+  const currentServiceData = services.find((s: any) => s.id === selectedService);
   const currentCategory = currentServiceData?.category || 'video';
 
   const calculateCategoryCredits = () => {
@@ -841,7 +861,7 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
   const handleModelApply = (service: string, tier: string) => {
     setSelectedService(service);
     setSelectedTier(tier);
-    const selectedSvc = AI_SERVICES.find((s: any) => s.id === service);
+    const selectedSvc = services.find((s: any) => s.id === service);
     const selectedTierData = selectedSvc?.tiers.find((t: any) => t.id === tier);
     setAudioOn(selectedTierData?.audioSupported || false);
   };
@@ -849,6 +869,11 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
   const handleGenerate = async () => {
     if (!prompt.trim()) {
       setNotification({ type: 'error', message: '프롬프트를 입력해주세요.' });
+      return;
+    }
+
+    if (!isLoggedIn) {
+      onAuthClick('login');
       return;
     }
     
@@ -874,8 +899,6 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
       tierId: selectedTier
     });
     
-    await apiReserveCredits('user_mock', creditsToUse);
-    
     setIsGenerating(true);
     setRunningJobs((prev: number) => prev + 1);
     
@@ -887,6 +910,89 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
       resolution,
       audioOn
     };
+
+    if (isSupabaseConfigured) {
+      try {
+        if (!user?.id) {
+          throw new Error('사용자 정보가 없습니다.');
+        }
+
+        const result = await generateAI({
+          userId: user.id,
+          prompt,
+          service: selectedService,
+          tier: selectedTier,
+          options: {
+            duration,
+            resolution,
+            audioOn,
+            imageSize,
+            imageStyle,
+            imageCount,
+            maxTokens,
+            temperature,
+            outputFormat
+          }
+        });
+
+        if (!result?.success) {
+          throw new Error(result?.message || '생성 실패');
+        }
+
+        await deductCredits(user.id, creditsToUse, `${selectedService} 생성`);
+        addLedgerEntry({
+          id: Date.now(),
+          type: 'capture',
+          amount: creditsToUse,
+          jobId,
+          createdAt: new Date().toISOString(),
+          providerId: selectedService,
+          tierId: selectedTier
+        });
+
+        const service = services.find((s: any) => s.id === selectedService);
+        const tier = service?.tiers.find((t: any) => t.id === selectedTier);
+        const evaluation = generatePracticeEvaluation(prompt, sessionId, currentCategory);
+        const resultUrl = result?.result?.url || generateImage(prompt, sessionId);
+
+        setResults(prev => [...prev, {
+          id: result?.result?.id || Date.now(),
+          service: service?.name,
+          tier: tier?.name,
+          prompt: prompt,
+          thumbnail: resultUrl,
+          timestamp: new Date().toLocaleString(),
+          duration,
+          resolution,
+          creditsUsed: creditsToUse,
+          evaluation
+        }]);
+        
+        setNotification({ type: 'success', message: `생성 완료! ${creditsToUse} 크레딧 사용` });
+      } catch (error: any) {
+        setWallet((prev: any) => ({ ...prev, balance: prev.balance + creditsToUse }));
+        addLedgerEntry({
+          id: Date.now(),
+          type: 'refund',
+          amount: creditsToUse,
+          jobId,
+          createdAt: new Date().toISOString(),
+          providerId: selectedService,
+          tierId: selectedTier
+        });
+        
+        setNotification({ type: 'error', message: `생성 실패. ${creditsToUse} 크레딧 환불됨` });
+        console.error('Generate error:', error);
+      } finally {
+        setIsGenerating(false);
+        setRunningJobs((prev: number) => Math.max(0, prev - 1));
+        setPrompt('');
+        setTimeout(() => setNotification(null), 3000);
+      }
+      return;
+    }
+
+    await apiReserveCredits('user_mock', creditsToUse);
     await apiGenerateJob(payload);
     
     setTimeout(async () => {
@@ -904,7 +1010,7 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
           tierId: selectedTier
         });
         
-        const service = AI_SERVICES.find((s: any) => s.id === selectedService);
+        const service = services.find((s: any) => s.id === selectedService);
         const tier = service?.tiers.find((t: any) => t.id === selectedTier);
         
         const evaluation = generatePracticeEvaluation(prompt, sessionId, currentCategory);
@@ -1416,7 +1522,7 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
                 <ModelPicker
                   service={selectedService}
                   tier={selectedTier}
-                  services={AI_SERVICES}
+                  services={services}
                   onClick={() => setModelPickerOpen(true)}
                 />
 
@@ -1545,7 +1651,7 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
       <ModelPickerPanel
         isOpen={modelPickerOpen}
         onClose={() => setModelPickerOpen(false)}
-        services={AI_SERVICES}
+        services={services}
         selectedService={selectedService}
         selectedTier={selectedTier}
         onApply={handleModelApply}
@@ -1588,6 +1694,8 @@ export default function SessionPage() {
         onShowUpgradeModal={handleShowUpgradeModal}
         user={user}
         currentRole={currentRole}
+        isLoggedIn={isLoggedIn}
+        onAuthClick={handleAuthClick}
       />
     </>
   );

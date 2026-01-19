@@ -1,8 +1,10 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import { CURRICULUM } from '@/lib/data';
+import { getCourses } from '@/lib/api';
 import { useAuth } from '@/components/AuthProvider';
 
 const CourseCard = ({ course, onClick }: { course: any; onClick: () => void }) => {
@@ -61,6 +63,24 @@ const CourseCard = ({ course, onClick }: { course: any; onClick: () => void }) =
 export default function CurriculumPage() {
   const router = useRouter();
   const { isLoggedIn, user, viewMode, currentRole, wallet, userPlan, handleAuthClick, handleLogout, setCurrentPage, handleRoleSwitch, currentPage } = useAuth();
+  const [courses, setCourses] = useState<any[]>(Object.values(CURRICULUM));
+
+  useEffect(() => {
+    let isActive = true;
+    getCourses()
+      .then((data) => {
+        if (isActive && Array.isArray(data)) {
+          setCourses(data);
+        }
+      })
+      .catch((error) => {
+        console.error('Failed to load courses:', error);
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-white pt-24 pb-16">
@@ -85,7 +105,7 @@ export default function CurriculumPage() {
         </div>
 
         <div className="grid grid-cols-3 gap-6">
-          {Object.values(CURRICULUM).map((course: any) => (
+          {courses.map((course: any) => (
             <CourseCard
               key={course.id}
               course={course}

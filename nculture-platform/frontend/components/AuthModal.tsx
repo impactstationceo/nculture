@@ -7,7 +7,7 @@ interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialMode?: 'login' | 'signup' | 'institution_login' | 'institution_signup';
-  onLogin: (userData: any) => void;
+  onLogin: (userData: any) => Promise<void> | void;
 }
 
 export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLogin }: AuthModalProps) {
@@ -117,13 +117,15 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLo
     return 'pending';
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (mode === 'login') {
       if (email && password) {
         handleSaveEmail(rememberEmail, email);
         const isTestInstructor = email.toLowerCase() === 'test@test.com';
-        onLogin({ 
+        await onLogin({ 
+          action: 'login',
           email, 
+          password,
           name: email.split('@')[0],
           role: isTestInstructor ? 'instructor' : 'student',
           status: 'approved'
@@ -132,8 +134,10 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLo
     } else if (mode === 'institution_login') {
       if (email && password) {
         handleSaveEmail(rememberEmail, email);
-        onLogin({ 
+        await onLogin({ 
+          action: 'login',
           email, 
+          password,
           name: email.split('@')[0],
           role: 'institution_admin',
           status: 'approved',
@@ -143,8 +147,10 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLo
     } else {
       if (email && password && name && agreeTerms) {
         const status = determineApprovalStatus();
-        onLogin({ 
+        await onLogin({ 
+          action: 'signup',
           email, 
+          password,
           name,
           role: selectedRole,
           status,

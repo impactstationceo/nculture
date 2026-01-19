@@ -3,6 +3,8 @@
 import { createContext, useContext, useEffect, useMemo, useState, ReactNode } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { INSTITUTION_DATA, PRICING_PLANS } from '@/lib/data';
+import { upgradePlan, updateProfile } from '@/lib/api';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
 interface AuthContextType {
   user: any;
@@ -31,10 +33,10 @@ interface AuthContextType {
   setUser: React.Dispatch<React.SetStateAction<any>>;
   addLedgerEntry: (entry: any) => void;
   handleAuthClick: (mode?: string) => void;
-  handleLogin: (userData: any) => void;
+  handleLogin: (userData: any) => Promise<void>;
   handleLogout: () => void;
   handleShowUpgradeModal: (reason: any) => void;
-  handlePlanUpgrade: (newPlanId: string, enterpriseTier?: any) => void;
+  handlePlanUpgrade: (newPlanId: string, enterpriseTier?: any) => Promise<void> | void;
   handleToggleRole: () => void;
   handleRoleSwitch: (newViewMode: string | null) => void;
   setCurrentPage: (page: string) => void;
@@ -81,15 +83,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [currentCourse] = useState<any>(null);
   const [currentTest] = useState<any>(null);
   
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
-  const [user, setUser] = useState({ 
-    id: 'user_001',
-    email: 'test@test.com', 
-    name: '테스트',
-    role: 'instructor',
-    status: 'approved',
-    institutionId: null
-  });
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState<any>(null);
   const [viewMode, setViewMode] = useState<string | null>(null);
   const [institution, setInstitution] = useState(INSTITUTION_DATA);
   
@@ -105,13 +100,88 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [upgradeReason, setUpgradeReason] = useState<any>(null);
 
-  const [isLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const currentRole = useMemo(() => viewMode || user?.role || null, [viewMode, user]);
 
   useEffect(() => {
     setCurrentPageState(pathToPage(pathname || '/'));
   }, [pathname]);
+
+  const applyUserState = (nextUser: any, profile?: any) => {
+    const mergedUser = {
+      id: nextUser?.id || profile?.id,
+      email: nextUser?.email || profile?.email,
+      name: profile?.name || nextUser?.user_metadata?.name || nextUser?.email?.split('@')[0],
+      role: profile?.role || nextUser?.user_metadata?.role || 'student',
+      status: profile?.status || nextUser?.user_metadata?.status || 'approved',
+      institutionId: profile?.institution_id || nextUser?.user_metadata?.institutionId || null
+    };
+
+    setUser(mergedUser);
+    setIsLoggedIn(true);
+    setViewMode(null);
+
+    if (typeof profile?.credits === 'number') {
+      setWallet({ balance: profile.credits });
+    }
+    if (profile?.plan) {
+      setUserPlan(profile.plan);
+    }
+    if (profile?.enterprise_tier) {
+      setUserEnterpriseTier(profile.enterprise_tier);
+    }
+  };
+
+  useEffect(() => {
+    let isActive = true;
+
+    const initAuth = async () => {
+      try {
+        if (isSupabaseConfigured) {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.user) {
+            const { data: profile } = await supabase
+              .from('users_profile')
+              .select('*')
+              .eq('id', session.user.id)
+              .single();
+            if (isActive) {
+              applyUserState(session.user, profile);
+            }
+          } else if (isActive) {
+            setIsLoggedIn(false);
+            setUser(null);
+          }
+        } else {
+          const saved = localStorage.getItem('demo_session');
+          if (saved && isActive) {
+            const demoUser = JSON.parse(saved);
+            setUser(demoUser);
+            setIsLoggedIn(true);
+            if (typeof demoUser?.credits === 'number') {
+              setWallet({ balance: demoUser.credits });
+            }
+            if (demoUser?.plan) {
+              setUserPlan(demoUser.plan);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Auth init error:', error);
+      } finally {
+        if (isActive) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    initAuth();
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
 
   const addLedgerEntry = (entry: any) => {
     setCreditLedger(prev => [entry, ...prev]);
@@ -122,7 +192,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setShowUpgradeModal(true);
   };
 
-  const handlePlanUpgrade = (newPlanId: string, enterpriseTier: any = null) => {
+  const handlePlanUpgrade = async (newPlanId: string, enterpriseTier: any = null) => {
     if (newPlanId === 'enterprise' && enterpriseTier) {
       setUserPlan('enterprise');
       setUserEnterpriseTier(enterpriseTier);
@@ -137,6 +207,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     setShowUpgradeModal(false);
     setUpgradeReason(null);
+
+    if (isSupabaseConfigured && user?.id) {
+      try {
+        if (newPlanId === 'enterprise' && enterpriseTier) {
+          await updateProfile(user.id, {
+            plan: 'enterprise',
+            credits: enterpriseTier.monthlyCredits || 999999,
+            enterprise_tier: enterpriseTier
+          });
+        } else {
+          await upgradePlan(user.id, newPlanId);
+        }
+      } catch (error) {
+        console.error('Plan upgrade error:', error);
+      }
+    }
   };
 
   const handleAuthClick = (mode = 'login') => {
@@ -144,26 +230,97 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setShowAuthModal(true);
   };
 
-  const handleLogin = (userData: any) => {
-    setUser({
-      id: 'user_' + Date.now(),
-      email: userData.email,
-      name: userData.name,
-      role: userData.role || 'instructor',
-      status: userData.status || 'approved',
-      institutionId: userData.institutionId || null
-    });
-    setIsLoggedIn(true);
-    setShowAuthModal(false);
-    setViewMode(null);
-    
-    if (pendingAction) {
-      pendingAction();
-      setPendingAction(null);
+  const handleLogin = async (userData: any) => {
+    const { email, password, name, role, status, institutionId, action } = userData || {};
+
+    if (!email || !password) {
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      if (isSupabaseConfigured) {
+        if (action === 'signup') {
+          const { data, error } = await supabase.auth.signUp({ email, password });
+          if (error) throw error;
+
+          const userId = data.user?.id;
+          if (userId) {
+            const profilePayload = {
+              id: userId,
+              email,
+              name: name || email.split('@')[0],
+              role: role || 'student',
+              status: status || 'approved',
+              credits: 100,
+              plan: 'free',
+              institution_id: institutionId || null
+            };
+
+            const { error: profileError } = await supabase
+              .from('users_profile')
+              .insert(profilePayload);
+            if (profileError) throw profileError;
+
+            applyUserState(data.user, profilePayload);
+          }
+        } else {
+          const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+          if (error) throw error;
+
+          const { data: profile } = await supabase
+            .from('users_profile')
+            .select('*')
+            .eq('id', data.user?.id)
+            .single();
+
+          applyUserState(data.user, profile);
+        }
+      } else {
+        const demoUser = {
+          id: 'demo',
+          email,
+          name: name || email.split('@')[0],
+          role: role || 'student',
+          status: status || 'approved',
+          institutionId: institutionId || null,
+          credits: action === 'signup' ? 100 : 1000,
+          plan: action === 'signup' ? 'free' : userPlan
+        };
+
+        setUser(demoUser);
+        setIsLoggedIn(true);
+        setViewMode(null);
+        setWallet({ balance: demoUser.credits });
+        if (demoUser.plan) {
+          setUserPlan(demoUser.plan);
+        }
+        localStorage.setItem('demo_session', JSON.stringify(demoUser));
+      }
+
+      setShowAuthModal(false);
+
+      if (pendingAction) {
+        pendingAction();
+        setPendingAction(null);
+      }
+    } catch (error: any) {
+      console.error('Auth error:', error);
+      alert(`로그인 실패: ${error.message || '인증 오류'}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleLogout = () => {
+    if (isSupabaseConfigured) {
+      supabase.auth.signOut().catch((error) => {
+        console.error('Logout error:', error);
+      });
+    } else {
+      localStorage.removeItem('demo_session');
+    }
     setUser(null);
     setIsLoggedIn(false);
     setViewMode(null);
