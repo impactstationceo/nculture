@@ -28,6 +28,7 @@ interface AuthContextType {
   setShowAuthModal: React.Dispatch<React.SetStateAction<boolean>>;
   setShowUpgradeModal: React.Dispatch<React.SetStateAction<boolean>>;
   setUpgradeReason: React.Dispatch<React.SetStateAction<any>>;
+  setUser: React.Dispatch<React.SetStateAction<any>>;
   addLedgerEntry: (entry: any) => void;
   handleAuthClick: (mode?: string) => void;
   handleLogin: (userData: any) => void;
@@ -240,6 +241,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setShowAuthModal,
     setShowUpgradeModal,
     setUpgradeReason,
+    setUser,
     addLedgerEntry,
     handleAuthClick,
     handleLogin,
