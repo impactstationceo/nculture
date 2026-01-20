@@ -117,9 +117,9 @@ const MediaGalleryPage = () => {
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-[#E8F3FF] to-[#F9FAFB]" />
         <div className="max-w-screen-xl mx-auto px-4 md:px-6 lg:px-8 py-12 relative">
-          <div className="bg-white/90 backdrop-blur-md border border-[#E5E8EB] rounded-3xl p-8 shadow-sm">
-            <h1 className="text-4xl font-bold text-[#191F28] mb-3">갤러리</h1>
-            <p className="text-[#6B7684] text-lg">수강생들이 만든 우수 작품을 만나보세요</p>
+          <div className="bg-white/90 backdrop-blur-md border border-[#E5E8EB] rounded-3xl p-8 md:p-10 shadow-sm">
+            <h1 className="text-3xl md:text-4xl font-bold text-[#191F28] mb-2 tracking-tight">갤러리</h1>
+            <p className="text-[#6B7684] text-base md:text-lg">수강생들이 만든 우수 작품을 만나보세요</p>
           </div>
         </div>
       </div>

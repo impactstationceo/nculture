@@ -112,9 +112,9 @@ export default function LivePage() {
       />
 
       <div className="max-w-screen-xl mx-auto px-4 md:px-6 lg:px-8">
-        <div className="mb-10 bg-white border border-[#E5E8EB] rounded-3xl p-8 shadow-sm">
-          <h1 className="text-4xl font-bold text-[#191F28] mb-2 tracking-tight">라이브</h1>
-          <p className="text-[#6B7684]">실시간 AI 실습 클래스에 참여하세요</p>
+        <div className="mb-10 bg-white border border-[#E5E8EB] rounded-3xl p-8 md:p-10 shadow-sm">
+          <h1 className="text-3xl md:text-4xl font-bold text-[#191F28] mb-2 tracking-tight">라이브</h1>
+          <p className="text-[#6B7684] text-base md:text-lg">실시간 AI 실습 클래스에 참여하세요</p>
         </div>
 
         <div className="grid grid-cols-3 gap-8">

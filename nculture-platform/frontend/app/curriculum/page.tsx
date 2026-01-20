@@ -103,9 +103,9 @@ export default function CurriculumPage() {
       <div className="max-w-screen-xl mx-auto px-4 md:px-6 lg:px-8">
         <div className="relative mb-10">
           <div className="absolute inset-0 bg-gradient-to-r from-[#E8F3FF] via-white to-[#F9FAFB] rounded-3xl" />
-          <div className="relative bg-white/90 border border-[#E5E8EB] rounded-3xl p-8 shadow-md backdrop-blur">
-            <h1 className="text-4xl font-bold text-[#191F28] mb-2 tracking-tight">클래스</h1>
-            <p className="text-[#6B7684] mb-6">체계적인 AI 콘텐츠 창작 학습 과정</p>
+          <div className="relative bg-white/90 border border-[#E5E8EB] rounded-3xl p-8 md:p-10 shadow-sm backdrop-blur">
+            <h1 className="text-3xl md:text-4xl font-bold text-[#191F28] mb-2 tracking-tight">클래스</h1>
+            <p className="text-[#6B7684] text-base md:text-lg mb-6">체계적인 AI 콘텐츠 창작 학습 과정</p>
             <div className="flex flex-wrap gap-3 mb-6">
               {['영상', '이미지', '프롬프트', '라이브 실습', '평가'].map((tag) => (
                 <span key={tag} className="px-3 py-1.5 bg-white border border-[#E5E8EB] rounded-full text-sm text-[#6B7684]">

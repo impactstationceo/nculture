@@ -462,8 +462,8 @@ const AssessmentListPage = ({ onEnterStudio }: { onEnterStudio: (test: any) => v
   return (
     <div className="min-h-screen bg-[#F9FAFB] pt-20">
       <div className="max-w-screen-xl mx-auto px-4 md:px-6 lg:px-8 py-8">
-        <div className="bg-white border border-neutral-200 rounded-3xl p-6 shadow-sm mb-8">
-          <h1 className="text-2xl font-bold text-neutral-900">테스트</h1>
+        <div className="bg-white border border-neutral-200 rounded-3xl p-8 md:p-10 shadow-sm mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold text-neutral-900 tracking-tight">테스트</h1>
         </div>
         {/* 요약 카드 */}
         <div className="grid grid-cols-4 gap-4 mb-8">
