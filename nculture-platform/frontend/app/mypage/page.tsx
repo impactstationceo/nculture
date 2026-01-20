@@ -574,19 +574,19 @@ const MyPage = ({ wallet, userPlan, setUserPlan, setWallet, creditLedger, userEn
                 </div>
                 {/* 요약 카드 */}
                 <div className="grid grid-cols-4 gap-4">
-                  <div className="bg-white rounded-xl p-5 border border-neutral-200">
+                  <div className="bg-white rounded-2xl p-5 border border-neutral-200 shadow-sm">
                     <div className="text-sm text-neutral-500 mb-1">운영 중인 클래스</div>
                     <div className="text-2xl font-bold text-neutral-900">2개</div>
                   </div>
-                  <div className="bg-white rounded-xl p-5 border border-neutral-200">
+                  <div className="bg-white rounded-2xl p-5 border border-neutral-200 shadow-sm">
                     <div className="text-sm text-neutral-500 mb-1">전체 수강생</div>
                     <div className="text-2xl font-bold text-indigo-600">234명</div>
                   </div>
-                  <div className="bg-white rounded-xl p-5 border border-neutral-200">
+                  <div className="bg-white rounded-2xl p-5 border border-neutral-200 shadow-sm">
                     <div className="text-sm text-neutral-500 mb-1">이번 달 수익</div>
                     <div className="text-2xl font-bold text-emerald-600">₩1,250,000</div>
                   </div>
-                  <div className="bg-gradient-to-r from-amber-50 to-amber-100 rounded-xl p-5 border border-amber-200">
+                  <div className="bg-gradient-to-r from-amber-50 to-amber-100 rounded-2xl p-5 border border-amber-200 shadow-sm">
                     <div className="text-sm text-amber-600 mb-1">잔여 크레딧</div>
                     <div className="text-2xl font-bold text-amber-700 flex items-center gap-1">
                       <Zap className="w-5 h-5" />
@@ -597,7 +597,7 @@ const MyPage = ({ wallet, userPlan, setUserPlan, setWallet, creditLedger, userEn
 
                 <div className="grid grid-cols-2 gap-6">
                   {/* 최근 학생 활동 */}
-                  <div className="bg-white border border-neutral-200 rounded-2xl p-6">
+                  <div className="bg-white border border-neutral-200 rounded-2xl p-6 shadow-sm">
                     <h3 className="text-lg font-semibold text-neutral-900 mb-4">최근 학생 활동</h3>
                     <div className="space-y-3">
                       {[
@@ -623,7 +623,7 @@ const MyPage = ({ wallet, userPlan, setUserPlan, setWallet, creditLedger, userEn
                   </div>
 
                   {/* 예정된 라이브 */}
-                  <div className="bg-white border border-neutral-200 rounded-2xl p-6">
+                  <div className="bg-white border border-neutral-200 rounded-2xl p-6 shadow-sm">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-lg font-semibold text-neutral-900">예정된 라이브</h3>
                       <button
@@ -1368,19 +1368,19 @@ const MyPage = ({ wallet, userPlan, setUserPlan, setWallet, creditLedger, userEn
           <div className="space-y-6">
             {/* 요약 카드 */}
             <div className="grid grid-cols-4 gap-4">
-              <div className="bg-white rounded-xl p-5 border border-neutral-200">
+              <div className="bg-white rounded-2xl p-5 border border-neutral-200 shadow-sm">
                 <div className="text-sm text-neutral-500 mb-1">전체 테스트</div>
                 <div className="text-2xl font-bold text-neutral-900">{instructorTests.length}개</div>
               </div>
-              <div className="bg-white rounded-xl p-5 border border-neutral-200">
+              <div className="bg-white rounded-2xl p-5 border border-neutral-200 shadow-sm">
                 <div className="text-sm text-neutral-500 mb-1">진행중</div>
                 <div className="text-2xl font-bold text-emerald-600">{instructorTests.filter(t => t.status === 'active').length}개</div>
               </div>
-              <div className="bg-white rounded-xl p-5 border border-neutral-200">
+              <div className="bg-white rounded-2xl p-5 border border-neutral-200 shadow-sm">
                 <div className="text-sm text-neutral-500 mb-1">채점 대기</div>
                 <div className="text-2xl font-bold text-amber-600">{pendingSubmissions.length}건</div>
               </div>
-              <div className="bg-white rounded-xl p-5 border border-neutral-200">
+              <div className="bg-white rounded-2xl p-5 border border-neutral-200 shadow-sm">
                 <div className="text-sm text-neutral-500 mb-1">평균 점수</div>
                 <div className="text-2xl font-bold text-indigo-600">
                   {Math.round(instructorTests.filter(t => t.avgScore).reduce((a, t) => a + t.avgScore, 0) / instructorTests.filter(t => t.avgScore).length)}점

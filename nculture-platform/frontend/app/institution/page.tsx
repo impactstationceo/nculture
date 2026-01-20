@@ -152,7 +152,7 @@ const InstitutionAdminPage = ({ user, institution, setInstitution, setCurrentPag
         </div>
         
         {/* 최근 활동 */}
-        <div className="bg-white border border-neutral-200 rounded-xl p-6">
+        <div className="bg-white border border-neutral-200 rounded-2xl p-6 shadow-sm">
           <h3 className="font-semibold text-neutral-900 mb-4 flex items-center gap-2">
             <Activity className="w-5 h-5 text-indigo-500" />
             최근 크레딧 변동
@@ -184,7 +184,7 @@ const InstitutionAdminPage = ({ user, institution, setInstitution, setCurrentPag
       </div>
       
       {/* 교육자별 현황 */}
-      <div className="bg-white border border-neutral-200 rounded-xl overflow-hidden">
+      <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-neutral-200 flex items-center justify-between">
           <h3 className="font-semibold text-neutral-900">교육자별 현황</h3>
           <button 
@@ -276,7 +276,7 @@ const InstitutionAdminPage = ({ user, institution, setInstitution, setCurrentPag
       </div>
       
       {/* 교육자 목록 */}
-      <div className="bg-white border border-neutral-200 rounded-xl overflow-hidden">
+      <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-neutral-200 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <User className="w-5 h-5 text-violet-500" />
@@ -342,7 +342,7 @@ const InstitutionAdminPage = ({ user, institution, setInstitution, setCurrentPag
       </div>
       
       {/* 수강생 목록 */}
-      <div className="bg-white border border-neutral-200 rounded-xl overflow-hidden">
+      <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-neutral-200 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Users className="w-5 h-5 text-emerald-500" />
@@ -419,7 +419,7 @@ const InstitutionAdminPage = ({ user, institution, setInstitution, setCurrentPag
   // 클래스 관리 탭
   const renderClasses = () => (
     <div className="space-y-6">
-      <div className="bg-white border border-neutral-200 rounded-xl overflow-hidden">
+      <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-neutral-200 flex items-center justify-between">
           <h3 className="font-semibold text-neutral-900">전체 클래스 현황</h3>
           <div className="flex gap-2">
@@ -501,7 +501,7 @@ const InstitutionAdminPage = ({ user, institution, setInstitution, setCurrentPag
           <div className="text-4xl font-bold mb-2">{institution.creditPool.toLocaleString()}</div>
           <div className="text-white/80 text-sm">사용 가능</div>
         </div>
-        <div className="bg-white border border-neutral-200 rounded-xl p-6">
+        <div className="bg-white border border-neutral-200 rounded-2xl p-6 shadow-sm">
           <div className="text-neutral-500 text-sm mb-2">총 배분량</div>
           <div className="text-3xl font-bold text-neutral-900">
             {(INSTITUTION_INSTRUCTORS.reduce((sum, i) => sum + i.creditsAllocated, 0) + 
@@ -509,7 +509,7 @@ const InstitutionAdminPage = ({ user, institution, setInstitution, setCurrentPag
           </div>
           <div className="text-sm text-neutral-500 mt-1">교육자 + 수강생</div>
         </div>
-        <div className="bg-white border border-neutral-200 rounded-xl p-6">
+        <div className="bg-white border border-neutral-200 rounded-2xl p-6 shadow-sm">
           <div className="text-neutral-500 text-sm mb-2">이번 달 사용량</div>
           <div className="text-3xl font-bold text-neutral-900">{institution.usedCredits.toLocaleString()}</div>
           <div className="text-sm text-emerald-600 mt-1 flex items-center gap-1">
@@ -520,7 +520,7 @@ const InstitutionAdminPage = ({ user, institution, setInstitution, setCurrentPag
       </div>
       
       {/* 크레딧 배분 이력 */}
-      <div className="bg-white border border-neutral-200 rounded-xl overflow-hidden">
+      <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-neutral-200 flex items-center justify-between">
           <h3 className="font-semibold text-neutral-900">크레딧 변동 이력</h3>
           <button className="px-4 py-2 bg-amber-500 text-white text-sm font-medium rounded-lg hover:bg-amber-600 transition-colors flex items-center gap-2">
@@ -571,7 +571,7 @@ const InstitutionAdminPage = ({ user, institution, setInstitution, setCurrentPag
   // 설정 탭
   const renderSettings = () => (
     <div className="space-y-6">
-      <div className="bg-white border border-neutral-200 rounded-xl p-6">
+      <div className="bg-white border border-neutral-200 rounded-2xl p-6 shadow-sm">
         <h3 className="font-semibold text-neutral-900 mb-6">기관 정보</h3>
         <div className="space-y-4">
           <div>
@@ -592,7 +592,7 @@ const InstitutionAdminPage = ({ user, institution, setInstitution, setCurrentPag
         </div>
       </div>
       
-      <div className="bg-white border border-neutral-200 rounded-xl p-6">
+      <div className="bg-white border border-neutral-200 rounded-2xl p-6 shadow-sm">
         <h3 className="font-semibold text-neutral-900 mb-6">기본 정책</h3>
         <div className="space-y-4">
           <div className="flex items-center justify-between py-3 border-b border-neutral-100">
