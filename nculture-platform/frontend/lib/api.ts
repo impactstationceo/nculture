@@ -22,14 +22,17 @@ const mapCourseListItem = (course: any) => {
 };
 
 const mapCourseDetail = (course: any) => {
-  const sessions = (course?.sessions || []).map((session: any, index: number) => ({
-    ...session,
-    id: session?.id ?? index + 1,
-    title: session?.title || `세션 ${index + 1}`,
-    summary: session?.summary || session?.description || '',
-    concepts: session?.concepts || [],
-    examples: session?.examples || []
-  }));
+  const sessions = (course?.sessions || []).map((session: any, index: number) => {
+    const sessionNumber = session?.session_number ?? session?.sessionNumber;
+    return {
+      ...session,
+      id: sessionNumber ?? session?.id ?? index + 1,
+      title: session?.title || `세션 ${index + 1}`,
+      summary: session?.summary || session?.description || '',
+      concepts: session?.concepts || [],
+      examples: session?.examples || []
+    };
+  });
 
   return {
     ...course,
@@ -59,11 +62,12 @@ export const getCourses = async () => {
 // 클래스 상세 가져오기
 export const getCourse = async (id: string) => {
   if (isSupabaseConfigured) {
-    const { data, error } = await supabase
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    let query = supabase
       .from('courses')
-      .select('*, sessions:sessions(*), instructor:users_profile(name)')
-      .eq('id', id)
-      .single();
+      .select('*, sessions:sessions(*), instructor:users_profile(name)');
+    query = isUuid ? query.eq('id', id) : query.eq('slug', id);
+    const { data, error } = await query.single();
     if (error) throw error;
     return mapCourseDetail(data);
   }
