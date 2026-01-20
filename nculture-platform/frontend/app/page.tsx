@@ -25,9 +25,13 @@ export default function HomePage() {
         onRoleSwitch={handleRoleSwitch}
       />
 
-      <section className="pt-24 pb-12 px-4 md:px-6 lg:px-8">
-        <div className="max-w-screen-xl mx-auto">
-          <div className="bg-white border border-[#E5E8EB] rounded-3xl p-8 md:p-12 shadow-sm flex items-center justify-between gap-10">
+      <section className="pt-24 pb-12 px-4 md:px-6 lg:px-8 relative">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-24 right-10 w-72 h-72 bg-[#E8F3FF] rounded-full blur-3xl opacity-80" />
+          <div className="absolute top-16 left-0 w-56 h-56 bg-[#F2F4F6] rounded-full blur-3xl opacity-80" />
+        </div>
+        <div className="max-w-screen-xl mx-auto relative">
+          <div className="bg-white border border-[#E5E8EB] rounded-3xl p-8 md:p-12 shadow-md flex items-center justify-between gap-10">
             <div className="max-w-2xl">
             <h1 className="text-sm md:text-base font-semibold text-[#3182F6]">
               <span className="inline-flex items-center px-3 py-1 rounded-full bg-[#E8F3FF] text-[#3182F6]">
@@ -49,23 +53,34 @@ export default function HomePage() {
                   handleAuthClick('signup');
                 }
               }}
-              className="w-full max-w-md px-8 py-4 bg-[#3182F6] text-white text-base font-semibold rounded-xl shadow-sm hover:bg-[#1B64DA] transition-colors"
+              className="w-full max-w-md px-8 py-4 bg-[#3182F6] text-white text-base font-semibold rounded-xl shadow-md hover:bg-[#1B64DA] transition-colors"
             >
               {isLoggedIn ? '학습 시작하기' : '무료로 시작하기'}
             </button>
+            <div className="mt-6 flex flex-wrap gap-3 text-sm text-[#6B7684]">
+              <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#F9FAFB] border border-[#E5E8EB] rounded-full">
+                실습 중심 커리큘럼
+              </span>
+              <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#F9FAFB] border border-[#E5E8EB] rounded-full">
+                최신 모델 실전 적용
+              </span>
+              <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#F9FAFB] border border-[#E5E8EB] rounded-full">
+                결과 기반 피드백
+              </span>
+            </div>
             </div>
             
             <div className="flex-shrink-0 relative">
-              <div className="w-80 h-80 bg-[#E8F3FF] rounded-full flex items-center justify-center border border-[#D1E5FF] shadow-sm">
+              <div className="w-80 h-80 bg-[#E8F3FF] rounded-full flex items-center justify-center border border-[#D1E5FF] shadow-md">
                 <div className="text-center">
                   <Video className="w-20 h-20 text-[#3182F6] mx-auto mb-4" />
                   <div className="text-[#3182F6] font-medium">AI Video Creation</div>
                 </div>
               </div>
-              <div className="absolute -top-4 -right-4 w-24 h-24 bg-[#3182F6] rounded-2xl flex items-center justify-center rotate-12 shadow-sm">
+              <div className="absolute -top-4 -right-4 w-24 h-24 bg-[#3182F6] rounded-2xl flex items-center justify-center rotate-12 shadow-md">
                 <Sparkles className="w-10 h-10 text-white" />
               </div>
-              <div className="absolute -bottom-4 -left-4 w-20 h-20 bg-[#A7CCFF] rounded-full flex items-center justify-center shadow-sm">
+              <div className="absolute -bottom-4 -left-4 w-20 h-20 bg-[#A7CCFF] rounded-full flex items-center justify-center shadow-md">
                 <Zap className="w-8 h-8 text-white" />
               </div>
             </div>
@@ -75,7 +90,7 @@ export default function HomePage() {
 
       <section className="py-16 px-4 md:px-6 lg:px-8">
         <div className="max-w-screen-xl mx-auto">
-          <div className="bg-white border border-[#E5E8EB] rounded-3xl p-10 md:p-12 shadow-sm">
+          <div className="bg-white border border-[#E5E8EB] rounded-3xl p-10 md:p-12 shadow-md">
             <h2 className="text-3xl font-bold text-[#191F28] text-center mb-4">체계적인 AI 영상 교육</h2>
             <p className="text-[#6B7684] text-center mb-12">실무에 바로 적용할 수 있는 커리큘럼</p>
             
