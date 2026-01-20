@@ -114,7 +114,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email: nextUser?.email || profile?.email,
       name: profile?.name || nextUser?.user_metadata?.name || nextUser?.email?.split('@')[0],
       role: profile?.role || nextUser?.user_metadata?.role || 'student',
-      status: profile?.status || nextUser?.user_metadata?.status || 'approved',
+      status: profile?.status || nextUser?.user_metadata?.status || 'active',
       institutionId: profile?.institution_id || nextUser?.user_metadata?.institutionId || null
     };
 
@@ -242,28 +242,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       if (isSupabaseConfigured) {
         if (action === 'signup') {
-          const { data, error } = await supabase.auth.signUp({ email, password });
+          const metadata = {
+            name: name || email.split('@')[0],
+            role: role || 'student',
+            institutionId: institutionId || null
+          };
+          const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: { data: metadata }
+          });
           if (error) throw error;
 
           const userId = data.user?.id;
           if (userId) {
-            const profilePayload = {
+            const { data: profile } = await supabase
+              .from('users_profile')
+              .select('*')
+              .eq('id', userId)
+              .single();
+
+            applyUserState(data.user, profile || {
               id: userId,
               email,
-              name: name || email.split('@')[0],
-              role: role || 'student',
-              status: status || 'approved',
-              credits: 100,
+              name: metadata.name,
+              role: metadata.role,
+              status: metadata.role === 'student' ? 'active' : 'pending',
+              institution_id: metadata.institutionId,
               plan: 'free',
-              institution_id: institutionId || null
-            };
-
-            const { error: profileError } = await supabase
-              .from('users_profile')
-              .insert(profilePayload);
-            if (profileError) throw profileError;
-
-            applyUserState(data.user, profilePayload);
+              credits: 100
+            });
           }
         } else {
           const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -283,7 +291,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           email,
           name: name || email.split('@')[0],
           role: role || 'student',
-          status: status || 'approved',
+          status: status || 'active',
           institutionId: institutionId || null,
           credits: action === 'signup' ? 100 : 1000,
           plan: action === 'signup' ? 'free' : userPlan
@@ -343,7 +351,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const handleToggleRole = () => {
-    if (user?.role === 'instructor' && user?.status === 'approved') {
+    if (user?.role === 'instructor' && user?.status === 'active') {
       setViewMode(prev => prev === 'student' ? null : 'student');
     } else if (user?.role === 'institution_admin') {
       setViewMode(prev => {
