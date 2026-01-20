@@ -460,29 +460,26 @@ const AssessmentListPage = ({ onEnterStudio }: { onEnterStudio: (test: any) => v
   const completedTests = tests.filter(t => t.status === 'completed');
 
   return (
-    <div className="min-h-screen bg-neutral-50 pt-16">
-      <div className="bg-white border-b border-neutral-200">
-        <div className="max-w-6xl mx-auto px-8">
-          <h1 className="text-xl font-bold text-neutral-900 py-5">테스트</h1>
+    <div className="min-h-screen bg-[#F9FAFB] pt-20">
+      <div className="max-w-screen-xl mx-auto px-4 md:px-6 lg:px-8 py-8">
+        <div className="bg-white border border-neutral-200 rounded-3xl p-6 shadow-sm mb-8">
+          <h1 className="text-2xl font-bold text-neutral-900">테스트</h1>
         </div>
-      </div>
-
-      <div className="max-w-6xl mx-auto px-8 py-8">
         {/* 요약 카드 */}
         <div className="grid grid-cols-4 gap-4 mb-8">
-          <div className="bg-white rounded-xl p-5 border border-neutral-200">
+          <div className="bg-white rounded-2xl p-5 border border-neutral-200 shadow-sm">
             <div className="text-sm text-neutral-500 mb-1">진행 중</div>
             <div className="text-2xl font-bold text-emerald-600">{activeTests.length}개</div>
           </div>
-          <div className="bg-white rounded-xl p-5 border border-neutral-200">
+          <div className="bg-white rounded-2xl p-5 border border-neutral-200 shadow-sm">
             <div className="text-sm text-neutral-500 mb-1">예정된 테스트</div>
             <div className="text-2xl font-bold text-blue-600">{scheduledTests.length}개</div>
           </div>
-          <div className="bg-white rounded-xl p-5 border border-neutral-200">
+          <div className="bg-white rounded-2xl p-5 border border-neutral-200 shadow-sm">
             <div className="text-sm text-neutral-500 mb-1">완료</div>
             <div className="text-2xl font-bold text-neutral-600">{completedTests.length}개</div>
           </div>
-          <div className="bg-white rounded-xl p-5 border border-neutral-200">
+          <div className="bg-white rounded-2xl p-5 border border-neutral-200 shadow-sm">
             <div className="text-sm text-neutral-500 mb-1">전체 응시자</div>
             <div className="text-2xl font-bold text-indigo-600">{tests.reduce((sum, t) => sum + t.participants, 0)}명</div>
           </div>

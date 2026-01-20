@@ -496,10 +496,10 @@ const MyPage = ({ wallet, userPlan, setUserPlan, setWallet, creditLedger, userEn
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 pt-20 pb-16">
+    <div className="min-h-screen bg-[#F9FAFB] pt-20 pb-16">
       <div className="max-w-5xl mx-auto px-8">
         {/* 프로필 헤더 */}
-        <div className="bg-gradient-to-r from-indigo-600 to-violet-600 rounded-2xl p-6 mb-6 text-white">
+        <div className="bg-gradient-to-r from-indigo-600 to-violet-600 rounded-3xl p-6 mb-6 text-white shadow-sm">
           <div className="flex items-center gap-5">
             <div className={`w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold ${
               user?.role === 'instructor' ? 'bg-violet-400' : 'bg-indigo-400'
@@ -531,7 +531,7 @@ const MyPage = ({ wallet, userPlan, setUserPlan, setWallet, creditLedger, userEn
         </div>
 
         {/* 탭 네비게이션 */}
-        <div className="bg-white rounded-xl border border-neutral-200 p-1.5 mb-6 flex gap-1">
+        <div className="bg-white rounded-2xl border border-neutral-200 p-1.5 mb-6 flex gap-1 shadow-sm">
           {(isInstitutionAdmin ? [
             // 기관관리자는 플랜 구독과 설정만
             { id: 'subscription', label: '플랜 구독', icon: Zap },

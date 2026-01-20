@@ -73,7 +73,7 @@ const InstitutionAdminPage = ({ user, institution, setInstitution, setCurrentPag
   const renderDashboard = () => (
     <div className="space-y-6">
       {/* 기관 정보 헤더 */}
-      <div className="bg-gradient-to-r from-indigo-600 to-violet-600 rounded-2xl p-6 text-white">
+      <div className="bg-gradient-to-r from-indigo-600 to-violet-600 rounded-3xl p-6 text-white shadow-sm">
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-3 mb-2">
@@ -102,7 +102,7 @@ const InstitutionAdminPage = ({ user, institution, setInstitution, setCurrentPag
           { label: '총 수익', value: (institution.stats.totalRevenue / 10000).toFixed(0), suffix: '만원', icon: TrendingUp, color: 'amber' },
           { label: '평균 완료율', value: institution.stats.completionRate, suffix: '%', icon: Target, color: 'pink' }
         ].map((stat, idx) => (
-          <div key={idx} className="bg-white border border-neutral-200 rounded-xl p-5">
+          <div key={idx} className="bg-white border border-neutral-200 rounded-2xl p-5 shadow-sm">
             <div className="flex items-center justify-between mb-3">
               <div className={`w-10 h-10 rounded-lg flex items-center justify-center bg-${stat.color}-100`}>
                 <stat.icon className={`w-5 h-5 text-${stat.color}-600`} />
@@ -116,7 +116,7 @@ const InstitutionAdminPage = ({ user, institution, setInstitution, setCurrentPag
       
       {/* 크레딧 현황 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white border border-neutral-200 rounded-xl p-6">
+        <div className="bg-white border border-neutral-200 rounded-2xl p-6 shadow-sm">
           <h3 className="font-semibold text-neutral-900 mb-4 flex items-center gap-2">
             <Zap className="w-5 h-5 text-amber-500" />
             크레딧 사용 현황
@@ -624,10 +624,10 @@ const InstitutionAdminPage = ({ user, institution, setInstitution, setCurrentPag
   );
   
   return (
-    <div className="min-h-screen bg-neutral-50 pt-16">
-      <div className="max-w-7xl mx-auto px-8 py-8">
+    <div className="min-h-screen bg-[#F9FAFB] pt-20">
+      <div className="max-w-screen-xl mx-auto px-4 md:px-6 lg:px-8 py-8">
         {/* 탭 네비게이션 */}
-        <div className="bg-white border border-neutral-200 rounded-xl p-1.5 mb-6 flex gap-1 overflow-x-auto">
+        <div className="bg-white border border-neutral-200 rounded-2xl p-1.5 mb-6 flex gap-1 overflow-x-auto shadow-sm">
           {tabs.map(tab => (
             <button
               key={tab.id}
@@ -655,7 +655,7 @@ const InstitutionAdminPage = ({ user, institution, setInstitution, setCurrentPag
       {/* 크레딧 배분 모달 */}
       {showCreditModal && selectedMember && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-md p-6">
+          <div className="bg-white rounded-3xl w-full max-w-md p-6 shadow-xl">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold text-neutral-900">크레딧 배분</h3>
               <button onClick={() => setShowCreditModal(false)} className="p-2 hover:bg-neutral-100 rounded-lg transition-colors">
@@ -664,7 +664,7 @@ const InstitutionAdminPage = ({ user, institution, setInstitution, setCurrentPag
             </div>
             
             <div className="space-y-4">
-              <div className="bg-neutral-50 rounded-xl p-4">
+              <div className="bg-neutral-50 rounded-2xl p-4">
                 <div className="flex items-center gap-3">
                   <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold`} style={{ backgroundColor: selectedMember.avatar || '#6366f1' }}>
                     {selectedMember.name.charAt(0)}

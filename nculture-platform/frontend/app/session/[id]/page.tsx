@@ -1060,7 +1060,9 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
   }, [notification]);
 
   return (
-    <div className="h-screen bg-white pt-20 overflow-hidden">
+    <div className="h-screen bg-[#F9FAFB] pt-20 overflow-hidden">
+      <div className="h-full max-w-screen-xl mx-auto px-4 md:px-6 lg:px-8 pb-6">
+        <div className="h-full bg-white border border-[#E5E8EB] rounded-3xl shadow-sm overflow-hidden">
       {isInstructor && (
         <div className="fixed top-24 right-6 z-30 flex flex-col gap-2">
           <button
@@ -1351,16 +1353,16 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
 
       <div className="h-full flex flex-col">
         <div className="flex-[6] flex min-h-0">
-          <div className="w-1/2 border-r border-neutral-200 overflow-y-auto">
+          <div className="w-1/2 border-r border-[#E5E8EB] bg-[#F9FAFB] overflow-y-auto">
             <div className="p-5">
-              <div className="bg-neutral-100 rounded-xl mb-4 aspect-video flex items-center justify-center">
+              <div className="bg-[#F2F4F6] rounded-2xl mb-4 aspect-video flex items-center justify-center border border-[#E5E8EB]">
                 <Play className="w-14 h-14 text-neutral-400" />
               </div>
 
               <h2 className="text-lg font-semibold mb-2">{sessionId}회차: {currentSession.title}</h2>
               <p className="text-neutral-600 text-sm mb-4">{currentSession.summary}</p>
 
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-3">
+              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-3">
                 <h3 className="text-sm font-medium text-amber-900 mb-2 flex items-center gap-2">
                   <Lightbulb className="w-4 h-4 text-amber-600" />
                   핵심 개념
@@ -1376,7 +1378,7 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
               </div>
 
               {currentSession.examples && (
-                <div className="bg-neutral-50 border border-neutral-200 rounded-xl p-3">
+                <div className="bg-white border border-neutral-200 rounded-2xl p-4 shadow-sm">
                   <h3 className="text-sm font-medium text-neutral-900 mb-2 flex items-center gap-2">
                     <Lightbulb className="w-4 h-4 text-amber-500" />
                     예시 프롬프트
@@ -1403,7 +1405,7 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
           </div>
 
           <div className="w-1/2 flex flex-col min-h-0">
-            <div className="flex-shrink-0 bg-white p-4 border-b border-neutral-100">
+            <div className="flex-shrink-0 bg-[#F9FAFB] p-4 border-b border-[#E5E8EB]">
               <h3 className="text-base font-bold text-neutral-900 flex items-center gap-2">
                 <Eye className="w-4 h-4" />
                 실습 히스토리 {results.length > 0 && <span className="text-sm font-normal text-neutral-500">({results.length}개)</span>}
@@ -1513,8 +1515,8 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
           </div>
         </div>
 
-        <div className="flex-[4] flex border-t border-neutral-300 min-h-0">
-          <div className="w-1/2 border-r border-neutral-200 bg-neutral-50 overflow-y-auto">
+        <div className="flex-[4] flex border-t border-[#E5E8EB] min-h-0">
+          <div className="w-1/2 border-r border-[#E5E8EB] bg-[#F9FAFB] overflow-y-auto">
             <div className="p-4">
               <h3 className="text-sm font-semibold text-neutral-900 mb-3">생성 설정</h3>
 
@@ -1635,10 +1637,10 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
               )}
             </div>
 
-            <div className="flex-shrink-0 p-4 pt-3 border-t border-neutral-100 flex justify-end">
+            <div className="flex-shrink-0 p-4 pt-3 border-t border-[#E5E8EB] flex justify-end">
               <button
                 onClick={() => setTutorOpen(true)}
-                className="px-4 py-2 bg-slate-100 text-slate-600 font-medium rounded-lg text-sm hover:bg-slate-200 transition-colors flex items-center gap-2"
+                className="px-4 py-2 bg-[#F2F4F6] text-[#6B7684] font-medium rounded-lg text-sm hover:bg-[#E5E8EB] transition-colors flex items-center gap-2"
               >
                 <MessageSquare className="w-4 h-4" />
                 튜터에게 질문
@@ -1660,6 +1662,8 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
       />
 
       <TutorDrawer isOpen={tutorOpen} onClose={() => setTutorOpen(false)} />
+        </div>
+      </div>
     </div>
   );
 };
