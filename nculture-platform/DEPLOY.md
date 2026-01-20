@@ -66,9 +66,19 @@ Supabase 대시보드 → SQL Editor에서 순서대로 실행:
 
 ```
 migrations/001_schema.sql
-migrations/002_seed.sql
+migrations/002_rls_policies.sql
+migrations/003_storage_policies.sql
+migrations/004_invitations.sql
+migrations/005_reviews.sql
+migrations/006_notifications.sql
+migrations/007_inquiries.sql
+migrations/008_credit_packages.sql
 migrations/009_additional_tables.sql
 migrations/010_user_plan_credits.sql
+migrations/011_backend_alignment.sql
+migrations/012_auth_profile_alignment.sql
+migrations/013_media_gallery_rls.sql
+migrations/014_course_slug_and_seed.sql
 ```
 
 ### 3. 환경 변수 설정
@@ -78,6 +88,7 @@ migrations/010_user_plan_credits.sql
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 ```
 
 ### 4. Edge Functions 배포 (선택)
@@ -92,10 +103,28 @@ supabase login
 # 프로젝트 연결
 supabase link --project-ref your-project-ref
 
-# 함수 배포
+ # 함수 배포
 supabase functions deploy ai-generate
 supabase functions deploy live-room
 supabase functions deploy payment
+```
+
+### 4-1. Edge Function 환경 변수
+
+Supabase Functions 환경 변수에 아래 키를 등록:
+
+```
+SUPABASE_URL
+SUPABASE_SERVICE_ROLE_KEY
+OPENAI_API_KEY
+SORA_API_URL
+SORA_API_KEY
+VEO_API_URL
+VEO_API_KEY
+MIDJOURNEY_API_URL
+MIDJOURNEY_API_KEY
+DAILY_API_KEY
+TOSS_SECRET_KEY
 ```
 
 ### 5. Vercel 배포
@@ -110,6 +139,7 @@ vercel
 환경 변수 설정:
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY` (서버/엣지 전용)
 
 ---
 
@@ -180,11 +210,12 @@ vercel
 |--------|------|------|
 | Supabase Auth | ✅ 구현됨 | 데모 모드 fallback 있음 |
 | Supabase DB | ✅ 구현됨 | 마이그레이션 필요 |
-| OpenAI Sora | 🟡 준비됨 | Edge Function에 API 키 필요 |
-| Google Veo | 🟡 준비됨 | Edge Function에 API 키 필요 |
+| OpenAI Sora | 🟡 준비됨 | SORA_API_URL / SORA_API_KEY 필요 |
+| Google Veo | 🟡 준비됨 | VEO_API_URL / VEO_API_KEY 필요 |
+| Midjourney | 🟡 준비됨 | MIDJOURNEY_API_URL / MIDJOURNEY_API_KEY 필요 |
 | DALL-E | ✅ 구현됨 | OPENAI_API_KEY 필요 |
-| Daily.co | 🟡 준비됨 | 라이브 기능에 필요 |
-| Toss Payments | 🟡 준비됨 | 결제 기능에 필요 |
+| Daily.co | 🟡 준비됨 | DAILY_API_KEY 필요 |
+| Toss Payments | 🟡 준비됨 | TOSS_SECRET_KEY 필요 |
 
 ---
 
@@ -192,10 +223,10 @@ vercel
 
 - **폰트**: Pretendard (한글), System UI (영문)
 - **컬러**:
-  - Primary: Indigo (#6366f1)
-  - Success: Emerald (#059669)
-  - Warning: Amber (#f59e0b)
-  - Danger: Red (#dc2626)
+  - Primary: Toss Blue (#3182F6)
+  - Success: #00C853
+  - Warning: #FF9100
+  - Danger: #F44336
 - **스타일**: Tailwind CSS
 
 ---
