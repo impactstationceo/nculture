@@ -59,7 +59,7 @@ const ParticipantStatusCard = ({ participant, onClick }: { participant: any; onC
   return (
     <div 
       onClick={onClick}
-      className="bg-white border border-neutral-200 rounded-xl p-4 hover:border-neutral-400 hover:shadow-md transition-all cursor-pointer"
+      className="bg-white border border-neutral-200 rounded-2xl p-4 shadow-sm hover:border-neutral-400 hover:shadow-lg transition-all cursor-pointer"
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
@@ -156,7 +156,7 @@ const ActivityLogItem = ({ activity }: { activity: any }) => {
 
 const SessionTimeline = ({ timeline, participantName }: { timeline: any[]; participantName: string }) => {
   return (
-    <div className="bg-white border border-neutral-200 rounded-xl">
+    <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm">
       <div className="px-6 py-4 border-b border-neutral-200">
         <div className="flex items-center justify-between">
           <div>
@@ -190,7 +190,7 @@ const EvaluationSummaryTable = ({ results }: { results: any[] }) => {
   };
   
   return (
-    <div className="bg-white border border-neutral-200 rounded-xl overflow-hidden">
+    <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm overflow-hidden">
       <div className="px-6 py-4 border-b border-neutral-200 flex items-center justify-between">
         <h3 className="font-semibold text-neutral-900">평가 결과 요약</h3>
         <div className="flex gap-2">
@@ -493,7 +493,7 @@ const AssessmentListPage = ({ onEnterStudio }: { onEnterStudio: (test: any) => v
               {activeTests.map(test => (
                 <div
                   key={test.id}
-                  className="bg-white border-2 border-emerald-200 rounded-xl p-5 hover:shadow-md transition-all"
+                  className="bg-white border-2 border-emerald-200 rounded-2xl p-5 shadow-sm hover:shadow-lg transition-all"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -538,7 +538,7 @@ const AssessmentListPage = ({ onEnterStudio }: { onEnterStudio: (test: any) => v
               {scheduledTests.map(test => (
                 <div
                   key={test.id}
-                  className="bg-white border border-neutral-200 rounded-xl p-5 hover:border-neutral-300 transition-all"
+                  className="bg-white border border-neutral-200 rounded-2xl p-5 shadow-sm hover:border-neutral-300 hover:shadow-md transition-all"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -576,7 +576,7 @@ const AssessmentListPage = ({ onEnterStudio }: { onEnterStudio: (test: any) => v
         {completedTests.length > 0 && (
           <div>
             <h2 className="text-lg font-semibold text-neutral-900 mb-4">완료된 테스트</h2>
-            <div className="bg-white border border-neutral-200 rounded-xl overflow-hidden">
+            <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm overflow-hidden">
               <table className="w-full">
                 <thead className="bg-neutral-50">
                   <tr>

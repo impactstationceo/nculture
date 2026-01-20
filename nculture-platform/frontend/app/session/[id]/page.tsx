@@ -37,7 +37,7 @@ import {
 
 // ============= 2단 선택 컴포넌트 =============
 const SpecBadge = ({ label, value }: any) => (
-  <span className="px-2 py-0.5 bg-neutral-100 text-neutral-600 text-xs rounded">
+  <span className="px-2.5 py-0.5 bg-[#F2F4F6] text-[#6B7684] text-xs rounded-full font-medium">
     {label}: {value}
   </span>
 );
@@ -45,28 +45,28 @@ const SpecBadge = ({ label, value }: any) => (
 const ServiceListItem = ({ service, isSelected, onClick }: any) => (
   <button
     onClick={onClick}
-    className={`w-full px-4 py-3 flex items-center gap-3 hover:bg-neutral-50 transition-all text-left border-l-2 ${
-      isSelected ? 'bg-indigo-50 border-l-indigo-600' : 'border-l-transparent'
+    className={`w-full px-4 py-3 flex items-center gap-3 transition-all text-left border-l-2 ${
+      isSelected ? 'bg-[#E8F3FF] border-l-[#3182F6]' : 'border-l-transparent hover:bg-[#F9FAFB]'
     }`}
   >
-    <div className="w-10 h-10 rounded-lg bg-neutral-100 flex items-center justify-center text-xl flex-shrink-0">
+    <div className="w-10 h-10 rounded-lg bg-[#F2F4F6] border border-[#E5E8EB] flex items-center justify-center text-xl flex-shrink-0">
       {service.icon}
     </div>
     <div className="flex-1 min-w-0">
       <div className="text-sm font-semibold text-neutral-900">{service.name}</div>
       <div className="text-xs text-neutral-500 truncate">{service.description}</div>
     </div>
-    <ChevronRight className={`w-4 h-4 flex-shrink-0 ${isSelected ? 'text-indigo-600' : 'text-neutral-400'}`} strokeWidth={1.5} />
+    <ChevronRight className={`w-4 h-4 flex-shrink-0 ${isSelected ? 'text-[#3182F6]' : 'text-[#8B95A1]'}`} strokeWidth={1.5} />
   </button>
 );
 
 const TierListItem = ({ tier, isSelected, onClick }: any) => (
   <button
     onClick={onClick}
-    className={`w-full px-4 py-3 border rounded-lg text-left transition-all ${
+    className={`w-full px-4 py-3 border rounded-2xl text-left transition-all ${
       isSelected 
-        ? 'bg-indigo-50 border-indigo-300' 
-        : 'bg-white border-neutral-200 hover:border-neutral-300'
+        ? 'bg-[#E8F3FF] border-[#A7CCFF] shadow-sm' 
+        : 'bg-white border-[#E5E8EB] hover:border-[#A7CCFF]'
     }`}
   >
     <div className="flex items-center justify-between mb-2">
@@ -136,9 +136,9 @@ const ModelPickerPanel = ({ isOpen, onClose, services, selectedService, selected
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/20" onClick={onClose} />
-      <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[80vh] flex flex-col">
-        <div className="px-6 py-4 border-b border-neutral-200">
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+      <div className="relative bg-white rounded-2xl border border-[#E5E8EB] shadow-2xl w-full max-w-4xl max-h-[80vh] flex flex-col">
+        <div className="px-6 py-4 border-b border-[#E5E8EB]">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-neutral-900">AI 모델 선택</h3>
             <button onClick={onClose} className="text-neutral-500 hover:text-neutral-900">
@@ -150,10 +150,10 @@ const ModelPickerPanel = ({ isOpen, onClose, services, selectedService, selected
               <button
                 key={cat.id}
                 onClick={() => handleCategoryChange(cat.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
                   activeCategory === cat.id
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                    ? 'bg-[#3182F6] text-white'
+                    : 'bg-[#F2F4F6] text-[#6B7684] hover:bg-[#E5E8EB]'
                 }`}
               >
                 <span>{cat.icon}</span>
@@ -164,8 +164,8 @@ const ModelPickerPanel = ({ isOpen, onClose, services, selectedService, selected
         </div>
 
         <div className="flex-1 overflow-hidden flex">
-          <div className="w-2/5 border-r border-neutral-200 overflow-y-auto">
-            <div className="p-3 bg-neutral-50 border-b border-neutral-200">
+          <div className="w-2/5 border-r border-[#E5E8EB] overflow-y-auto">
+            <div className="p-3 bg-[#F9FAFB] border-b border-[#E5E8EB]">
               <h4 className="text-xs font-semibold text-neutral-700 uppercase">
                 {categories.find(c => c.id === activeCategory)?.label} 서비스
               </h4>
@@ -183,8 +183,8 @@ const ModelPickerPanel = ({ isOpen, onClose, services, selectedService, selected
             ))}
           </div>
 
-          <div className="w-3/5 overflow-y-auto bg-neutral-50">
-            <div className="p-3 border-b border-neutral-200">
+          <div className="w-3/5 overflow-y-auto bg-[#F9FAFB]">
+            <div className="p-3 border-b border-[#E5E8EB]">
               <h4 className="text-xs font-semibold text-neutral-700 uppercase">
                 {currentService?.name} 모델
               </h4>
@@ -202,16 +202,16 @@ const ModelPickerPanel = ({ isOpen, onClose, services, selectedService, selected
           </div>
         </div>
 
-        <div className="px-6 py-4 border-t border-neutral-200 flex gap-3 justify-end bg-neutral-50">
+        <div className="px-6 py-4 border-t border-[#E5E8EB] flex gap-3 justify-end bg-[#F9FAFB]">
           <button
             onClick={onClose}
-            className="px-5 py-2 bg-white border border-neutral-300 rounded-lg text-sm font-medium text-neutral-700 hover:bg-neutral-50 transition-colors"
+            className="px-5 py-2 bg-white border border-[#E5E8EB] rounded-xl text-sm font-medium text-[#333D4B] hover:bg-[#F9FAFB] transition-colors"
           >
             취소
           </button>
           <button
             onClick={handleApply}
-            className="px-5 py-2 bg-neutral-900 text-white rounded-lg text-sm font-medium hover:bg-neutral-800 transition-colors"
+            className="px-5 py-2 bg-[#3182F6] text-white rounded-xl text-sm font-medium shadow-sm hover:bg-[#1B64DA] transition-colors"
           >
             적용
           </button>
@@ -230,10 +230,10 @@ const ModelPicker = ({ service, tier, services, onClick }: any) => {
       <label className="block text-sm font-medium text-neutral-900 mb-1.5">AI 모델</label>
       <button
         onClick={onClick}
-        className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-3 py-2.5 text-left flex items-center justify-between hover:border-indigo-400 hover:bg-white transition-all group"
+        className="w-full bg-white border border-[#E5E8EB] rounded-2xl px-3 py-2.5 text-left flex items-center justify-between shadow-sm hover:border-[#A7CCFF] hover:bg-[#F9FAFB] transition-all group"
       >
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center text-lg border border-neutral-100">
+          <div className="w-9 h-9 bg-[#F2F4F6] rounded-lg flex items-center justify-center text-lg border border-[#E5E8EB]">
             {selectedService?.icon}
           </div>
           <div>
@@ -1091,7 +1091,7 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
       )}
 
       {isInstructor && showScheduledNoticePanel && (
-        <div className="fixed top-40 right-6 z-30 w-96 bg-white border border-neutral-200 rounded-xl shadow-xl overflow-hidden">
+        <div className="fixed top-40 right-6 z-30 w-96 bg-white border border-neutral-200 rounded-2xl shadow-xl overflow-hidden">
           <div className="px-4 py-3 bg-amber-50 border-b border-amber-200 flex items-center justify-between">
             <h3 className="font-semibold text-neutral-900 text-sm">📅 예약 공지 설정</h3>
             <div className="flex items-center gap-2">
@@ -1203,7 +1203,7 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
 
       {isInstructor && editingNotice && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl w-full max-w-md p-6 mx-4">
+          <div className="bg-white rounded-3xl w-full max-w-md p-6 mx-4 shadow-xl">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-neutral-900">공지 수정</h3>
               <button onClick={() => setEditingNotice(null)} className="text-neutral-400 hover:text-neutral-600">
@@ -1270,7 +1270,7 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
       )}
 
       {isInstructor && showStudentPanel && (
-        <div className="fixed top-40 right-6 z-30 w-80 bg-white border border-neutral-200 rounded-xl shadow-xl overflow-hidden">
+        <div className="fixed top-40 right-6 z-30 w-80 bg-white border border-neutral-200 rounded-2xl shadow-xl overflow-hidden">
           <div className="px-4 py-3 bg-neutral-50 border-b border-neutral-200 flex items-center justify-between">
             <h3 className="font-semibold text-neutral-900 text-sm">수강생 현황</h3>
             <div className="flex items-center gap-2">
@@ -1309,7 +1309,7 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
 
       {receivedBroadcast && (
         <div className="fixed top-24 left-1/2 -translate-x-1/2 z-50">
-          <div className={`text-white rounded-2xl shadow-2xl p-4 max-w-md min-w-[320px] ${
+          <div className={`text-white rounded-3xl shadow-2xl p-4 max-w-md min-w-[320px] ${
             receivedBroadcast.type === 'hint' ? 'bg-amber-500' :
             receivedBroadcast.type === 'reminder' ? 'bg-orange-500' :
             receivedBroadcast.type === 'start' ? 'bg-emerald-500' :
