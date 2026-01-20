@@ -54,71 +54,78 @@ serve(async (req) => {
 
     const paymentData = await tossResponse.json()
 
+    const planCredits: Record<string, number> = {
+      'basic': 500,
+      'pro': 2000,
+      'max': 5000,
+      'enterprise': 10000
+    }
+
+    const creditsToApply = credits ?? (planId ? planCredits[planId] || 0 : 0);
+
     // 2. 결제 기록 저장
-    await supabase
+    const { data: payment } = await supabase
       .from('payments')
       .insert({
         user_id: userId,
-        payment_key: paymentKey,
-        order_id: orderId,
         amount,
+        credits: creditsToApply,
         status: 'completed',
-        payment_method: paymentData.method,
-        metadata: paymentData
+        provider: 'toss',
+        provider_payment_key: paymentKey,
+        provider_order_id: orderId,
+        method: paymentData.method,
+        card_company: paymentData.card?.company,
+        receipt_url: paymentData.receipt?.url,
+        metadata: paymentData,
+        paid_at: paymentData.approvedAt || new Date().toISOString()
       })
+      .select()
+      .single()
 
     // 3. 플랜 결제인 경우 플랜 업그레이드
     if (planId) {
-      const planCredits: Record<string, number> = {
-        'basic': 500,
-        'pro': 2000,
-        'max': 5000,
-        'enterprise': 10000
-      }
-
-      await supabase
-        .from('users_profile')
-        .update({ 
-          plan: planId,
-          credits: planCredits[planId] || 500,
-          monthly_credits_limit: planCredits[planId] || 500
-        })
-        .eq('id', userId)
-
-      // 플랜 결제 기록
-      await supabase
-        .from('credit_transactions')
-        .insert({
-          user_id: userId,
-          amount: planCredits[planId] || 500,
-          transaction_type: 'plan_purchase',
-          description: `${planId} 플랜 결제`,
-          metadata: { planId, amount }
-        })
-    }
-
-    // 4. 크레딧 충전인 경우 크레딧 추가
-    if (credits) {
       const { data: profile } = await supabase
         .from('users_profile')
         .select('credits')
         .eq('id', userId)
         .single()
 
-      await supabase
-        .from('users_profile')
-        .update({ credits: (profile?.credits || 0) + credits })
-        .eq('id', userId)
+      const targetCredits = planCredits[planId] || 500
+      const delta = targetCredits - (profile?.credits || 0)
+
+      if (delta !== 0) {
+        await supabase.rpc('apply_credit_transaction', {
+          p_user_id: userId,
+          p_amount: delta,
+          p_tx_type: 'recharge',
+          p_description: `${planId} 플랜 결제`,
+          p_ref_type: 'payment',
+          p_ref_id: payment?.id,
+          p_metadata: { planId, amount }
+        })
+      }
 
       await supabase
-        .from('credit_transactions')
-        .insert({
-          user_id: userId,
-          amount: credits,
-          transaction_type: 'purchase',
-          description: `크레딧 ${credits}개 충전`,
-          metadata: { amount }
+        .from('users_profile')
+        .update({
+          plan: planId,
+          monthly_credits_limit: targetCredits
         })
+        .eq('id', userId)
+    }
+
+    // 4. 크레딧 충전인 경우 크레딧 추가
+    if (credits) {
+      await supabase.rpc('apply_credit_transaction', {
+        p_user_id: userId,
+        p_amount: credits,
+        p_tx_type: 'recharge',
+        p_description: `크레딧 ${credits}개 충전`,
+        p_ref_type: 'payment',
+        p_ref_id: payment?.id,
+        p_metadata: { amount }
+      })
     }
 
     return new Response(

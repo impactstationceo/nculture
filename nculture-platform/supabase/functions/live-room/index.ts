@@ -93,7 +93,8 @@ serve(async (req) => {
         await supabase
           .from('live_classes')
           .update({ 
-            room_url: roomData.url,
+            daily_room_name: roomData.name,
+            daily_room_url: roomData.url,
             status: 'live',
             started_at: new Date().toISOString()
           })
@@ -109,7 +110,7 @@ serve(async (req) => {
       }
 
       case 'join': {
-        if (!liveClass.room_url) {
+        if (!liveClass.daily_room_url) {
           throw new Error('Room not started yet')
         }
 
@@ -129,7 +130,7 @@ serve(async (req) => {
           },
           body: JSON.stringify({
             properties: {
-              room_name: `nculture-${liveClassId}`,
+              room_name: liveClass.daily_room_name || `nculture-${liveClassId}`,
               is_owner: false,
               user_name: user?.name || 'Anonymous',
             }
@@ -155,7 +156,7 @@ serve(async (req) => {
 
         return new Response(
           JSON.stringify({ 
-            roomUrl: liveClass.room_url,
+            roomUrl: liveClass.daily_room_url,
             token: tokenData.token,
           }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

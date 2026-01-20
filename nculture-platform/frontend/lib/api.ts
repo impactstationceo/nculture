@@ -48,7 +48,7 @@ export const getCourses = async () => {
   if (isSupabaseConfigured) {
     const { data, error } = await supabase
       .from('courses')
-      .select('*, instructor:users_profile(name), sessions:course_sessions(count)')
+      .select('*, instructor:users_profile(name), sessions:sessions(count)')
       .eq('status', 'published');
     if (error) throw error;
     return (data || []).map(mapCourseListItem);
@@ -61,7 +61,7 @@ export const getCourse = async (id: string) => {
   if (isSupabaseConfigured) {
     const { data, error } = await supabase
       .from('courses')
-      .select('*, sessions:course_sessions(*), instructor:users_profile(name)')
+      .select('*, sessions:sessions(*), instructor:users_profile(name)')
       .eq('id', id)
       .single();
     if (error) throw error;
@@ -74,20 +74,20 @@ export const getCourse = async (id: string) => {
 export const getLiveClasses = async () => {
   if (isSupabaseConfigured) {
     const { data, error } = await supabase
-      .from('live_sessions')
-      .select('*, instructor:users_profile(name)')
+      .from('live_classes')
+      .select('*, host:users_profile(name)')
       .order('scheduled_at', { ascending: true });
     if (error) throw error;
     return (data || []).map((item: any) => ({
       ...item,
       id: item?.id,
       title: item?.title,
-      instructor: item?.instructor?.name || item?.instructor || 'nCulture',
+      instructor: item?.host?.name || item?.instructor || 'nCulture',
       status: item?.status || 'upcoming',
-      participants: item?.participants || 0,
+      participants: item?.participant_count || 0,
       thumbnail: item?.thumbnail_url || item?.thumbnail || createPlaceholder('live', '#dc2626'),
-      startTime: item?.start_time || item?.startTime || item?.scheduled_at || '',
-      duration: item?.duration || ''
+      startTime: item?.scheduled_at || '',
+      duration: item?.duration_minutes ? `${item.duration_minutes}분` : item?.duration || ''
     }));
   }
   return LIVE_CLASSES;
@@ -112,25 +112,14 @@ export const getAIServices = async () => {
 // 크레딧 차감
 export const deductCredits = async (userId: string, amount: number, description: string) => {
   if (isSupabaseConfigured) {
-    await supabase.from('credit_transactions').insert({
-      user_id: userId,
-      amount: -amount,
-      transaction_type: 'usage',
-      description
-    });
-
-    const { data: profile } = await supabase
-      .from('users_profile')
-      .select('credits')
-      .eq('id', userId)
-      .single();
-
-    const nextCredits = Math.max((profile?.credits || 0) - amount, 0);
-
     await supabase
-      .from('users_profile')
-      .update({ credits: nextCredits })
-      .eq('id', userId);
+      .rpc('apply_credit_transaction', {
+        p_user_id: userId,
+        p_amount: -amount,
+        p_tx_type: 'usage',
+        p_description: description,
+        p_ref_type: 'ai_job'
+      });
   }
 };
 
@@ -177,13 +166,32 @@ export const upgradePlan = async (userId: string, plan: string) => {
     free: 50,
     basic: 500,
     pro: 2000,
-    max: 5000
+    max: 5000,
+    enterprise: 10000
   };
 
   if (isSupabaseConfigured) {
+    const targetCredits = planCredits[plan] ?? 50;
+    const { data: profile } = await supabase
+      .from('users_profile')
+      .select('credits')
+      .eq('id', userId)
+      .single();
+
+    const delta = targetCredits - (profile?.credits || 0);
+    if (delta !== 0) {
+      await supabase.rpc('apply_credit_transaction', {
+        p_user_id: userId,
+        p_amount: delta,
+        p_tx_type: 'recharge',
+        p_description: `${plan} 플랜 적용`,
+        p_ref_type: 'plan'
+      });
+    }
+
     await supabase
       .from('users_profile')
-      .update({ plan, credits: planCredits[plan] })
+      .update({ plan, monthly_credits_limit: targetCredits })
       .eq('id', userId);
   }
 };
@@ -210,9 +218,17 @@ export const saveMedia = async (media: {
   ai_service: string;
 }) => {
   if (isSupabaseConfigured) {
+    const payload = {
+      user_id: media.user_id,
+      media_type: media.type,
+      title: media.title,
+      url: media.url,
+      prompt: media.prompt,
+      ai_service_id: media.ai_service
+    };
     const { data, error } = await supabase
       .from('media_gallery')
-      .insert(media)
+      .insert(payload)
       .select()
       .single();
     if (error) throw error;
