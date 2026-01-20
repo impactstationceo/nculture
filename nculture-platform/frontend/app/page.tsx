@@ -33,16 +33,16 @@ export default function HomePage() {
         <div className="max-w-screen-xl mx-auto relative">
           <div className="bg-white border border-[#E5E8EB] rounded-3xl p-8 md:p-12 shadow-md flex items-center justify-between gap-10">
             <div className="max-w-2xl">
-            <h1 className="text-xs md:text-sm font-semibold text-[#3182F6] tracking-[0.08em]">
-              <span className="inline-flex items-center px-3 py-1 rounded-full bg-[#E8F3FF] border border-[#D1E5FF] text-[#3182F6]">
+            <h1 className="text-base md:text-lg font-semibold text-[#3182F6]">
+              <span className="inline-flex items-center px-3 py-1 rounded-full bg-[#E8F3FF] text-[#3182F6]">
                 AI 콘텐츠 교육,
               </span>
             </h1>
-            <h2 className="text-4xl md:text-6xl font-extrabold text-[#191F28] mt-4 leading-tight tracking-tight">
-              <span className="gradient-text font-extrabold text-5xl md:text-7xl">앤컬쳐</span>와 함께면<br/>
+            <h2 className="text-4xl md:text-5xl font-bold text-[#191F28] mt-5 leading-tight">
+              <span className="gradient-text font-extrabold text-5xl md:text-6xl">앤컬쳐</span>와 함께면<br/>
               기초 학습부터 전문가로의 성장까지
             </h2>
-            <p className="text-lg md:text-2xl font-medium text-[#333D4B] mt-4 mb-8">
+            <p className="text-2xl md:text-3xl font-semibold text-[#191F28] mt-6 mb-10">
               모두 가능합니다!
             </p>
             <button 
