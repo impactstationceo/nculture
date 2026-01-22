@@ -4,96 +4,113 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Play, ChevronRight, ChevronLeft, ChevronDown, Save, TrendingUp, BarChart3, CheckCircle, Clock, Zap, Sparkles, Video, Target, Award, BookOpen, ArrowRight, RefreshCw, Eye, Copy, Lightbulb, MessageSquare, X, Send, Upload, Check, User, AlertTriangle, Activity, FileText, Download, Bell, Users, Shield, History, AlertCircle, Radio, PenTool, MousePointer, Monitor, Volume2, VideoOff, Maximize2, Search, Image, Star, Headphones, Settings, Plus } from 'lucide-react';
 
 // ============= Placeholder 이미지 생성 함수 =============
+const hashValue = (value) => {
+  let hash = 0;
+  for (let i = 0; i < value.length; i += 1) {
+    hash = (hash * 31 + value.charCodeAt(i)) >>> 0;
+  }
+  return hash;
+};
+
+const THUMBNAIL_LIBRARY = {
+  video: [
+    'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=900&q=80',
+    'https://images.unsplash.com/photo-1626544827763-d516dce335e2?auto=format&fit=crop&w=900&q=80',
+    'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=80',
+    'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=900&q=80'
+  ],
+  live: [
+    'https://images.unsplash.com/photo-1504805572947-34fad45aed93?auto=format&fit=crop&w=900&q=80',
+    'https://images.unsplash.com/photo-1515169067865-5387ec356754?auto=format&fit=crop&w=900&q=80',
+    'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=900&q=80',
+    'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?auto=format&fit=crop&w=900&q=80'
+  ],
+  creative: [
+    'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=900&q=80',
+    'https://images.unsplash.com/photo-1541356665065-22676f35dd40?auto=format&fit=crop&w=900&q=80',
+    'https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?auto=format&fit=crop&w=900&q=80',
+    'https://images.unsplash.com/photo-1522383225653-ed111181a951?auto=format&fit=crop&w=900&q=80'
+  ],
+  ai: [
+    'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=900&q=80',
+    'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=900&q=80',
+    'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=80',
+    'https://images.unsplash.com/photo-1526378722484-bd91ca387e72?auto=format&fit=crop&w=900&q=80'
+  ],
+  robot: [
+    'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=900&q=80',
+    'https://images.unsplash.com/photo-1581090464777-f3220bbe1b8b?auto=format&fit=crop&w=900&q=80',
+    'https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?auto=format&fit=crop&w=900&q=80',
+    'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=900&q=80'
+  ],
+  business: [
+    'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=900&q=80',
+    'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=900&q=80',
+    'https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=900&q=80',
+    'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=900&q=80'
+  ],
+  code: [
+    'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=900&q=80',
+    'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=900&q=80',
+    'https://images.unsplash.com/photo-1517433456452-f9633a875f6f?auto=format&fit=crop&w=900&q=80',
+    'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=900&q=80'
+  ],
+  default: [
+    'https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=900&q=80',
+    'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=900&q=80',
+    'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=900&q=80',
+    'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=80'
+  ]
+};
+
+const REAL_FACE_IMAGES = [
+  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&h=400&q=80',
+  'https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=crop&w=400&h=400&q=80',
+  'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=400&h=400&q=80',
+  'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&h=400&q=80',
+  'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&h=400&q=80',
+  'https://images.unsplash.com/photo-1525134479668-1bee5c7c6845?auto=format&fit=crop&w=400&h=400&q=80',
+  'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&h=400&q=80',
+  'https://images.unsplash.com/photo-1545996124-0501ebae84d0?auto=format&fit=crop&w=400&h=400&q=80'
+];
+
+const SCREEN_IMAGES = [
+  'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80',
+  'https://images.unsplash.com/photo-1517433456452-f9633a875f6f?auto=format&fit=crop&w=1200&q=80',
+  'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1200&q=80',
+  'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80'
+];
+
+const CLASS_AI_RESULT_IMAGES = [
+  'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=900&q=80',
+  'https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=900&q=80',
+  'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=900&q=80',
+  'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?auto=format&fit=crop&w=900&q=80',
+  'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=900&q=80',
+  'https://images.unsplash.com/photo-1541356665065-22676f35dd40?auto=format&fit=crop&w=900&q=80',
+  'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=900&q=80',
+  'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=80'
+];
+
 const createPlaceholder = (type, bgColor = '#6366f1') => {
-  const icons = {
-    video: `<circle cx="200" cy="100" r="40" fill="rgba(255,255,255,0.2)"/><polygon points="190,85 220,100 190,115" fill="white"/>`,
-    ai: `<circle cx="200" cy="90" r="35" fill="rgba(255,255,255,0.15)"/><circle cx="200" cy="90" r="20" fill="rgba(255,255,255,0.2)"/><circle cx="200" cy="90" r="8" fill="white"/><path d="M165 130 Q200 160 235 130" stroke="rgba(255,255,255,0.3)" stroke-width="3" fill="none"/><circle cx="170" cy="140" r="5" fill="rgba(255,255,255,0.2)"/><circle cx="230" cy="140" r="5" fill="rgba(255,255,255,0.2)"/><circle cx="200" cy="155" r="4" fill="rgba(255,255,255,0.2)"/>`,
-    business: `<rect x="160" y="80" width="80" height="60" rx="4" fill="rgba(255,255,255,0.2)"/><line x1="175" y1="95" x2="225" y2="95" stroke="white" stroke-width="2"/><line x1="175" y1="108" x2="210" y2="108" stroke="rgba(255,255,255,0.5)" stroke-width="2"/><line x1="175" y1="121" x2="220" y2="121" stroke="rgba(255,255,255,0.5)" stroke-width="2"/><path d="M250 140 L270 100 L290 120 L310 80" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="310" cy="80" r="5" fill="white"/>`,
-    creative: `<circle cx="160" cy="100" r="30" fill="rgba(255,255,255,0.2)"/><circle cx="200" cy="85" r="25" fill="rgba(255,255,255,0.25)"/><circle cx="240" cy="105" r="28" fill="rgba(255,255,255,0.15)"/><path d="M180 130 Q200 150 220 130" stroke="white" stroke-width="2" fill="none"/><polygon points="200,60 205,75 220,75 208,85 213,100 200,90 187,100 192,85 180,75 195,75" fill="white"/>`,
-    robot: `<rect x="170" y="70" width="60" height="50" rx="8" fill="rgba(255,255,255,0.25)"/><circle cx="185" cy="90" r="6" fill="white"/><circle cx="215" cy="90" r="6" fill="white"/><rect x="190" y="105" width="20" height="4" rx="2" fill="white"/><rect x="175" y="125" width="50" height="25" rx="4" fill="rgba(255,255,255,0.2)"/><line x1="185" y1="135" x2="215" y2="135" stroke="rgba(255,255,255,0.5)" stroke-width="2"/><line x1="185" y1="142" x2="205" y2="142" stroke="rgba(255,255,255,0.5)" stroke-width="2"/><rect x="165" y="80" width="5" height="15" rx="2" fill="rgba(255,255,255,0.3)"/><rect x="230" y="80" width="5" height="15" rx="2" fill="rgba(255,255,255,0.3)"/>`,
-    live: `<circle cx="200" cy="100" r="45" fill="rgba(255,255,255,0.1)"/><circle cx="200" cy="100" r="30" fill="rgba(255,255,255,0.15)"/><circle cx="200" cy="100" r="15" fill="rgba(255,255,255,0.2)"/><circle cx="200" cy="100" r="6" fill="white"/><circle cx="260" cy="70" r="8" fill="white" opacity="0.8"/><circle cx="270" cy="90" r="5" fill="white" opacity="0.5"/><circle cx="255" cy="55" r="4" fill="white" opacity="0.3"/>`,
-    code: `<rect x="150" y="70" width="100" height="70" rx="6" fill="rgba(255,255,255,0.15)"/><text x="160" y="95" font-family="monospace" font-size="12" fill="rgba(255,255,255,0.7)">&lt;/&gt;</text><line x1="160" y1="108" x2="220" y2="108" stroke="rgba(255,255,255,0.4)" stroke-width="2"/><line x1="160" y1="120" x2="200" y2="120" stroke="rgba(255,255,255,0.4)" stroke-width="2"/><circle cx="235" cy="125" r="3" fill="rgba(255,255,255,0.6)"/>`,
-  };
-  
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="225" viewBox="0 0 400 225">
-    <defs>
-      <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" style="stop-color:${bgColor};stop-opacity:1" />
-        <stop offset="100%" style="stop-color:${bgColor}dd;stop-opacity:1" />
-      </linearGradient>
-    </defs>
-    <rect width="400" height="225" fill="url(#grad)"/>
-    ${icons[type] || icons.video}
-  </svg>`;
-  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+  const pool = THUMBNAIL_LIBRARY[type] || THUMBNAIL_LIBRARY.default;
+  const hash = hashValue(`${type}-${bgColor}`);
+  return pool[hash % pool.length];
 };
 
 const createAvatar = (name, bgColor = '#6366f1') => {
-  const initial = name.charAt(0);
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
-    <defs>
-      <linearGradient id="avatarGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" style="stop-color:${bgColor};stop-opacity:1" />
-        <stop offset="100%" style="stop-color:${bgColor}bb;stop-opacity:1" />
-      </linearGradient>
-    </defs>
-    <rect width="100" height="100" fill="url(#avatarGrad)"/>
-    <circle cx="50" cy="35" r="18" fill="rgba(255,255,255,0.9)"/>
-    <ellipse cx="50" cy="75" rx="28" ry="20" fill="rgba(255,255,255,0.9)"/>
-    <text x="50" y="55" font-family="system-ui, sans-serif" font-size="24" font-weight="600" fill="${bgColor}" text-anchor="middle" dominant-baseline="central">${initial}</text>
-  </svg>`;
-  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+  const hash = hashValue(`${name}-${bgColor}`);
+  return REAL_FACE_IMAGES[hash % REAL_FACE_IMAGES.length];
 };
 
 const createScreen = (status = 'active', bgColor = '#1e293b') => {
-  const statusIcons = {
-    active: `<rect x="100" y="60" width="200" height="120" rx="8" fill="#334155"/>
-      <rect x="115" y="75" width="80" height="10" rx="2" fill="#6366f1"/>
-      <rect x="115" y="95" width="170" height="6" rx="2" fill="#475569"/>
-      <rect x="115" y="110" width="140" height="6" rx="2" fill="#475569"/>
-      <rect x="115" y="125" width="160" height="6" rx="2" fill="#475569"/>
-      <rect x="115" y="145" width="60" height="20" rx="4" fill="#6366f1"/>
-      <circle cx="350" cy="190" r="20" fill="#22c55e" opacity="0.2"/>
-      <circle cx="350" cy="190" r="10" fill="#22c55e"/>`,
-    away: `<rect x="100" y="60" width="200" height="120" rx="8" fill="#334155"/>
-      <circle cx="200" cy="120" r="25" fill="#475569"/>
-      <rect x="195" y="105" width="10" height="20" rx="2" fill="#64748b"/>
-      <circle cx="200" cy="140" r="4" fill="#64748b"/>
-      <circle cx="350" cy="190" r="20" fill="#f59e0b" opacity="0.2"/>
-      <circle cx="350" cy="190" r="10" fill="#f59e0b"/>`,
-  };
-  
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
-    <rect width="400" height="300" fill="${bgColor}"/>
-    ${statusIcons[status] || statusIcons.active}
-  </svg>`;
-  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+  const hash = hashValue(`${status}-${bgColor}`);
+  return SCREEN_IMAGES[hash % SCREEN_IMAGES.length];
 };
 
 const createResult = (index = 0) => {
-  const colors = ['#6366f1', '#0891b2', '#7c3aed', '#059669', '#dc2626'];
-  const bgColor = colors[index % colors.length];
-  
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="338" viewBox="0 0 600 338">
-    <defs>
-      <linearGradient id="resultGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" style="stop-color:${bgColor};stop-opacity:1" />
-        <stop offset="100%" style="stop-color:${bgColor}cc;stop-opacity:1" />
-      </linearGradient>
-    </defs>
-    <rect width="600" height="338" fill="url(#resultGrad)"/>
-    <rect x="50" y="50" width="200" height="120" rx="12" fill="rgba(255,255,255,0.1)"/>
-    <circle cx="150" cy="110" r="30" fill="rgba(255,255,255,0.2)"/>
-    <polygon points="140,95 170,110 140,125" fill="white"/>
-    <rect x="280" y="60" width="270" height="12" rx="4" fill="rgba(255,255,255,0.3)"/>
-    <rect x="280" y="85" width="220" height="8" rx="3" fill="rgba(255,255,255,0.2)"/>
-    <rect x="280" y="105" width="240" height="8" rx="3" fill="rgba(255,255,255,0.2)"/>
-    <rect x="280" y="140" width="100" height="30" rx="6" fill="rgba(255,255,255,0.25)"/>
-    <circle cx="100" cy="250" r="40" fill="rgba(255,255,255,0.08)"/>
-    <circle cx="500" cy="280" r="50" fill="rgba(255,255,255,0.05)"/>
-    <text x="300" y="300" font-family="system-ui" font-size="14" fill="rgba(255,255,255,0.4)" text-anchor="middle">AI Generated</text>
-  </svg>`;
-  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+  const safeIndex = Math.abs(index) % CLASS_AI_RESULT_IMAGES.length;
+  return CLASS_AI_RESULT_IMAGES[safeIndex];
 };
 
 // ============= 라이브 클래스 Mock 데이터 =============
@@ -10313,6 +10330,13 @@ const SessionPage = ({ sessionId, wallet, setWallet, addLedgerEntry, userPlan, o
     }
   }, [results]);
 
+  // notification이 변경되면 해당 영역으로 스크롤
+  useEffect(() => {
+    if (notification && notificationRef.current) {
+      notificationRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [notification]);
+
   const currentSession = Object.values(CURRICULUM)
     .flatMap(stage => stage.sessions)
     .find(s => s.id === sessionId);
@@ -10489,13 +10513,6 @@ const SessionPage = ({ sessionId, wallet, setWallet, addLedgerEntry, userPlan, o
       setTimeout(() => setNotification(null), 3000);
     }, 2000);
   };
-
-  // notification이 변경되면 해당 영역으로 스크롤
-  useEffect(() => {
-    if (notification && notificationRef.current) {
-      notificationRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  }, [notification]);
 
   return (
     <div className="h-screen bg-white pt-20 overflow-hidden">

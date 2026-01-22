@@ -805,6 +805,12 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
     }
   }, [results]);
 
+  useEffect(() => {
+    if (notification && notificationRef.current) {
+      notificationRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [notification]);
+
   const currentSession = Object.values(CURRICULUM)
     .flatMap((stage: any) => stage.sessions)
     .find((s: any) => s.id === sessionId);
@@ -1052,12 +1058,6 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
       setTimeout(() => setNotification(null), 3000);
     }, 2000);
   };
-
-  useEffect(() => {
-    if (notification && notificationRef.current) {
-      notificationRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  }, [notification]);
 
   return (
     <div className="h-screen bg-[#F9FAFB] pt-20 overflow-hidden">
