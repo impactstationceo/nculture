@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Header from '@/components/Header';
 import { useAuth } from '@/components/AuthProvider';
-import { AI_SERVICES, CURRICULUM, createResult, PRICING_PLANS } from '@/lib/data';
+import { AI_SERVICES, CURRICULUM, createResult, MOCK_THUMBNAILS, PRICING_PLANS } from '@/lib/data';
 import { getAIServices, generateAI, deductCredits } from '@/lib/api';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { apiReserveCredits, apiGenerateJob, apiCaptureCredits, apiRefundCredits, calculateCredits, checkPlanLimits, getTierLevel, generatePracticeEvaluation } from '@/lib/utils';
@@ -667,8 +667,26 @@ const TutorDrawer = ({ isOpen, onClose }: any) => {
   );
 };
 
-const generateImage = (prompt: string, sessionId: number) => {
-  return createResult(sessionId);
+const VIDEO_RESULT_IMAGES = [
+  MOCK_THUMBNAILS[8],
+  MOCK_THUMBNAILS[9],
+  MOCK_THUMBNAILS[10],
+  MOCK_THUMBNAILS[11],
+  MOCK_THUMBNAILS[0],
+  MOCK_THUMBNAILS[1]
+];
+
+const getFallbackResultImage = (index: number, category: string) => {
+  const pool = category === 'video' ? VIDEO_RESULT_IMAGES : MOCK_THUMBNAILS;
+  return pool[Math.abs(index) % pool.length];
+};
+
+const generateImage = (prompt: string, sessionId: number, category = 'video') => {
+  const candidate = createResult(sessionId);
+  if (!candidate || (typeof candidate === 'string' && candidate.startsWith('data:image'))) {
+    return getFallbackResultImage(sessionId, category);
+  }
+  return candidate;
 };
 
 // ============= Session Page =============
@@ -959,7 +977,7 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
         const service = services.find((s: any) => s.id === selectedService);
         const tier = service?.tiers.find((t: any) => t.id === selectedTier);
         const evaluation = generatePracticeEvaluation(prompt, sessionId, currentCategory);
-        const resultUrl = result?.result?.url || generateImage(prompt, sessionId);
+        const resultUrl = result?.result?.url || generateImage(prompt, sessionId, currentCategory);
 
         setResults(prev => [...prev, {
           id: result?.result?.id || Date.now(),
@@ -1026,7 +1044,7 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
           service: service?.name,
           tier: tier?.name,
           prompt: prompt,
-          thumbnail: generateImage(prompt, sessionId),
+          thumbnail: generateImage(prompt, sessionId, currentCategory),
           timestamp: new Date().toLocaleString(),
           duration,
           resolution,
@@ -1421,7 +1439,7 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
                 </div>
               ) : (
                 <div className="p-4 space-y-4">
-                  {results.map((r: any) => (
+                  {results.map((r: any, index: number) => (
                     <div key={r.id}>
                     <div className="space-y-2.5">
                       <div className="flex justify-end">
@@ -1439,7 +1457,14 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
                           <Sparkles className="w-3.5 h-3.5 text-violet-600" />
                         </div>
                         <div className="flex-1 max-w-[85%] bg-white border border-neutral-200 rounded-2xl rounded-tl-sm overflow-hidden shadow-sm">
-                          <img src={r.thumbnail} alt="" className="w-full" />
+                          <img
+                            src={r.thumbnail}
+                            alt=""
+                            className="w-full"
+                            onError={(event) => {
+                              event.currentTarget.src = getFallbackResultImage(index, currentCategory);
+                            }}
+                          />
                           <div className="p-2.5 flex items-center justify-between">
                             <span className="text-xs text-neutral-500">✨ {r.creditsUsed} 크레딧</span>
                             <div className="flex gap-1.5">

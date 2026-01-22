@@ -72,7 +72,7 @@ const MediaGalleryPage = () => {
 
   const [works, setWorks] = useState(demoWorks);
 
-  const mapMediaItem = (item: any) => ({
+  const mapMediaItem = (item: any, index: number) => ({
     id: item?.id,
     title: item?.title || '작품',
     creator: item?.creator || item?.user_name || item?.user?.name || '익명',
@@ -80,7 +80,7 @@ const MediaGalleryPage = () => {
     style: item?.style || 'cinematic',
     type: item?.type || item?.media_type || 'image',
     likes: item?.likes || 0,
-    thumbnail: item?.thumbnail_url || item?.url || item?.thumbnail || '',
+    thumbnail: item?.thumbnail_url || item?.url || item?.thumbnail || MOCK_THUMBNAILS[index % MOCK_THUMBNAILS.length],
     featured: !!item?.featured,
     prompt: item?.prompt || '',
     model: item?.ai_service || item?.ai_service_name || '',
