@@ -2186,7 +2186,11 @@ const AssessmentStudioPage = ({ test, onExit, user, currentRole }) => {
 };
 
 const generateImage = (prompt, sessionId) => {
-  return createResult(sessionId);
+  const candidate = createResult(sessionId);
+  if (typeof candidate !== 'string' || candidate.length === 0 || candidate === 'demo_url' || candidate.startsWith('data:image')) {
+    return MOCK_THUMBNAILS[Math.abs(sessionId) % MOCK_THUMBNAILS.length];
+  }
+  return candidate;
 };
 
 // ============= 2단 선택 컴포넌트 =============

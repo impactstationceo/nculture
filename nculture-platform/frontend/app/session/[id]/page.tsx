@@ -676,6 +676,12 @@ const VIDEO_RESULT_IMAGES = [
   MOCK_THUMBNAILS[1]
 ];
 
+const isInvalidResultUrl = (value: unknown) =>
+  typeof value !== 'string' ||
+  value.length === 0 ||
+  value === 'demo_url' ||
+  value.startsWith('data:image');
+
 const getFallbackResultImage = (index: number, category: string) => {
   const pool = category === 'video' ? VIDEO_RESULT_IMAGES : MOCK_THUMBNAILS;
   return pool[Math.abs(index) % pool.length];
@@ -683,7 +689,7 @@ const getFallbackResultImage = (index: number, category: string) => {
 
 const generateImage = (prompt: string, sessionId: number, category = 'video') => {
   const candidate = createResult(sessionId);
-  if (!candidate || (typeof candidate === 'string' && candidate.startsWith('data:image'))) {
+  if (isInvalidResultUrl(candidate)) {
     return getFallbackResultImage(sessionId, category);
   }
   return candidate;
@@ -977,7 +983,10 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
         const service = services.find((s: any) => s.id === selectedService);
         const tier = service?.tiers.find((t: any) => t.id === selectedTier);
         const evaluation = generatePracticeEvaluation(prompt, sessionId, currentCategory);
-        const resultUrl = result?.result?.url || generateImage(prompt, sessionId, currentCategory);
+        const rawResultUrl = result?.result?.url;
+        const resultUrl = isInvalidResultUrl(rawResultUrl)
+          ? generateImage(prompt, sessionId, currentCategory)
+          : rawResultUrl;
 
         setResults(prev => [...prev, {
           id: result?.result?.id || Date.now(),
@@ -1458,7 +1467,7 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
                         </div>
                         <div className="flex-1 max-w-[85%] bg-white border border-neutral-200 rounded-2xl rounded-tl-sm overflow-hidden shadow-sm">
                           <img
-                            src={r.thumbnail}
+                            src={isInvalidResultUrl(r.thumbnail) ? getFallbackResultImage(index, currentCategory) : r.thumbnail}
                             alt=""
                             className="w-full"
                             onError={(event) => {
