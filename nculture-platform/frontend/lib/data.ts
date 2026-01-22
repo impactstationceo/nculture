@@ -65,31 +65,32 @@ export const createScreen = (status = 'active', bgColor = '#1e293b') => {
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 };
 
+const CLASS_AI_RESULT_IMAGES = [
+  'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=900&q=80',
+  'https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=900&q=80',
+  'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=900&q=80',
+  'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?auto=format&fit=crop&w=900&q=80',
+  'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=900&q=80',
+  'https://images.unsplash.com/photo-1541356665065-22676f35dd40?auto=format&fit=crop&w=900&q=80',
+  'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=900&q=80',
+  'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=80'
+];
+
 export const createResult = (index = 0) => {
-  const colors = ['#6366f1', '#0891b2', '#7c3aed', '#059669', '#dc2626'];
-  const bgColor = colors[index % colors.length];
-  
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="338" viewBox="0 0 600 338">
-    <defs>
-      <linearGradient id="resultGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" style="stop-color:${bgColor};stop-opacity:1" />
-        <stop offset="100%" style="stop-color:${bgColor}cc;stop-opacity:1" />
-      </linearGradient>
-    </defs>
-    <rect width="600" height="338" fill="url(#resultGrad)"/>
-    <rect x="50" y="50" width="200" height="120" rx="12" fill="rgba(255,255,255,0.1)"/>
-    <circle cx="150" cy="110" r="30" fill="rgba(255,255,255,0.2)"/>
-    <polygon points="140,95 170,110 140,125" fill="white"/>
-    <rect x="280" y="60" width="270" height="12" rx="4" fill="rgba(255,255,255,0.3)"/>
-    <rect x="280" y="85" width="220" height="8" rx="3" fill="rgba(255,255,255,0.2)"/>
-    <rect x="280" y="105" width="240" height="8" rx="3" fill="rgba(255,255,255,0.2)"/>
-    <rect x="280" y="140" width="100" height="30" rx="6" fill="rgba(255,255,255,0.25)"/>
-    <circle cx="100" cy="250" r="40" fill="rgba(255,255,255,0.08)"/>
-    <circle cx="500" cy="280" r="50" fill="rgba(255,255,255,0.05)"/>
-    <text x="300" y="300" font-family="system-ui" font-size="14" fill="rgba(255,255,255,0.4)" text-anchor="middle">AI Generated</text>
-  </svg>`;
-  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+  const safeIndex = Math.abs(index) % CLASS_AI_RESULT_IMAGES.length;
+  return CLASS_AI_RESULT_IMAGES[safeIndex];
 };
+
+export const REAL_FACE_IMAGES = [
+  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&h=400&q=80',
+  'https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=crop&w=400&h=400&q=80',
+  'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=400&h=400&q=80',
+  'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&h=400&q=80',
+  'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&h=400&q=80',
+  'https://images.unsplash.com/photo-1525134479668-1bee5c7c6845?auto=format&fit=crop&w=400&h=400&q=80',
+  'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&h=400&q=80',
+  'https://images.unsplash.com/photo-1545996124-0501ebae84d0?auto=format&fit=crop&w=400&h=400&q=80'
+];
 
 // ============= Mock 커리큘럼 데이터 =============
 export const CURRICULUM: Record<string, any> = {
