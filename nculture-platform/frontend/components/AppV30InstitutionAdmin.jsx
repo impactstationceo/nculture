@@ -12,85 +12,51 @@ const hashValue = (value) => {
   return hash;
 };
 
+const MOCK_THUMBNAILS = [
+  '/mock/thumbs/thumb-01.jpg',
+  '/mock/thumbs/thumb-02.jpg',
+  '/mock/thumbs/thumb-03.jpg',
+  '/mock/thumbs/thumb-04.jpg',
+  '/mock/thumbs/thumb-05.jpg',
+  '/mock/thumbs/thumb-06.jpg',
+  '/mock/thumbs/thumb-07.jpg',
+  '/mock/thumbs/thumb-08.jpg',
+  '/mock/thumbs/thumb-09.jpg',
+  '/mock/thumbs/thumb-10.jpg',
+  '/mock/thumbs/thumb-11.jpg',
+  '/mock/thumbs/thumb-12.jpg'
+];
+
 const THUMBNAIL_LIBRARY = {
-  video: [
-    'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1626544827763-d516dce335e2?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=900&q=80'
-  ],
-  live: [
-    'https://images.unsplash.com/photo-1504805572947-34fad45aed93?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1515169067865-5387ec356754?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?auto=format&fit=crop&w=900&q=80'
-  ],
-  creative: [
-    'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1541356665065-22676f35dd40?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1522383225653-ed111181a951?auto=format&fit=crop&w=900&q=80'
-  ],
-  ai: [
-    'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1526378722484-bd91ca387e72?auto=format&fit=crop&w=900&q=80'
-  ],
-  robot: [
-    'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1581090464777-f3220bbe1b8b?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=900&q=80'
-  ],
-  business: [
-    'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=900&q=80'
-  ],
-  code: [
-    'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1517433456452-f9633a875f6f?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=900&q=80'
-  ],
-  default: [
-    'https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=80'
-  ]
+  video: MOCK_THUMBNAILS.slice(0, 4),
+  live: MOCK_THUMBNAILS.slice(4, 8),
+  creative: MOCK_THUMBNAILS.slice(2, 6),
+  ai: MOCK_THUMBNAILS.slice(6, 10),
+  robot: MOCK_THUMBNAILS.slice(8, 12),
+  business: MOCK_THUMBNAILS.slice(1, 5),
+  code: MOCK_THUMBNAILS.slice(5, 9),
+  default: MOCK_THUMBNAILS.slice(0, 4)
 };
 
 const REAL_FACE_IMAGES = [
-  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&h=400&q=80',
-  'https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=crop&w=400&h=400&q=80',
-  'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=400&h=400&q=80',
-  'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&h=400&q=80',
-  'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&h=400&q=80',
-  'https://images.unsplash.com/photo-1525134479668-1bee5c7c6845?auto=format&fit=crop&w=400&h=400&q=80',
-  'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&h=400&q=80',
-  'https://images.unsplash.com/photo-1545996124-0501ebae84d0?auto=format&fit=crop&w=400&h=400&q=80'
+  '/mock/faces/face-01.jpg',
+  '/mock/faces/face-02.jpg',
+  '/mock/faces/face-03.jpg',
+  '/mock/faces/face-04.jpg',
+  '/mock/faces/face-05.jpg',
+  '/mock/faces/face-06.jpg',
+  '/mock/faces/face-07.jpg',
+  '/mock/faces/face-08.jpg'
 ];
 
 const SCREEN_IMAGES = [
-  'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80',
-  'https://images.unsplash.com/photo-1517433456452-f9633a875f6f?auto=format&fit=crop&w=1200&q=80',
-  'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1200&q=80',
-  'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80'
+  '/mock/screens/screen-01.jpg',
+  '/mock/screens/screen-02.jpg',
+  '/mock/screens/screen-03.jpg',
+  '/mock/screens/screen-04.jpg'
 ];
 
-const CLASS_AI_RESULT_IMAGES = [
-  'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=900&q=80',
-  'https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=900&q=80',
-  'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=900&q=80',
-  'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?auto=format&fit=crop&w=900&q=80',
-  'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=900&q=80',
-  'https://images.unsplash.com/photo-1541356665065-22676f35dd40?auto=format&fit=crop&w=900&q=80',
-  'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=900&q=80',
-  'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=80'
-];
+const CLASS_AI_RESULT_IMAGES = MOCK_THUMBNAILS;
 
 const createPlaceholder = (type, bgColor = '#6366f1') => {
   const pool = THUMBNAIL_LIBRARY[type] || THUMBNAIL_LIBRARY.default;
@@ -3628,8 +3594,8 @@ const MyPage = ({ wallet, userPlan, setUserPlan, setWallet, creditLedger, userEn
   };
   
   const instructorCourses = [
-    { id: 1, title: '프롬프트로 AI 영상 만들기', students: 156, progress: 67, status: 'active', thumbnail: 'https://images.unsplash.com/photo-1626544827763-d516dce335e2?w=400' },
-    { id: 2, title: 'AI 이미지 생성 마스터', students: 78, progress: 42, status: 'active', thumbnail: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400' },
+    { id: 1, title: '프롬프트로 AI 영상 만들기', students: 156, progress: 67, status: 'active', thumbnail: MOCK_THUMBNAILS[0] },
+    { id: 2, title: 'AI 이미지 생성 마스터', students: 78, progress: 42, status: 'active', thumbnail: MOCK_THUMBNAILS[1] },
   ];
 
   // 테스트 관리 상태
@@ -3660,10 +3626,10 @@ const MyPage = ({ wallet, userPlan, setUserPlan, setWallet, creditLedger, userEn
       { id: 3, studentName: '박지호', submittedAt: '2일 전', score: 72, aiScore: 72, feedback: '복습이 필요합니다.', status: 'graded' },
     ],
     2: [
-      { id: 1, studentName: '김민준', submittedAt: '2시간 전', score: null, aiScore: 85, feedback: '', status: 'pending', prompt: '네온 불빛이 반짝이는 도시의 밤거리, 시네마틱한 분위기로 표현', thumbnail: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=400' },
-      { id: 2, studentName: '이서연', submittedAt: '3시간 전', score: null, aiScore: 92, feedback: '', status: 'pending', prompt: '환상적인 보라색 오로라가 펼쳐진 북극의 밤하늘', thumbnail: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=400' },
-      { id: 3, studentName: '박지호', submittedAt: '5시간 전', score: null, aiScore: 78, feedback: '', status: 'pending', prompt: '고요한 호수 위에 비친 산의 모습, 일출 시간대', thumbnail: 'https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=400' },
-      { id: 4, studentName: '최수아', submittedAt: '1일 전', score: 88, aiScore: 85, feedback: 'AI 추천 점수에서 상향 조정했습니다. 창의성이 돋보입니다.', status: 'graded', prompt: '미래 도시의 하늘을 나는 자동차들', thumbnail: 'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=400' },
+      { id: 1, studentName: '김민준', submittedAt: '2시간 전', score: null, aiScore: 85, feedback: '', status: 'pending', prompt: '네온 불빛이 반짝이는 도시의 밤거리, 시네마틱한 분위기로 표현', thumbnail: MOCK_THUMBNAILS[8] },
+      { id: 2, studentName: '이서연', submittedAt: '3시간 전', score: null, aiScore: 92, feedback: '', status: 'pending', prompt: '환상적인 보라색 오로라가 펼쳐진 북극의 밤하늘', thumbnail: MOCK_THUMBNAILS[9] },
+      { id: 3, studentName: '박지호', submittedAt: '5시간 전', score: null, aiScore: 78, feedback: '', status: 'pending', prompt: '고요한 호수 위에 비친 산의 모습, 일출 시간대', thumbnail: MOCK_THUMBNAILS[10] },
+      { id: 4, studentName: '최수아', submittedAt: '1일 전', score: 88, aiScore: 85, feedback: 'AI 추천 점수에서 상향 조정했습니다. 창의성이 돋보입니다.', status: 'graded', prompt: '미래 도시의 하늘을 나는 자동차들', thumbnail: MOCK_THUMBNAILS[11] },
     ],
     3: [
       { id: 1, studentName: '정예준', submittedAt: '3일 전', score: 80, aiScore: 80, feedback: '기본기가 탄탄합니다.', status: 'graded' },
@@ -3671,9 +3637,9 @@ const MyPage = ({ wallet, userPlan, setUserPlan, setWallet, creditLedger, userEn
     ]
   };
   const pendingSubmissions = [
-    { id: 1, testId: 2, testTitle: '중간 실기 평가', studentName: '김민준', submittedAt: '2시간 전', prompt: '네온 불빛이 반짝이는 도시의 밤거리...', thumbnail: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=200', aiScore: 85 },
-    { id: 2, testId: 2, testTitle: '중간 실기 평가', studentName: '이서연', submittedAt: '3시간 전', prompt: '환상적인 보라색 오로라가 펼쳐진...', thumbnail: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=200', aiScore: 92 },
-    { id: 3, testId: 2, testTitle: '중간 실기 평가', studentName: '박지호', submittedAt: '5시간 전', prompt: '고요한 호수 위에 비친 산의 모습...', thumbnail: 'https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=200', aiScore: 78 },
+    { id: 1, testId: 2, testTitle: '중간 실기 평가', studentName: '김민준', submittedAt: '2시간 전', prompt: '네온 불빛이 반짝이는 도시의 밤거리...', thumbnail: MOCK_THUMBNAILS[8], aiScore: 85 },
+    { id: 2, testId: 2, testTitle: '중간 실기 평가', studentName: '이서연', submittedAt: '3시간 전', prompt: '환상적인 보라색 오로라가 펼쳐진...', thumbnail: MOCK_THUMBNAILS[9], aiScore: 92 },
+    { id: 3, testId: 2, testTitle: '중간 실기 평가', studentName: '박지호', submittedAt: '5시간 전', prompt: '고요한 호수 위에 비친 산의 모습...', thumbnail: MOCK_THUMBNAILS[10], aiScore: 78 },
   ];
 
   // 라이브 관리 상태
@@ -4230,7 +4196,7 @@ const MyPage = ({ wallet, userPlan, setUserPlan, setWallet, creditLedger, userEn
                   <h3 className="text-lg font-semibold text-neutral-900 mb-4">수강 중인 클래스</h3>
                   <div className="flex items-start gap-6">
                     <img 
-                      src="https://images.unsplash.com/photo-1626544827763-d516dce335e2?w=400" 
+                      src={MOCK_THUMBNAILS[0]} 
                       alt="" 
                       className="w-44 h-28 object-cover rounded-xl" 
                     />
@@ -4290,9 +4256,9 @@ const MyPage = ({ wallet, userPlan, setUserPlan, setWallet, creditLedger, userEn
                     <h3 className="text-lg font-semibold text-neutral-900 mb-4">최근 생성 결과물</h3>
                     <div className="space-y-3">
                       {[
-                        { type: 'video', prompt: '도시의 야경이 반짝이는 영상', time: '2시간 전', credits: 8, img: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=200' },
-                        { type: 'image', prompt: '미래 도시의 일출', time: '어제', credits: 3, img: 'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=200' },
-                        { type: 'video', prompt: '바다 위를 날아가는 드론 영상', time: '2일 전', credits: 6, img: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=200' },
+                        { type: 'video', prompt: '도시의 야경이 반짝이는 영상', time: '2시간 전', credits: 8, img: MOCK_THUMBNAILS[2] },
+                        { type: 'image', prompt: '미래 도시의 일출', time: '어제', credits: 3, img: MOCK_THUMBNAILS[3] },
+                        { type: 'video', prompt: '바다 위를 날아가는 드론 영상', time: '2일 전', credits: 6, img: MOCK_THUMBNAILS[4] },
                       ].map((work, idx) => (
                         <div key={idx} className="flex items-center gap-3 py-2 border-b border-neutral-100 last:border-0">
                           <img src={work.img} alt="" className="w-12 h-12 object-cover rounded-lg" />
@@ -4315,9 +4281,9 @@ const MyPage = ({ wallet, userPlan, setUserPlan, setWallet, creditLedger, userEn
                   <h3 className="text-lg font-semibold text-neutral-900 mb-4">추천 클래스</h3>
                   <div className="grid grid-cols-3 gap-4">
                     {[
-                      { title: 'Midjourney 마스터 클래스', instructor: '이아트', sessions: 10, img: 'https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=300' },
-                      { title: 'Sora로 시작하는 영상 제작', instructor: '박영상', sessions: 8, img: 'https://images.unsplash.com/photo-1536240478700-b869070f9279?w=300' },
-                      { title: 'ChatGPT 프롬프트 엔지니어링', instructor: '최텍스트', sessions: 6, img: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=300' },
+                      { title: 'Midjourney 마스터 클래스', instructor: '이아트', sessions: 10, img: MOCK_THUMBNAILS[5] },
+                      { title: 'Sora로 시작하는 영상 제작', instructor: '박영상', sessions: 8, img: MOCK_THUMBNAILS[6] },
+                      { title: 'ChatGPT 프롬프트 엔지니어링', instructor: '최텍스트', sessions: 6, img: MOCK_THUMBNAILS[7] },
                     ].map((course, idx) => (
                       <div key={idx} className="border border-neutral-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
                         <img src={course.img} alt="" className="w-full h-32 object-cover" />
@@ -8325,7 +8291,7 @@ const MyPage = ({ wallet, userPlan, setUserPlan, setWallet, creditLedger, userEn
                             <p className="text-xs text-neutral-400">1280x720px, JPG/PNG</p>
                           </div>
                           <button 
-                            onClick={() => setNewCourseForm({...newCourseForm, thumbnail: 'https://images.unsplash.com/photo-1626544827763-d516dce335e2?w=400'})}
+                            onClick={() => setNewCourseForm({...newCourseForm, thumbnail: MOCK_THUMBNAILS[0]})}
                             className="px-3 py-1.5 bg-neutral-100 text-neutral-600 text-xs rounded-lg hover:bg-neutral-200"
                           >
                             샘플 사용
@@ -11203,7 +11169,10 @@ const MediaGalleryPage = ({ setCurrentPage, wallet }) => {
     // Anime 추가
     { id: 30, title: '벚꽃 아래', creator: '최서아', course: 'AI 이미지 생성', style: 'anime', type: 'image', likes: 523, thumbnail: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?w=400', featured: true, prompt: '벚꽃이 흩날리는 학교 운동장, 교복 입은 소녀가 서 있는 장면, 애니메이션 스타일', model: 'Midjourney', createdAt: '2024-12-17', creditsUsed: 8 },
     { id: 31, title: '사이버펑크 도쿄', creator: '정유나', course: 'AI 영상 생성', style: 'anime', type: 'video', likes: 445, thumbnail: 'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=400', featured: true, prompt: '네온 불빛이 가득한 미래의 도쿄 거리, 사이버펑크 애니메이션 스타일', model: 'Kling Pro', createdAt: '2024-12-16', creditsUsed: 12 },
-  ];
+  ].map((work, index) => ({
+    ...work,
+    thumbnail: MOCK_THUMBNAILS[index % MOCK_THUMBNAILS.length]
+  }));
 
   const filteredWorks = works.filter(work => {
     if (activeCategory === 'featured') return work.featured;
@@ -11446,13 +11415,13 @@ const StudentDashboard = ({ user, wallet, onStartSession }) => {
     totalSessions: 12,
     nextSessionTitle: '5회차: 고급 프롬프트 기법',
     progress: 42,
-    thumbnail: 'https://images.unsplash.com/photo-1626544827763-d516dce335e2?w=400'
+    thumbnail: MOCK_THUMBNAILS[0]
   };
 
   const recentWorks = [
-    { id: 1, type: 'video', prompt: '도시의 야경이 반짝이는 영상', createdAt: '2시간 전', credits: 8, thumbnail: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=200' },
-    { id: 2, type: 'image', prompt: '미래 도시의 일출', createdAt: '어제', credits: 3, thumbnail: 'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=200' },
-    { id: 3, type: 'video', prompt: '바다 위를 날아가는 드론 영상', createdAt: '2일 전', credits: 6, thumbnail: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=200' },
+    { id: 1, type: 'video', prompt: '도시의 야경이 반짝이는 영상', createdAt: '2시간 전', credits: 8, thumbnail: MOCK_THUMBNAILS[2] },
+    { id: 2, type: 'image', prompt: '미래 도시의 일출', createdAt: '어제', credits: 3, thumbnail: MOCK_THUMBNAILS[3] },
+    { id: 3, type: 'video', prompt: '바다 위를 날아가는 드론 영상', createdAt: '2일 전', credits: 6, thumbnail: MOCK_THUMBNAILS[4] },
   ];
 
   const upcomingTasks = [
@@ -11573,7 +11542,7 @@ const InstructorDashboard = () => {
       creditsTotal: 10000,
       status: 'active',
       startDate: '2025-01-06',
-      thumbnail: 'https://images.unsplash.com/photo-1626544827763-d516dce335e2?w=400'
+      thumbnail: MOCK_THUMBNAILS[0]
     },
     { 
       id: 2, 
@@ -11584,7 +11553,7 @@ const InstructorDashboard = () => {
       creditsTotal: 8000,
       status: 'active',
       startDate: '2025-01-13',
-      thumbnail: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400'
+      thumbnail: MOCK_THUMBNAILS[1]
     },
     { 
       id: 3, 
@@ -11595,7 +11564,7 @@ const InstructorDashboard = () => {
       creditsTotal: 8000,
       status: 'completed',
       startDate: '2024-11-04',
-      thumbnail: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=400'
+      thumbnail: MOCK_THUMBNAILS[2]
     },
   ];
 

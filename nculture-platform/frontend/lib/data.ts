@@ -7,55 +7,30 @@ const hashValue = (value: string) => {
   return hash;
 };
 
+export const MOCK_THUMBNAILS = [
+  '/mock/thumbs/thumb-01.jpg',
+  '/mock/thumbs/thumb-02.jpg',
+  '/mock/thumbs/thumb-03.jpg',
+  '/mock/thumbs/thumb-04.jpg',
+  '/mock/thumbs/thumb-05.jpg',
+  '/mock/thumbs/thumb-06.jpg',
+  '/mock/thumbs/thumb-07.jpg',
+  '/mock/thumbs/thumb-08.jpg',
+  '/mock/thumbs/thumb-09.jpg',
+  '/mock/thumbs/thumb-10.jpg',
+  '/mock/thumbs/thumb-11.jpg',
+  '/mock/thumbs/thumb-12.jpg'
+];
+
 const THUMBNAIL_LIBRARY: Record<string, string[]> = {
-  video: [
-    'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1626544827763-d516dce335e2?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=900&q=80'
-  ],
-  live: [
-    'https://images.unsplash.com/photo-1504805572947-34fad45aed93?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1515169067865-5387ec356754?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?auto=format&fit=crop&w=900&q=80'
-  ],
-  creative: [
-    'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1541356665065-22676f35dd40?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1522383225653-ed111181a951?auto=format&fit=crop&w=900&q=80'
-  ],
-  ai: [
-    'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1526378722484-bd91ca387e72?auto=format&fit=crop&w=900&q=80'
-  ],
-  robot: [
-    'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1581090464777-f3220bbe1b8b?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=900&q=80'
-  ],
-  business: [
-    'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=900&q=80'
-  ],
-  code: [
-    'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1517433456452-f9633a875f6f?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=900&q=80'
-  ],
-  default: [
-    'https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=80'
-  ]
+  video: MOCK_THUMBNAILS.slice(0, 4),
+  live: MOCK_THUMBNAILS.slice(4, 8),
+  creative: MOCK_THUMBNAILS.slice(2, 6),
+  ai: MOCK_THUMBNAILS.slice(6, 10),
+  robot: MOCK_THUMBNAILS.slice(8, 12),
+  business: MOCK_THUMBNAILS.slice(1, 5),
+  code: MOCK_THUMBNAILS.slice(5, 9),
+  default: MOCK_THUMBNAILS.slice(0, 4)
 };
 
 export const createPlaceholder = (type: string, bgColor = '#6366f1') => {
@@ -65,27 +40,15 @@ export const createPlaceholder = (type: string, bgColor = '#6366f1') => {
 };
 
 export const createAvatar = (name: string, bgColor = '#6366f1') => {
-  const initial = name.charAt(0);
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
-    <defs>
-      <linearGradient id="avatarGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" style="stop-color:${bgColor};stop-opacity:1" />
-        <stop offset="100%" style="stop-color:${bgColor}bb;stop-opacity:1" />
-      </linearGradient>
-    </defs>
-    <rect width="100" height="100" fill="url(#avatarGrad)"/>
-    <circle cx="50" cy="35" r="18" fill="rgba(255,255,255,0.9)"/>
-    <ellipse cx="50" cy="75" rx="28" ry="20" fill="rgba(255,255,255,0.9)"/>
-    <text x="50" y="55" font-family="system-ui, sans-serif" font-size="24" font-weight="600" fill="${bgColor}" text-anchor="middle" dominant-baseline="central">${initial}</text>
-  </svg>`;
-  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+  const hash = hashValue(`${name}-${bgColor}`);
+  return REAL_FACE_IMAGES[hash % REAL_FACE_IMAGES.length];
 };
 
 const SCREEN_IMAGES = [
-  'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80',
-  'https://images.unsplash.com/photo-1517433456452-f9633a875f6f?auto=format&fit=crop&w=1200&q=80',
-  'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1200&q=80',
-  'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80'
+  '/mock/screens/screen-01.jpg',
+  '/mock/screens/screen-02.jpg',
+  '/mock/screens/screen-03.jpg',
+  '/mock/screens/screen-04.jpg'
 ];
 
 export const createScreen = (status = 'active', bgColor = '#1e293b') => {
@@ -93,16 +56,7 @@ export const createScreen = (status = 'active', bgColor = '#1e293b') => {
   return SCREEN_IMAGES[hash % SCREEN_IMAGES.length];
 };
 
-const CLASS_AI_RESULT_IMAGES = [
-  'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=900&q=80',
-  'https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=900&q=80',
-  'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=900&q=80',
-  'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?auto=format&fit=crop&w=900&q=80',
-  'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=900&q=80',
-  'https://images.unsplash.com/photo-1541356665065-22676f35dd40?auto=format&fit=crop&w=900&q=80',
-  'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=900&q=80',
-  'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=80'
-];
+const CLASS_AI_RESULT_IMAGES = MOCK_THUMBNAILS;
 
 export const createResult = (index = 0) => {
   const safeIndex = Math.abs(index) % CLASS_AI_RESULT_IMAGES.length;
@@ -110,14 +64,14 @@ export const createResult = (index = 0) => {
 };
 
 export const REAL_FACE_IMAGES = [
-  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&h=400&q=80',
-  'https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=crop&w=400&h=400&q=80',
-  'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=400&h=400&q=80',
-  'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&h=400&q=80',
-  'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&h=400&q=80',
-  'https://images.unsplash.com/photo-1525134479668-1bee5c7c6845?auto=format&fit=crop&w=400&h=400&q=80',
-  'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&h=400&q=80',
-  'https://images.unsplash.com/photo-1545996124-0501ebae84d0?auto=format&fit=crop&w=400&h=400&q=80'
+  '/mock/faces/face-01.jpg',
+  '/mock/faces/face-02.jpg',
+  '/mock/faces/face-03.jpg',
+  '/mock/faces/face-04.jpg',
+  '/mock/faces/face-05.jpg',
+  '/mock/faces/face-06.jpg',
+  '/mock/faces/face-07.jpg',
+  '/mock/faces/face-08.jpg'
 ];
 
 // ============= Mock 커리큘럼 데이터 =============
