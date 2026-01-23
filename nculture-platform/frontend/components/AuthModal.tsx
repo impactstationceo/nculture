@@ -88,7 +88,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLo
 
   if (!isOpen) return null;
 
-  const isInstitutionMode = mode === 'institution_login' || mode === 'institution_signup';
+  const isInstitutionMode = mode === 'institution_login';
 
   const handleSaveEmail = (shouldSave: boolean, emailValue: string) => {
     try {
