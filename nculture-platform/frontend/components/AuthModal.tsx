@@ -11,7 +11,9 @@ interface AuthModalProps {
 }
 
 export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLogin }: AuthModalProps) {
-  const [mode, setMode] = useState(initialMode);
+  const [mode, setMode] = useState(
+    initialMode === 'institution_signup' ? 'institution_login' : initialMode
+  );
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -50,7 +52,8 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLo
   }, []);
 
   useEffect(() => {
-    setMode(initialMode);
+    const nextMode = initialMode === 'institution_signup' ? 'institution_login' : initialMode;
+    setMode(nextMode);
     if (initialMode === 'institution_login' || initialMode === 'institution_signup') {
       setInstRegStep(1);
     }
