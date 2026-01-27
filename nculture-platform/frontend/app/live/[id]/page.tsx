@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Video, MessageSquare, Users, Volume2, VideoOff, Maximize2, Send } from 'lucide-react';
-import { LIVE_CLASSES, LIVE_CHAT_MESSAGES, createAvatar, createScreen } from '@/lib/data';
+import { LIVE_CLASSES, LIVE_CHAT_MESSAGES, REAL_FACE_IMAGES, createScreen } from '@/lib/data';
 
 const LiveClassRoom = ({ classId, onExit }: { classId: number; onExit: () => void }) => {
   const [chatMessages, setChatMessages] = useState(LIVE_CHAT_MESSAGES);
@@ -22,10 +22,11 @@ const LiveClassRoom = ({ classId, onExit }: { classId: number; onExit: () => voi
     { id: 5, name: "박서연", email: "seoyeon@gmail.com", status: "away" },
   ];
 
+  const instructorFace = REAL_FACE_IMAGES[0];
   const studentCams = [
-    { id: 1, name: "용기 있는 바닷가재", img: createAvatar("용", "#6366f1") },
-    { id: 2, name: "근엄한 유니콘", img: createAvatar("근", "#6366f1") },
-    { id: 3, name: "김수안", img: createAvatar("김", "#6366f1") },
+    { id: 1, name: "용기 있는 바닷가재", img: REAL_FACE_IMAGES[1] },
+    { id: 2, name: "근엄한 유니콘", img: REAL_FACE_IMAGES[2] },
+    { id: 3, name: "김수안", img: REAL_FACE_IMAGES[3] },
   ];
 
   const handleChatMessage = () => {
@@ -108,7 +109,7 @@ const LiveClassRoom = ({ classId, onExit }: { classId: number; onExit: () => voi
             <div className="flex-1 relative rounded-2xl overflow-hidden bg-[#0B0F1A]">
               <img src={createScreen('active')} alt="강사 화면" className="w-full h-full object-contain" />
               <div className="absolute top-3 right-3 w-36 aspect-video rounded-xl overflow-hidden border border-[#3182F6]/60 shadow-xl">
-                <img src={createAvatar("김", "#6366f1")} alt="강사" className="w-full h-full object-cover" />
+                <img src={instructorFace} alt="강사" className="w-full h-full object-cover" />
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-1.5">
                   <div className="flex items-center justify-between">
                     <span className="text-white text-xs">김민수 강사</span>
@@ -136,7 +137,7 @@ const LiveClassRoom = ({ classId, onExit }: { classId: number; onExit: () => voi
           <div className="w-60 bg-white border border-[#E5E8EB] rounded-2xl shadow-sm flex flex-col overflow-hidden">
             <div className="p-2 border-b border-[#E5E8EB]">
               <div className="relative rounded-xl overflow-hidden aspect-video bg-[#0B0F1A]">
-                <img src={createAvatar("김", "#6366f1")} alt="강사" className="w-full h-full object-cover" />
+                <img src={instructorFace} alt="강사" className="w-full h-full object-cover" />
                 <div className="absolute bottom-1 left-1 flex items-center gap-1">
                   <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
                   <span className="text-white text-xs">강사</span>

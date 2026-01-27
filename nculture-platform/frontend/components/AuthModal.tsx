@@ -11,7 +11,9 @@ interface AuthModalProps {
 }
 
 export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLogin }: AuthModalProps) {
-  const [mode, setMode] = useState(initialMode);
+  const [mode, setMode] = useState(
+    initialMode === 'institution_signup' ? 'institution_login' : initialMode
+  );
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -50,7 +52,8 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLo
   }, []);
 
   useEffect(() => {
-    setMode(initialMode);
+    const nextMode = initialMode === 'institution_signup' ? 'institution_login' : initialMode;
+    setMode(nextMode);
     if (initialMode === 'institution_login' || initialMode === 'institution_signup') {
       setInstRegStep(1);
     }
@@ -85,7 +88,10 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLo
 
   if (!isOpen) return null;
 
-  const isInstitutionMode = mode === 'institution_login' || mode === 'institution_signup';
+  const isInstitutionMode = mode === 'institution_login';
+  const showTestAccounts =
+    process.env.NODE_ENV !== 'production' ||
+    process.env.NEXT_PUBLIC_SHOW_TEST_ACCOUNTS === 'true';
 
   const handleSaveEmail = (shouldSave: boolean, emailValue: string) => {
     try {
@@ -312,7 +318,13 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLo
 
   const renderLoginForm = () => (
     <div className="p-6">
-      <h3 className="text-lg font-semibold text-[#191F28] mb-6">로그인</h3>
+      <h3 className="text-lg font-semibold text-[#191F28] mb-2">
+        {mode === 'institution_login' ? '기관 관리자 로그인' : '로그인'}
+      </h3>
+      {mode === 'institution_login' && (
+        <p className="text-sm text-[#6B7684] mb-6">기관 관리자 계정으로 로그인하세요.</p>
+      )}
+      {mode !== 'institution_login' && <div className="mb-6" />}
 
       <div className="space-y-4">
         <div>
@@ -355,26 +367,30 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLo
         </button>
       </div>
       
-      <div className="mt-6 text-center">
-        <button
-          onClick={() => {
-            setMode('signup');
-            setSignupStep(1);
-          }}
-          className="text-sm text-[#6B7684] hover:text-[#191F28]"
-        >
-          계정이 없으신가요? <span className="text-[#3182F6] font-medium">회원가입</span>
-        </button>
-      </div>
-
-      <div className="mt-6 p-4 bg-[#F9FAFB] rounded-xl border border-[#E5E8EB]">
-        <p className="text-xs text-[#6B7684] mb-2">🧪 테스트 계정 (데모 모드)</p>
-        <div className="text-xs text-[#333D4B] space-y-1">
-          <p>• 기관관리자: admin@test.com / 아무 비밀번호</p>
-          <p>• 교육자: test@test.com / 아무 비밀번호</p>
-          <p>• 수강생: 아무 이메일 / 아무 비밀번호</p>
+      {mode !== 'institution_login' && (
+        <div className="mt-6 text-center">
+          <button
+            onClick={() => {
+              setMode('signup');
+              setSignupStep(1);
+            }}
+            className="text-sm text-[#6B7684] hover:text-[#191F28]"
+          >
+            계정이 없으신가요? <span className="text-[#3182F6] font-medium">회원가입</span>
+          </button>
         </div>
-      </div>
+      )}
+
+      {showTestAccounts && (
+        <div className="mt-6 p-4 bg-[#F9FAFB] rounded-xl border border-[#E5E8EB]">
+          <p className="text-xs text-[#6B7684] mb-2">🧪 테스트 계정 (데모 모드)</p>
+          <div className="text-xs text-[#333D4B] space-y-1">
+            <p>• 기관관리자: admin@test.com / 아무 비밀번호</p>
+            <p>• 교육자: test@test.com / 아무 비밀번호</p>
+            <p>• 수강생: 아무 이메일 / 아무 비밀번호</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 
@@ -388,7 +404,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLo
           <X className="w-5 h-5" />
         </button>
 
-        {mode === 'login' && renderLoginForm()}
+        {(mode === 'login' || mode === 'institution_login') && renderLoginForm()}
         {mode === 'signup' && signupStep === 1 && renderRoleSelection()}
         {mode === 'signup' && signupStep === 2 && renderSignupForm()}
       </div>

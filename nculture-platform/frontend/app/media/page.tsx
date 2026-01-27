@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Header from '@/components/Header';
 import { useAuth } from '@/components/AuthProvider';
 import { getMediaGallery } from '@/lib/api';
+import { MOCK_THUMBNAILS } from '@/lib/data';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { Play, ChevronDown, X, Sparkles } from 'lucide-react';
 
@@ -64,11 +65,14 @@ const MediaGalleryPage = () => {
     { id: 29, title: '선과 여백', creator: '박채원', course: 'AI 영상 생성', style: 'minimalist', type: 'video', likes: 203, thumbnail: 'https://images.unsplash.com/photo-1493397212122-2b85dda8106b?w=400', featured: true, prompt: '단순한 선들이 천천히 그려지며 형태를 만들어가는 미니멀 애니메이션', model: 'Runway Gen-3', createdAt: '2024-12-18', creditsUsed: 10 },
     { id: 30, title: '벚꽃 아래', creator: '최서아', course: 'AI 이미지 생성', style: 'anime', type: 'image', likes: 523, thumbnail: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?w=400', featured: true, prompt: '벚꽃이 흩날리는 학교 운동장, 교복 입은 소녀가 서 있는 장면, 애니메이션 스타일', model: 'Midjourney', createdAt: '2024-12-17', creditsUsed: 8 },
     { id: 31, title: '사이버펑크 도쿄', creator: '정유나', course: 'AI 영상 생성', style: 'anime', type: 'video', likes: 445, thumbnail: 'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=400', featured: true, prompt: '네온 불빛이 가득한 미래의 도쿄 거리, 사이버펑크 애니메이션 스타일', model: 'Kling Pro', createdAt: '2024-12-16', creditsUsed: 12 },
-  ];
+  ].map((work, index) => ({
+    ...work,
+    thumbnail: MOCK_THUMBNAILS[index % MOCK_THUMBNAILS.length]
+  }));
 
   const [works, setWorks] = useState(demoWorks);
 
-  const mapMediaItem = (item: any) => ({
+  const mapMediaItem = (item: any, index: number) => ({
     id: item?.id,
     title: item?.title || '작품',
     creator: item?.creator || item?.user_name || item?.user?.name || '익명',
@@ -76,7 +80,7 @@ const MediaGalleryPage = () => {
     style: item?.style || 'cinematic',
     type: item?.type || item?.media_type || 'image',
     likes: item?.likes || 0,
-    thumbnail: item?.thumbnail_url || item?.url || item?.thumbnail || '',
+    thumbnail: item?.thumbnail_url || item?.url || item?.thumbnail || MOCK_THUMBNAILS[index % MOCK_THUMBNAILS.length],
     featured: !!item?.featured,
     prompt: item?.prompt || '',
     model: item?.ai_service || item?.ai_service_name || '',

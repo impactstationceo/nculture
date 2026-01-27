@@ -4,96 +4,79 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Play, ChevronRight, ChevronLeft, ChevronDown, Save, TrendingUp, BarChart3, CheckCircle, Clock, Zap, Sparkles, Video, Target, Award, BookOpen, ArrowRight, RefreshCw, Eye, Copy, Lightbulb, MessageSquare, X, Send, Upload, Check, User, AlertTriangle, Activity, FileText, Download, Bell, Users, Shield, History, AlertCircle, Radio, PenTool, MousePointer, Monitor, Volume2, VideoOff, Maximize2, Search, Image, Star, Headphones, Settings, Plus } from 'lucide-react';
 
 // ============= Placeholder 이미지 생성 함수 =============
+const hashValue = (value) => {
+  let hash = 0;
+  for (let i = 0; i < value.length; i += 1) {
+    hash = (hash * 31 + value.charCodeAt(i)) >>> 0;
+  }
+  return hash;
+};
+
+const MOCK_THUMBNAILS = [
+  '/mock/thumbs/thumb-01.jpg',
+  '/mock/thumbs/thumb-02.jpg',
+  '/mock/thumbs/thumb-03.jpg',
+  '/mock/thumbs/thumb-04.jpg',
+  '/mock/thumbs/thumb-05.jpg',
+  '/mock/thumbs/thumb-06.jpg',
+  '/mock/thumbs/thumb-07.jpg',
+  '/mock/thumbs/thumb-08.jpg',
+  '/mock/thumbs/thumb-09.jpg',
+  '/mock/thumbs/thumb-10.jpg',
+  '/mock/thumbs/thumb-11.jpg',
+  '/mock/thumbs/thumb-12.jpg'
+];
+
+const THUMBNAIL_LIBRARY = {
+  video: MOCK_THUMBNAILS.slice(0, 4),
+  live: MOCK_THUMBNAILS.slice(4, 8),
+  creative: MOCK_THUMBNAILS.slice(2, 6),
+  ai: MOCK_THUMBNAILS.slice(6, 10),
+  robot: MOCK_THUMBNAILS.slice(8, 12),
+  business: MOCK_THUMBNAILS.slice(1, 5),
+  code: MOCK_THUMBNAILS.slice(5, 9),
+  default: MOCK_THUMBNAILS.slice(0, 4)
+};
+
+const REAL_FACE_IMAGES = [
+  '/mock/faces/face-01.jpg',
+  '/mock/faces/face-02.jpg',
+  '/mock/faces/face-03.jpg',
+  '/mock/faces/face-04.jpg',
+  '/mock/faces/face-05.jpg',
+  '/mock/faces/face-06.jpg',
+  '/mock/faces/face-07.jpg',
+  '/mock/faces/face-08.jpg'
+];
+
+const SCREEN_IMAGES = [
+  '/mock/screens/screen-01.jpg',
+  '/mock/screens/screen-02.jpg',
+  '/mock/screens/screen-03.jpg',
+  '/mock/screens/screen-04.jpg'
+];
+
+const CLASS_AI_RESULT_IMAGES = MOCK_THUMBNAILS;
+
 const createPlaceholder = (type, bgColor = '#6366f1') => {
-  const icons = {
-    video: `<circle cx="200" cy="100" r="40" fill="rgba(255,255,255,0.2)"/><polygon points="190,85 220,100 190,115" fill="white"/>`,
-    ai: `<circle cx="200" cy="90" r="35" fill="rgba(255,255,255,0.15)"/><circle cx="200" cy="90" r="20" fill="rgba(255,255,255,0.2)"/><circle cx="200" cy="90" r="8" fill="white"/><path d="M165 130 Q200 160 235 130" stroke="rgba(255,255,255,0.3)" stroke-width="3" fill="none"/><circle cx="170" cy="140" r="5" fill="rgba(255,255,255,0.2)"/><circle cx="230" cy="140" r="5" fill="rgba(255,255,255,0.2)"/><circle cx="200" cy="155" r="4" fill="rgba(255,255,255,0.2)"/>`,
-    business: `<rect x="160" y="80" width="80" height="60" rx="4" fill="rgba(255,255,255,0.2)"/><line x1="175" y1="95" x2="225" y2="95" stroke="white" stroke-width="2"/><line x1="175" y1="108" x2="210" y2="108" stroke="rgba(255,255,255,0.5)" stroke-width="2"/><line x1="175" y1="121" x2="220" y2="121" stroke="rgba(255,255,255,0.5)" stroke-width="2"/><path d="M250 140 L270 100 L290 120 L310 80" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="310" cy="80" r="5" fill="white"/>`,
-    creative: `<circle cx="160" cy="100" r="30" fill="rgba(255,255,255,0.2)"/><circle cx="200" cy="85" r="25" fill="rgba(255,255,255,0.25)"/><circle cx="240" cy="105" r="28" fill="rgba(255,255,255,0.15)"/><path d="M180 130 Q200 150 220 130" stroke="white" stroke-width="2" fill="none"/><polygon points="200,60 205,75 220,75 208,85 213,100 200,90 187,100 192,85 180,75 195,75" fill="white"/>`,
-    robot: `<rect x="170" y="70" width="60" height="50" rx="8" fill="rgba(255,255,255,0.25)"/><circle cx="185" cy="90" r="6" fill="white"/><circle cx="215" cy="90" r="6" fill="white"/><rect x="190" y="105" width="20" height="4" rx="2" fill="white"/><rect x="175" y="125" width="50" height="25" rx="4" fill="rgba(255,255,255,0.2)"/><line x1="185" y1="135" x2="215" y2="135" stroke="rgba(255,255,255,0.5)" stroke-width="2"/><line x1="185" y1="142" x2="205" y2="142" stroke="rgba(255,255,255,0.5)" stroke-width="2"/><rect x="165" y="80" width="5" height="15" rx="2" fill="rgba(255,255,255,0.3)"/><rect x="230" y="80" width="5" height="15" rx="2" fill="rgba(255,255,255,0.3)"/>`,
-    live: `<circle cx="200" cy="100" r="45" fill="rgba(255,255,255,0.1)"/><circle cx="200" cy="100" r="30" fill="rgba(255,255,255,0.15)"/><circle cx="200" cy="100" r="15" fill="rgba(255,255,255,0.2)"/><circle cx="200" cy="100" r="6" fill="white"/><circle cx="260" cy="70" r="8" fill="white" opacity="0.8"/><circle cx="270" cy="90" r="5" fill="white" opacity="0.5"/><circle cx="255" cy="55" r="4" fill="white" opacity="0.3"/>`,
-    code: `<rect x="150" y="70" width="100" height="70" rx="6" fill="rgba(255,255,255,0.15)"/><text x="160" y="95" font-family="monospace" font-size="12" fill="rgba(255,255,255,0.7)">&lt;/&gt;</text><line x1="160" y1="108" x2="220" y2="108" stroke="rgba(255,255,255,0.4)" stroke-width="2"/><line x1="160" y1="120" x2="200" y2="120" stroke="rgba(255,255,255,0.4)" stroke-width="2"/><circle cx="235" cy="125" r="3" fill="rgba(255,255,255,0.6)"/>`,
-  };
-  
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="225" viewBox="0 0 400 225">
-    <defs>
-      <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" style="stop-color:${bgColor};stop-opacity:1" />
-        <stop offset="100%" style="stop-color:${bgColor}dd;stop-opacity:1" />
-      </linearGradient>
-    </defs>
-    <rect width="400" height="225" fill="url(#grad)"/>
-    ${icons[type] || icons.video}
-  </svg>`;
-  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+  const pool = THUMBNAIL_LIBRARY[type] || THUMBNAIL_LIBRARY.default;
+  const hash = hashValue(`${type}-${bgColor}`);
+  return pool[hash % pool.length];
 };
 
 const createAvatar = (name, bgColor = '#6366f1') => {
-  const initial = name.charAt(0);
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
-    <defs>
-      <linearGradient id="avatarGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" style="stop-color:${bgColor};stop-opacity:1" />
-        <stop offset="100%" style="stop-color:${bgColor}bb;stop-opacity:1" />
-      </linearGradient>
-    </defs>
-    <rect width="100" height="100" fill="url(#avatarGrad)"/>
-    <circle cx="50" cy="35" r="18" fill="rgba(255,255,255,0.9)"/>
-    <ellipse cx="50" cy="75" rx="28" ry="20" fill="rgba(255,255,255,0.9)"/>
-    <text x="50" y="55" font-family="system-ui, sans-serif" font-size="24" font-weight="600" fill="${bgColor}" text-anchor="middle" dominant-baseline="central">${initial}</text>
-  </svg>`;
-  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+  const hash = hashValue(`${name}-${bgColor}`);
+  return REAL_FACE_IMAGES[hash % REAL_FACE_IMAGES.length];
 };
 
 const createScreen = (status = 'active', bgColor = '#1e293b') => {
-  const statusIcons = {
-    active: `<rect x="100" y="60" width="200" height="120" rx="8" fill="#334155"/>
-      <rect x="115" y="75" width="80" height="10" rx="2" fill="#6366f1"/>
-      <rect x="115" y="95" width="170" height="6" rx="2" fill="#475569"/>
-      <rect x="115" y="110" width="140" height="6" rx="2" fill="#475569"/>
-      <rect x="115" y="125" width="160" height="6" rx="2" fill="#475569"/>
-      <rect x="115" y="145" width="60" height="20" rx="4" fill="#6366f1"/>
-      <circle cx="350" cy="190" r="20" fill="#22c55e" opacity="0.2"/>
-      <circle cx="350" cy="190" r="10" fill="#22c55e"/>`,
-    away: `<rect x="100" y="60" width="200" height="120" rx="8" fill="#334155"/>
-      <circle cx="200" cy="120" r="25" fill="#475569"/>
-      <rect x="195" y="105" width="10" height="20" rx="2" fill="#64748b"/>
-      <circle cx="200" cy="140" r="4" fill="#64748b"/>
-      <circle cx="350" cy="190" r="20" fill="#f59e0b" opacity="0.2"/>
-      <circle cx="350" cy="190" r="10" fill="#f59e0b"/>`,
-  };
-  
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
-    <rect width="400" height="300" fill="${bgColor}"/>
-    ${statusIcons[status] || statusIcons.active}
-  </svg>`;
-  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+  const hash = hashValue(`${status}-${bgColor}`);
+  return SCREEN_IMAGES[hash % SCREEN_IMAGES.length];
 };
 
 const createResult = (index = 0) => {
-  const colors = ['#6366f1', '#0891b2', '#7c3aed', '#059669', '#dc2626'];
-  const bgColor = colors[index % colors.length];
-  
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="338" viewBox="0 0 600 338">
-    <defs>
-      <linearGradient id="resultGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" style="stop-color:${bgColor};stop-opacity:1" />
-        <stop offset="100%" style="stop-color:${bgColor}cc;stop-opacity:1" />
-      </linearGradient>
-    </defs>
-    <rect width="600" height="338" fill="url(#resultGrad)"/>
-    <rect x="50" y="50" width="200" height="120" rx="12" fill="rgba(255,255,255,0.1)"/>
-    <circle cx="150" cy="110" r="30" fill="rgba(255,255,255,0.2)"/>
-    <polygon points="140,95 170,110 140,125" fill="white"/>
-    <rect x="280" y="60" width="270" height="12" rx="4" fill="rgba(255,255,255,0.3)"/>
-    <rect x="280" y="85" width="220" height="8" rx="3" fill="rgba(255,255,255,0.2)"/>
-    <rect x="280" y="105" width="240" height="8" rx="3" fill="rgba(255,255,255,0.2)"/>
-    <rect x="280" y="140" width="100" height="30" rx="6" fill="rgba(255,255,255,0.25)"/>
-    <circle cx="100" cy="250" r="40" fill="rgba(255,255,255,0.08)"/>
-    <circle cx="500" cy="280" r="50" fill="rgba(255,255,255,0.05)"/>
-    <text x="300" y="300" font-family="system-ui" font-size="14" fill="rgba(255,255,255,0.4)" text-anchor="middle">AI Generated</text>
-  </svg>`;
-  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+  const safeIndex = Math.abs(index) % CLASS_AI_RESULT_IMAGES.length;
+  return CLASS_AI_RESULT_IMAGES[safeIndex];
 };
 
 // ============= 라이브 클래스 Mock 데이터 =============
@@ -2203,7 +2186,11 @@ const AssessmentStudioPage = ({ test, onExit, user, currentRole }) => {
 };
 
 const generateImage = (prompt, sessionId) => {
-  return createResult(sessionId);
+  const candidate = createResult(sessionId);
+  if (typeof candidate !== 'string' || candidate.length === 0 || candidate === 'demo_url' || candidate.startsWith('data:image')) {
+    return MOCK_THUMBNAILS[Math.abs(sessionId) % MOCK_THUMBNAILS.length];
+  }
+  return candidate;
 };
 
 // ============= 2단 선택 컴포넌트 =============
@@ -3611,8 +3598,8 @@ const MyPage = ({ wallet, userPlan, setUserPlan, setWallet, creditLedger, userEn
   };
   
   const instructorCourses = [
-    { id: 1, title: '프롬프트로 AI 영상 만들기', students: 156, progress: 67, status: 'active', thumbnail: 'https://images.unsplash.com/photo-1626544827763-d516dce335e2?w=400' },
-    { id: 2, title: 'AI 이미지 생성 마스터', students: 78, progress: 42, status: 'active', thumbnail: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400' },
+    { id: 1, title: '프롬프트로 AI 영상 만들기', students: 156, progress: 67, status: 'active', thumbnail: MOCK_THUMBNAILS[0] },
+    { id: 2, title: 'AI 이미지 생성 마스터', students: 78, progress: 42, status: 'active', thumbnail: MOCK_THUMBNAILS[1] },
   ];
 
   // 테스트 관리 상태
@@ -3643,10 +3630,10 @@ const MyPage = ({ wallet, userPlan, setUserPlan, setWallet, creditLedger, userEn
       { id: 3, studentName: '박지호', submittedAt: '2일 전', score: 72, aiScore: 72, feedback: '복습이 필요합니다.', status: 'graded' },
     ],
     2: [
-      { id: 1, studentName: '김민준', submittedAt: '2시간 전', score: null, aiScore: 85, feedback: '', status: 'pending', prompt: '네온 불빛이 반짝이는 도시의 밤거리, 시네마틱한 분위기로 표현', thumbnail: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=400' },
-      { id: 2, studentName: '이서연', submittedAt: '3시간 전', score: null, aiScore: 92, feedback: '', status: 'pending', prompt: '환상적인 보라색 오로라가 펼쳐진 북극의 밤하늘', thumbnail: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=400' },
-      { id: 3, studentName: '박지호', submittedAt: '5시간 전', score: null, aiScore: 78, feedback: '', status: 'pending', prompt: '고요한 호수 위에 비친 산의 모습, 일출 시간대', thumbnail: 'https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=400' },
-      { id: 4, studentName: '최수아', submittedAt: '1일 전', score: 88, aiScore: 85, feedback: 'AI 추천 점수에서 상향 조정했습니다. 창의성이 돋보입니다.', status: 'graded', prompt: '미래 도시의 하늘을 나는 자동차들', thumbnail: 'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=400' },
+      { id: 1, studentName: '김민준', submittedAt: '2시간 전', score: null, aiScore: 85, feedback: '', status: 'pending', prompt: '네온 불빛이 반짝이는 도시의 밤거리, 시네마틱한 분위기로 표현', thumbnail: MOCK_THUMBNAILS[8] },
+      { id: 2, studentName: '이서연', submittedAt: '3시간 전', score: null, aiScore: 92, feedback: '', status: 'pending', prompt: '환상적인 보라색 오로라가 펼쳐진 북극의 밤하늘', thumbnail: MOCK_THUMBNAILS[9] },
+      { id: 3, studentName: '박지호', submittedAt: '5시간 전', score: null, aiScore: 78, feedback: '', status: 'pending', prompt: '고요한 호수 위에 비친 산의 모습, 일출 시간대', thumbnail: MOCK_THUMBNAILS[10] },
+      { id: 4, studentName: '최수아', submittedAt: '1일 전', score: 88, aiScore: 85, feedback: 'AI 추천 점수에서 상향 조정했습니다. 창의성이 돋보입니다.', status: 'graded', prompt: '미래 도시의 하늘을 나는 자동차들', thumbnail: MOCK_THUMBNAILS[11] },
     ],
     3: [
       { id: 1, studentName: '정예준', submittedAt: '3일 전', score: 80, aiScore: 80, feedback: '기본기가 탄탄합니다.', status: 'graded' },
@@ -3654,9 +3641,9 @@ const MyPage = ({ wallet, userPlan, setUserPlan, setWallet, creditLedger, userEn
     ]
   };
   const pendingSubmissions = [
-    { id: 1, testId: 2, testTitle: '중간 실기 평가', studentName: '김민준', submittedAt: '2시간 전', prompt: '네온 불빛이 반짝이는 도시의 밤거리...', thumbnail: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=200', aiScore: 85 },
-    { id: 2, testId: 2, testTitle: '중간 실기 평가', studentName: '이서연', submittedAt: '3시간 전', prompt: '환상적인 보라색 오로라가 펼쳐진...', thumbnail: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=200', aiScore: 92 },
-    { id: 3, testId: 2, testTitle: '중간 실기 평가', studentName: '박지호', submittedAt: '5시간 전', prompt: '고요한 호수 위에 비친 산의 모습...', thumbnail: 'https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=200', aiScore: 78 },
+    { id: 1, testId: 2, testTitle: '중간 실기 평가', studentName: '김민준', submittedAt: '2시간 전', prompt: '네온 불빛이 반짝이는 도시의 밤거리...', thumbnail: MOCK_THUMBNAILS[8], aiScore: 85 },
+    { id: 2, testId: 2, testTitle: '중간 실기 평가', studentName: '이서연', submittedAt: '3시간 전', prompt: '환상적인 보라색 오로라가 펼쳐진...', thumbnail: MOCK_THUMBNAILS[9], aiScore: 92 },
+    { id: 3, testId: 2, testTitle: '중간 실기 평가', studentName: '박지호', submittedAt: '5시간 전', prompt: '고요한 호수 위에 비친 산의 모습...', thumbnail: MOCK_THUMBNAILS[10], aiScore: 78 },
   ];
 
   // 라이브 관리 상태
@@ -4213,7 +4200,7 @@ const MyPage = ({ wallet, userPlan, setUserPlan, setWallet, creditLedger, userEn
                   <h3 className="text-lg font-semibold text-neutral-900 mb-4">수강 중인 클래스</h3>
                   <div className="flex items-start gap-6">
                     <img 
-                      src="https://images.unsplash.com/photo-1626544827763-d516dce335e2?w=400" 
+                      src={MOCK_THUMBNAILS[0]} 
                       alt="" 
                       className="w-44 h-28 object-cover rounded-xl" 
                     />
@@ -4273,9 +4260,9 @@ const MyPage = ({ wallet, userPlan, setUserPlan, setWallet, creditLedger, userEn
                     <h3 className="text-lg font-semibold text-neutral-900 mb-4">최근 생성 결과물</h3>
                     <div className="space-y-3">
                       {[
-                        { type: 'video', prompt: '도시의 야경이 반짝이는 영상', time: '2시간 전', credits: 8, img: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=200' },
-                        { type: 'image', prompt: '미래 도시의 일출', time: '어제', credits: 3, img: 'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=200' },
-                        { type: 'video', prompt: '바다 위를 날아가는 드론 영상', time: '2일 전', credits: 6, img: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=200' },
+                        { type: 'video', prompt: '도시의 야경이 반짝이는 영상', time: '2시간 전', credits: 8, img: MOCK_THUMBNAILS[2] },
+                        { type: 'image', prompt: '미래 도시의 일출', time: '어제', credits: 3, img: MOCK_THUMBNAILS[3] },
+                        { type: 'video', prompt: '바다 위를 날아가는 드론 영상', time: '2일 전', credits: 6, img: MOCK_THUMBNAILS[4] },
                       ].map((work, idx) => (
                         <div key={idx} className="flex items-center gap-3 py-2 border-b border-neutral-100 last:border-0">
                           <img src={work.img} alt="" className="w-12 h-12 object-cover rounded-lg" />
@@ -4298,9 +4285,9 @@ const MyPage = ({ wallet, userPlan, setUserPlan, setWallet, creditLedger, userEn
                   <h3 className="text-lg font-semibold text-neutral-900 mb-4">추천 클래스</h3>
                   <div className="grid grid-cols-3 gap-4">
                     {[
-                      { title: 'Midjourney 마스터 클래스', instructor: '이아트', sessions: 10, img: 'https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=300' },
-                      { title: 'Sora로 시작하는 영상 제작', instructor: '박영상', sessions: 8, img: 'https://images.unsplash.com/photo-1536240478700-b869070f9279?w=300' },
-                      { title: 'ChatGPT 프롬프트 엔지니어링', instructor: '최텍스트', sessions: 6, img: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=300' },
+                      { title: 'Midjourney 마스터 클래스', instructor: '이아트', sessions: 10, img: MOCK_THUMBNAILS[5] },
+                      { title: 'Sora로 시작하는 영상 제작', instructor: '박영상', sessions: 8, img: MOCK_THUMBNAILS[6] },
+                      { title: 'ChatGPT 프롬프트 엔지니어링', instructor: '최텍스트', sessions: 6, img: MOCK_THUMBNAILS[7] },
                     ].map((course, idx) => (
                       <div key={idx} className="border border-neutral-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
                         <img src={course.img} alt="" className="w-full h-32 object-cover" />
@@ -8308,7 +8295,7 @@ const MyPage = ({ wallet, userPlan, setUserPlan, setWallet, creditLedger, userEn
                             <p className="text-xs text-neutral-400">1280x720px, JPG/PNG</p>
                           </div>
                           <button 
-                            onClick={() => setNewCourseForm({...newCourseForm, thumbnail: 'https://images.unsplash.com/photo-1626544827763-d516dce335e2?w=400'})}
+                            onClick={() => setNewCourseForm({...newCourseForm, thumbnail: MOCK_THUMBNAILS[0]})}
                             className="px-3 py-1.5 bg-neutral-100 text-neutral-600 text-xs rounded-lg hover:bg-neutral-200"
                           >
                             샘플 사용
@@ -10313,6 +10300,13 @@ const SessionPage = ({ sessionId, wallet, setWallet, addLedgerEntry, userPlan, o
     }
   }, [results]);
 
+  // notification이 변경되면 해당 영역으로 스크롤
+  useEffect(() => {
+    if (notification && notificationRef.current) {
+      notificationRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [notification]);
+
   const currentSession = Object.values(CURRICULUM)
     .flatMap(stage => stage.sessions)
     .find(s => s.id === sessionId);
@@ -10489,13 +10483,6 @@ const SessionPage = ({ sessionId, wallet, setWallet, addLedgerEntry, userPlan, o
       setTimeout(() => setNotification(null), 3000);
     }, 2000);
   };
-
-  // notification이 변경되면 해당 영역으로 스크롤
-  useEffect(() => {
-    if (notification && notificationRef.current) {
-      notificationRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  }, [notification]);
 
   return (
     <div className="h-screen bg-white pt-20 overflow-hidden">
@@ -11186,7 +11173,10 @@ const MediaGalleryPage = ({ setCurrentPage, wallet }) => {
     // Anime 추가
     { id: 30, title: '벚꽃 아래', creator: '최서아', course: 'AI 이미지 생성', style: 'anime', type: 'image', likes: 523, thumbnail: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?w=400', featured: true, prompt: '벚꽃이 흩날리는 학교 운동장, 교복 입은 소녀가 서 있는 장면, 애니메이션 스타일', model: 'Midjourney', createdAt: '2024-12-17', creditsUsed: 8 },
     { id: 31, title: '사이버펑크 도쿄', creator: '정유나', course: 'AI 영상 생성', style: 'anime', type: 'video', likes: 445, thumbnail: 'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=400', featured: true, prompt: '네온 불빛이 가득한 미래의 도쿄 거리, 사이버펑크 애니메이션 스타일', model: 'Kling Pro', createdAt: '2024-12-16', creditsUsed: 12 },
-  ];
+  ].map((work, index) => ({
+    ...work,
+    thumbnail: MOCK_THUMBNAILS[index % MOCK_THUMBNAILS.length]
+  }));
 
   const filteredWorks = works.filter(work => {
     if (activeCategory === 'featured') return work.featured;
@@ -11429,13 +11419,13 @@ const StudentDashboard = ({ user, wallet, onStartSession }) => {
     totalSessions: 12,
     nextSessionTitle: '5회차: 고급 프롬프트 기법',
     progress: 42,
-    thumbnail: 'https://images.unsplash.com/photo-1626544827763-d516dce335e2?w=400'
+    thumbnail: MOCK_THUMBNAILS[0]
   };
 
   const recentWorks = [
-    { id: 1, type: 'video', prompt: '도시의 야경이 반짝이는 영상', createdAt: '2시간 전', credits: 8, thumbnail: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=200' },
-    { id: 2, type: 'image', prompt: '미래 도시의 일출', createdAt: '어제', credits: 3, thumbnail: 'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=200' },
-    { id: 3, type: 'video', prompt: '바다 위를 날아가는 드론 영상', createdAt: '2일 전', credits: 6, thumbnail: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=200' },
+    { id: 1, type: 'video', prompt: '도시의 야경이 반짝이는 영상', createdAt: '2시간 전', credits: 8, thumbnail: MOCK_THUMBNAILS[2] },
+    { id: 2, type: 'image', prompt: '미래 도시의 일출', createdAt: '어제', credits: 3, thumbnail: MOCK_THUMBNAILS[3] },
+    { id: 3, type: 'video', prompt: '바다 위를 날아가는 드론 영상', createdAt: '2일 전', credits: 6, thumbnail: MOCK_THUMBNAILS[4] },
   ];
 
   const upcomingTasks = [
@@ -11556,7 +11546,7 @@ const InstructorDashboard = () => {
       creditsTotal: 10000,
       status: 'active',
       startDate: '2025-01-06',
-      thumbnail: 'https://images.unsplash.com/photo-1626544827763-d516dce335e2?w=400'
+      thumbnail: MOCK_THUMBNAILS[0]
     },
     { 
       id: 2, 
@@ -11567,7 +11557,7 @@ const InstructorDashboard = () => {
       creditsTotal: 8000,
       status: 'active',
       startDate: '2025-01-13',
-      thumbnail: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400'
+      thumbnail: MOCK_THUMBNAILS[1]
     },
     { 
       id: 3, 
@@ -11578,7 +11568,7 @@ const InstructorDashboard = () => {
       creditsTotal: 8000,
       status: 'completed',
       startDate: '2024-11-04',
-      thumbnail: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=400'
+      thumbnail: MOCK_THUMBNAILS[2]
     },
   ];
 

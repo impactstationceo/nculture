@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Header from '@/components/Header';
 import { useAuth } from '@/components/AuthProvider';
-import { createAvatar, createScreen, SESSION_TIMELINE, EVALUATION_RESULTS } from '@/lib/data';
+import { createScreen, SESSION_TIMELINE, EVALUATION_RESULTS, REAL_FACE_IMAGES } from '@/lib/data';
 import {
   AlertTriangle,
   CheckCircle,
@@ -822,14 +822,14 @@ const AssessmentStudioPage = ({ test, onExit, user, currentRole }: { test: any; 
   ];
 
   const monitoringScreens = [
-    { id: 1, name: "용기 있는 바닷가재", hasVideo: true, hasAudio: true, screen: createScreen('active'), face: createAvatar("용", "#6366f1"), status: "active" },
-    { id: 2, name: "근엄한 유니콘", hasVideo: true, hasAudio: false, screen: createScreen('active'), face: createAvatar("근", "#6366f1"), status: "active" },
-    { id: 3, name: "Jungkook Park", hasVideo: true, hasAudio: true, screen: createScreen('active'), face: createAvatar("J", "#6366f1"), status: "active" },
-    { id: 4, name: "유준배", hasVideo: true, hasAudio: false, screen: createScreen('active'), face: createAvatar("유", "#6366f1"), status: "active" },
-    { id: 5, name: "김수안", hasVideo: true, hasAudio: true, screen: createScreen('active'), face: createAvatar("김", "#6366f1"), status: "active" },
-    { id: 6, name: "황보영", hasVideo: true, hasAudio: false, screen: createScreen('away'), face: createAvatar("황", "#94a3b8"), status: "away", anomaly: "장시간 비활성" },
-    { id: 7, name: "용통성 있는 바닷가재", hasVideo: true, hasAudio: true, screen: createScreen('active'), face: createAvatar("용", "#6366f1"), status: "active" },
-    { id: 8, name: "권길동", hasVideo: true, hasAudio: false, screen: createScreen('active'), face: createAvatar("권", "#6366f1"), status: "active" },
+    { id: 1, name: "용기 있는 바닷가재", hasVideo: true, hasAudio: true, screen: createScreen('active'), face: REAL_FACE_IMAGES[0], status: "active" },
+    { id: 2, name: "근엄한 유니콘", hasVideo: true, hasAudio: false, screen: createScreen('active'), face: REAL_FACE_IMAGES[1], status: "active" },
+    { id: 3, name: "Jungkook Park", hasVideo: true, hasAudio: true, screen: createScreen('active'), face: REAL_FACE_IMAGES[2], status: "active" },
+    { id: 4, name: "유준배", hasVideo: true, hasAudio: false, screen: createScreen('active'), face: REAL_FACE_IMAGES[3], status: "active" },
+    { id: 5, name: "김수안", hasVideo: true, hasAudio: true, screen: createScreen('active'), face: REAL_FACE_IMAGES[4], status: "active" },
+    { id: 6, name: "황보영", hasVideo: true, hasAudio: false, screen: createScreen('away'), face: REAL_FACE_IMAGES[5], status: "away", anomaly: "장시간 비활성" },
+    { id: 7, name: "용통성 있는 바닷가재", hasVideo: true, hasAudio: true, screen: createScreen('active'), face: REAL_FACE_IMAGES[6], status: "active" },
+    { id: 8, name: "권길동", hasVideo: true, hasAudio: false, screen: createScreen('active'), face: REAL_FACE_IMAGES[7], status: "active" },
   ];
 
   const submissionStats = {
