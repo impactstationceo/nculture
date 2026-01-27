@@ -89,6 +89,9 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLo
   if (!isOpen) return null;
 
   const isInstitutionMode = mode === 'institution_login';
+  const showTestAccounts =
+    process.env.NODE_ENV !== 'production' ||
+    process.env.NEXT_PUBLIC_SHOW_TEST_ACCOUNTS === 'true';
 
   const handleSaveEmail = (shouldSave: boolean, emailValue: string) => {
     try {
@@ -378,14 +381,16 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLo
         </div>
       )}
 
-      <div className="mt-6 p-4 bg-[#F9FAFB] rounded-xl border border-[#E5E8EB]">
-        <p className="text-xs text-[#6B7684] mb-2">🧪 테스트 계정 (데모 모드)</p>
-        <div className="text-xs text-[#333D4B] space-y-1">
-          <p>• 기관관리자: admin@test.com / 아무 비밀번호</p>
-          <p>• 교육자: test@test.com / 아무 비밀번호</p>
-          <p>• 수강생: 아무 이메일 / 아무 비밀번호</p>
+      {showTestAccounts && (
+        <div className="mt-6 p-4 bg-[#F9FAFB] rounded-xl border border-[#E5E8EB]">
+          <p className="text-xs text-[#6B7684] mb-2">🧪 테스트 계정 (데모 모드)</p>
+          <div className="text-xs text-[#333D4B] space-y-1">
+            <p>• 기관관리자: admin@test.com / 아무 비밀번호</p>
+            <p>• 교육자: test@test.com / 아무 비밀번호</p>
+            <p>• 수강생: 아무 이메일 / 아무 비밀번호</p>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 
