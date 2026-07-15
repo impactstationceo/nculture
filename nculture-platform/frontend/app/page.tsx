@@ -126,8 +126,8 @@ export default function HomePage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
               <span className="text-lg tracking-tight">
-                <span className="font-normal text-[#3182F6]">n</span>
-                <span className="font-medium text-[#191F28]">Culture</span>
+                <span className="font-normal text-[#3182F6]">Coming</span>
+                <span className="font-medium text-[#191F28]"> AI</span>
               </span>
               <p className="text-sm text-[#8B95A1]">© 2025 Coming AI. All rights reserved.</p>
             </div>

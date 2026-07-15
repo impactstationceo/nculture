@@ -47,8 +47,8 @@ const LiveClassRoom = ({ classId, onExit }: { classId: number; onExit: () => voi
         <div className="flex items-center justify-between px-4 py-2.5">
           <div className="flex items-center gap-3">
             <button onClick={onExit} className="text-base tracking-tight hover:opacity-80 transition-opacity">
-              <span className="font-normal text-[#3182F6]">n</span>
-              <span className="font-medium text-[#191F28]">Culture</span>
+              <span className="font-normal text-[#3182F6]">Coming</span>
+              <span className="font-medium text-[#191F28]"> AI</span>
             </button>
             <div className="h-4 w-px bg-[#E5E8EB]" />
             <span className="text-[#6B7684] text-sm truncate max-w-md">{currentClass?.title}</span>

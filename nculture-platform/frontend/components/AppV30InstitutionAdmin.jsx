@@ -1794,8 +1794,8 @@ const AssessmentStudioPage = ({ test, onExit, user, currentRole }) => {
             >
               {/* Coming AI 로고 */}
               <span className="text-lg tracking-tight">
-                <span className="font-normal text-indigo-400">n</span>
-                <span className="font-medium text-indigo-400">Culture</span>
+                <span className="font-normal text-indigo-400">Coming</span>
+                <span className="font-medium text-indigo-400"> AI</span>
               </span>
             </button>
             <div className="h-5 w-px bg-neutral-700" />
@@ -9040,8 +9040,8 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login', onLogin }) => {
           <div className="flex items-center justify-between">
             <div>
               <span className="text-xl tracking-tight">
-                <span className="font-normal text-indigo-500">n</span>
-                <span className="font-medium text-indigo-500">Culture</span>
+                <span className="font-normal text-indigo-500">Coming</span>
+                <span className="font-medium text-indigo-500"> AI</span>
               </span>
             </div>
             <button onClick={onClose} className="p-2 hover:bg-neutral-100 rounded-lg transition-colors">
@@ -9310,8 +9310,8 @@ const Header = ({ currentPage, setCurrentPage, isLoggedIn, user, viewMode, curre
         <div className="cursor-pointer" onClick={() => setCurrentPage('main')}>
           {/* Coming AI 로고 */}
           <span className="text-xl tracking-tight">
-            <span className="font-normal text-indigo-500">n</span>
-            <span className="font-medium text-indigo-500">Culture</span>
+            <span className="font-normal text-indigo-500">Coming</span>
+            <span className="font-medium text-indigo-500"> AI</span>
           </span>
         </div>
         <nav className="flex gap-8">
@@ -9645,8 +9645,8 @@ const LiveClassRoom = ({ classId, onExit }) => {
         <div className="flex items-center justify-between px-4 py-2.5">
           <div className="flex items-center gap-3">
             <button onClick={onExit} className="text-base tracking-tight hover:opacity-80 transition-opacity">
-              <span className="font-normal text-indigo-400">n</span>
-              <span className="font-medium text-indigo-400">Culture</span>
+              <span className="font-normal text-indigo-400">Coming</span>
+              <span className="font-medium text-indigo-400"> AI</span>
             </button>
             <div className="h-4 w-px bg-neutral-700" />
             <span className="text-neutral-400 text-sm truncate max-w-md">{currentClass?.title}</span>
@@ -9980,8 +9980,8 @@ const MainPage = ({ setCurrentPage, setCurrentSession, isLoggedIn, onAuthClick, 
           {/* 로고 및 저작권 */}
           <div className="flex items-center gap-6">
             <span className="text-lg tracking-tight">
-              <span className="font-normal text-indigo-500">n</span>
-              <span className="font-medium text-indigo-500">Culture</span>
+              <span className="font-normal text-indigo-500">Coming</span>
+              <span className="font-medium text-indigo-500"> AI</span>
             </span>
             <p className="text-sm text-neutral-500">© 2025 Coming AI. All rights reserved.</p>
           </div>

@@ -54,8 +54,8 @@ export default function Header({ currentPage, setCurrentPage, isLoggedIn, user, 
       <div className="flex items-center gap-8">
         <div className="cursor-pointer" onClick={() => setCurrentPage('main')}>
           <span className="text-xl tracking-tight font-bold text-[#191F28]">
-            <span className="text-[#3182F6]">n</span>
-            <span className="text-[#191F28]">Culture</span>
+            <span className="text-[#3182F6]">Coming</span>
+            <span className="text-[#191F28]"> AI</span>
           </span>
         </div>
         <nav className="flex gap-6">

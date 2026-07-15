@@ -874,8 +874,8 @@ const AssessmentStudioPage = ({ test, onExit, user, currentRole }: { test: any; 
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
               <span className="text-lg tracking-tight">
-                <span className="font-normal text-indigo-400">n</span>
-                <span className="font-medium text-indigo-400">Culture</span>
+                <span className="font-normal text-indigo-400">Coming</span>
+                <span className="font-medium text-indigo-400"> AI</span>
               </span>
             </button>
             <div className="h-5 w-px bg-neutral-700" />
