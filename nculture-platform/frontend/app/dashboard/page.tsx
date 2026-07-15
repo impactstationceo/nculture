@@ -31,7 +31,7 @@ const DashboardPageContent = ({ user, currentRole, setCurrentPage }: any) => {
                 승인이 완료되면 등록된 이메일로 알림을 보내드립니다.
               </p>
               <p className="text-sm text-neutral-500">
-                문의사항은 <span className="text-indigo-600">support@nculture.com</span>으로 연락주세요.
+                문의사항은 <span className="text-indigo-600">support@comingai.com</span>으로 연락주세요.
               </p>
             </div>
           </div>

@@ -39,7 +39,7 @@ export default function HomePage() {
               </span>
             </h1>
             <h2 className="text-4xl md:text-5xl font-bold text-[#191F28] mt-5 leading-tight">
-              <span className="gradient-text font-extrabold text-5xl md:text-6xl">앤컬쳐</span>와 함께면<br/>
+              <span className="gradient-text font-extrabold text-5xl md:text-6xl">Coming AI</span>와 함께면<br/>
               기초 학습부터 전문가로의 성장까지
             </h2>
             <p className="text-2xl md:text-3xl font-semibold text-[#191F28] mt-6 mb-10">
@@ -129,7 +129,7 @@ export default function HomePage() {
                 <span className="font-normal text-[#3182F6]">n</span>
                 <span className="font-medium text-[#191F28]">Culture</span>
               </span>
-              <p className="text-sm text-[#8B95A1]">© 2025 nCulture. All rights reserved.</p>
+              <p className="text-sm text-[#8B95A1]">© 2025 Coming AI. All rights reserved.</p>
             </div>
             
             <div className="flex items-center gap-6 text-sm text-[#6B7684]">

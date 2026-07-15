@@ -1,5 +1,5 @@
 -- ============================================
--- nCulture Database Schema
+-- Coming AI Database Schema
 -- Supabase (PostgreSQL) + RLS
 -- ============================================
 

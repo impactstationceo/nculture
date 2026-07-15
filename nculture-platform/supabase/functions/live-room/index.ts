@@ -58,7 +58,7 @@ serve(async (req) => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            name: `nculture-${liveClassId}`,
+            name: `comingai-${liveClassId}`,
             privacy: 'public',
             properties: {
               enable_chat: true,
@@ -130,7 +130,7 @@ serve(async (req) => {
           },
           body: JSON.stringify({
             properties: {
-              room_name: liveClass.daily_room_name || `nculture-${liveClassId}`,
+              room_name: liveClass.daily_room_name || `comingai-${liveClassId}`,
               is_owner: false,
               user_name: user?.name || 'Anonymous',
             }
@@ -170,7 +170,7 @@ serve(async (req) => {
         }
 
         // Daily.co 룸 삭제
-        await fetch(`${DAILY_API_URL}/rooms/nculture-${liveClassId}`, {
+        await fetch(`${DAILY_API_URL}/rooms/comingai-${liveClassId}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${DAILY_API_KEY}`,

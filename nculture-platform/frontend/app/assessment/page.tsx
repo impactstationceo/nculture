@@ -803,22 +803,22 @@ const AssessmentStudioPage = ({ test, onExit, user, currentRole }: { test: any; 
     { id: 1, name: "용기 있는 바닷가재", email: "bigcrab@guest.io", status: "online" },
     { id: 2, name: "근엄한 유니콘", email: "unicorn@guest.io", status: "online" },
     { id: 3, name: "Jungkook Park", email: "jjk@naver.com", status: "online" },
-    { id: 4, name: "유준배", email: "jb@nculture.com", status: "online" },
-    { id: 5, name: "김수안", email: "suan@nculture.com", status: "online" },
-    { id: 6, name: "황보영", email: "h.young@nculture.com", status: "away" },
+    { id: 4, name: "유준배", email: "jb@comingai.com", status: "online" },
+    { id: 5, name: "김수안", email: "suan@comingai.com", status: "online" },
+    { id: 6, name: "황보영", email: "h.young@comingai.com", status: "away" },
     { id: 7, name: "용통성 있는 바닷가재", email: "crab2@guest.io", status: "online" },
-    { id: 8, name: "권길동", email: "gkwon@nculture.com", status: "online" },
+    { id: 8, name: "권길동", email: "gkwon@comingai.com", status: "online" },
   ];
 
   const submissionData = [
     { id: 1, name: "용기 있는 바닷가재", email: "bigcrab@guest.io", status: "submitted", score: 85, submittedAt: "14:23:45", duration: "18분 32초" },
     { id: 2, name: "근엄한 유니콘", email: "unicorn@guest.io", status: "submitted", score: 92, submittedAt: "14:18:12", duration: "13분 59초" },
     { id: 3, name: "Jungkook Park", email: "jjk@naver.com", status: "in_progress", score: null, submittedAt: null, duration: null },
-    { id: 4, name: "유준배", email: "jb@nculture.com", status: "submitted", score: 78, submittedAt: "14:31:02", duration: "26분 49초" },
-    { id: 5, name: "김수안", email: "suan@nculture.com", status: "submitted", score: 95, submittedAt: "14:15:38", duration: "11분 25초" },
-    { id: 6, name: "황보영", email: "h.young@nculture.com", status: "not_started", score: null, submittedAt: null, duration: null },
+    { id: 4, name: "유준배", email: "jb@comingai.com", status: "submitted", score: 78, submittedAt: "14:31:02", duration: "26분 49초" },
+    { id: 5, name: "김수안", email: "suan@comingai.com", status: "submitted", score: 95, submittedAt: "14:15:38", duration: "11분 25초" },
+    { id: 6, name: "황보영", email: "h.young@comingai.com", status: "not_started", score: null, submittedAt: null, duration: null },
     { id: 7, name: "용통성 있는 바닷가재", email: "crab2@guest.io", status: "in_progress", score: null, submittedAt: null, duration: null },
-    { id: 8, name: "권길동", email: "gkwon@nculture.com", status: "submitted", score: 88, submittedAt: "14:27:55", duration: "23분 42초" },
+    { id: 8, name: "권길동", email: "gkwon@comingai.com", status: "submitted", score: 88, submittedAt: "14:27:55", duration: "23분 42초" },
   ];
 
   const monitoringScreens = [

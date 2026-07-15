@@ -1,5 +1,5 @@
 -- ============================================
--- nCulture RLS Policies
+-- Coming AI RLS Policies
 -- Row Level Security for all tables
 -- ============================================
 

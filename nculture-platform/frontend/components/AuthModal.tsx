@@ -38,8 +38,8 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLo
 
   useEffect(() => {
     try {
-      const savedEmail = localStorage.getItem('nculture_saved_email');
-      const savedRemember = localStorage.getItem('nculture_remember_email');
+      const savedEmail = localStorage.getItem('comingai_saved_email');
+      const savedRemember = localStorage.getItem('comingai_remember_email');
       if (savedEmail && savedRemember === 'true') {
         setEmail(savedEmail);
         setRememberEmail(true);
@@ -90,11 +90,11 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLo
   const handleSaveEmail = (shouldSave: boolean, emailValue: string) => {
     try {
       if (shouldSave && emailValue) {
-        localStorage.setItem('nculture_saved_email', emailValue);
-        localStorage.setItem('nculture_remember_email', 'true');
+        localStorage.setItem('comingai_saved_email', emailValue);
+        localStorage.setItem('comingai_remember_email', 'true');
       } else {
-        localStorage.removeItem('nculture_saved_email');
-        localStorage.removeItem('nculture_remember_email');
+        localStorage.removeItem('comingai_saved_email');
+        localStorage.removeItem('comingai_remember_email');
       }
     } catch (e) {
       // ignore

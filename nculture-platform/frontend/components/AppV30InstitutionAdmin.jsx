@@ -792,7 +792,7 @@ const CURRICULUM = {
   course1: {
     id: 'course1',
     title: "프롬프트로 AI 영상 만들기",
-    instructor: "nCulture",
+    instructor: "Coming AI",
     totalSessions: 6,
     thumbnail: createPlaceholder('video', '#6366f1'),
     description: "텍스트 프롬프트로 AI 영상을 생성하는 기초부터 고급 테크닉까지",
@@ -1718,11 +1718,11 @@ const AssessmentStudioPage = ({ test, onExit, user, currentRole }) => {
     { id: 1, name: "용기 있는 바닷가재", email: "bigcrab@guest.io", status: "online" },
     { id: 2, name: "근엄한 유니콘", email: "unicorn@guest.io", status: "online" },
     { id: 3, name: "Jungkook Park", email: "jjk@naver.com", status: "online" },
-    { id: 4, name: "유준배", email: "jb@nculture.com", status: "online" },
-    { id: 5, name: "김수안", email: "suan@nculture.com", status: "online" },
-    { id: 6, name: "황보영", email: "h.young@nculture.com", status: "away" },
+    { id: 4, name: "유준배", email: "jb@comingai.com", status: "online" },
+    { id: 5, name: "김수안", email: "suan@comingai.com", status: "online" },
+    { id: 6, name: "황보영", email: "h.young@comingai.com", status: "away" },
     { id: 7, name: "용통성 있는 바닷가재", email: "crab2@guest.io", status: "online" },
-    { id: 8, name: "권길동", email: "gkwon@nculture.com", status: "online" },
+    { id: 8, name: "권길동", email: "gkwon@comingai.com", status: "online" },
   ];
 
   // 제출 현황 데이터
@@ -1730,11 +1730,11 @@ const AssessmentStudioPage = ({ test, onExit, user, currentRole }) => {
     { id: 1, name: "용기 있는 바닷가재", email: "bigcrab@guest.io", status: "submitted", score: 85, submittedAt: "14:23:45", duration: "18분 32초" },
     { id: 2, name: "근엄한 유니콘", email: "unicorn@guest.io", status: "submitted", score: 92, submittedAt: "14:18:12", duration: "13분 59초" },
     { id: 3, name: "Jungkook Park", email: "jjk@naver.com", status: "in_progress", score: null, submittedAt: null, duration: null },
-    { id: 4, name: "유준배", email: "jb@nculture.com", status: "submitted", score: 78, submittedAt: "14:31:02", duration: "26분 49초" },
-    { id: 5, name: "김수안", email: "suan@nculture.com", status: "submitted", score: 95, submittedAt: "14:15:38", duration: "11분 25초" },
-    { id: 6, name: "황보영", email: "h.young@nculture.com", status: "not_started", score: null, submittedAt: null, duration: null },
+    { id: 4, name: "유준배", email: "jb@comingai.com", status: "submitted", score: 78, submittedAt: "14:31:02", duration: "26분 49초" },
+    { id: 5, name: "김수안", email: "suan@comingai.com", status: "submitted", score: 95, submittedAt: "14:15:38", duration: "11분 25초" },
+    { id: 6, name: "황보영", email: "h.young@comingai.com", status: "not_started", score: null, submittedAt: null, duration: null },
     { id: 7, name: "용통성 있는 바닷가재", email: "crab2@guest.io", status: "in_progress", score: null, submittedAt: null, duration: null },
-    { id: 8, name: "권길동", email: "gkwon@nculture.com", status: "submitted", score: 88, submittedAt: "14:27:55", duration: "23분 42초" },
+    { id: 8, name: "권길동", email: "gkwon@comingai.com", status: "submitted", score: 88, submittedAt: "14:27:55", duration: "23분 42초" },
   ];
 
   // 학습자 화면 모니터링 데이터
@@ -1792,7 +1792,7 @@ const AssessmentStudioPage = ({ test, onExit, user, currentRole }) => {
               onClick={handleExit}
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
-              {/* nCulture 로고 */}
+              {/* Coming AI 로고 */}
               <span className="text-lg tracking-tight">
                 <span className="font-normal text-indigo-400">n</span>
                 <span className="font-medium text-indigo-400">Culture</span>
@@ -8558,8 +8558,8 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login', onLogin }) => {
   // 저장된 이메일 불러오기
   useEffect(() => {
     try {
-      const savedEmail = localStorage.getItem('nculture_saved_email');
-      const savedRemember = localStorage.getItem('nculture_remember_email');
+      const savedEmail = localStorage.getItem('comingai_saved_email');
+      const savedRemember = localStorage.getItem('comingai_remember_email');
       if (savedEmail && savedRemember === 'true') {
         setEmail(savedEmail);
         setRememberEmail(true);
@@ -8616,11 +8616,11 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login', onLogin }) => {
   const handleSaveEmail = (shouldSave, emailValue) => {
     try {
       if (shouldSave && emailValue) {
-        localStorage.setItem('nculture_saved_email', emailValue);
-        localStorage.setItem('nculture_remember_email', 'true');
+        localStorage.setItem('comingai_saved_email', emailValue);
+        localStorage.setItem('comingai_remember_email', 'true');
       } else {
-        localStorage.removeItem('nculture_saved_email');
-        localStorage.removeItem('nculture_remember_email');
+        localStorage.removeItem('comingai_saved_email');
+        localStorage.removeItem('comingai_remember_email');
       }
     } catch (e) {
       // localStorage 접근 불가 시 무시
@@ -9308,7 +9308,7 @@ const Header = ({ currentPage, setCurrentPage, isLoggedIn, user, viewMode, curre
     <div className="max-w-7xl mx-auto px-8 py-5 flex items-center justify-between">
       <div className="flex items-center gap-10">
         <div className="cursor-pointer" onClick={() => setCurrentPage('main')}>
-          {/* nCulture 로고 */}
+          {/* Coming AI 로고 */}
           <span className="text-xl tracking-tight">
             <span className="font-normal text-indigo-500">n</span>
             <span className="font-medium text-indigo-500">Culture</span>
@@ -9612,10 +9612,10 @@ const LiveClassRoom = ({ classId, onExit }) => {
   const currentClass = LIVE_CLASSES.find(c => c.id === classId);
 
   const participants = [
-    { id: 1, name: "김민지", email: "minji@nculture.com", status: "online" },
+    { id: 1, name: "김민지", email: "minji@comingai.com", status: "online" },
     { id: 2, name: "홍길동", email: "hong@naver.com", status: "online" },
     { id: 3, name: "김지영", email: "jiyoung@gmail.com", status: "online" },
-    { id: 4, name: "오도윤", email: "doyun@nculture.com", status: "online" },
+    { id: 4, name: "오도윤", email: "doyun@comingai.com", status: "online" },
     { id: 5, name: "박서연", email: "seoyeon@gmail.com", status: "away" },
   ];
 
@@ -9903,7 +9903,7 @@ const MainPage = ({ setCurrentPage, setCurrentSession, isLoggedIn, onAuthClick, 
             <span className="text-indigo-600">AI 콘텐츠 교육,</span>
           </h1>
           <h2 className="text-4xl font-bold text-neutral-900 mt-6 leading-relaxed">
-            <span className="text-black font-extrabold text-5xl">앤컬쳐</span>와 함께면<br/>
+            <span className="text-black font-extrabold text-5xl">Coming AI</span>와 함께면<br/>
             기초 학습부터 전문가로의 성장까지
           </h2>
           <p className="text-4xl font-bold text-neutral-800 mt-8 mb-12">
@@ -9983,7 +9983,7 @@ const MainPage = ({ setCurrentPage, setCurrentSession, isLoggedIn, onAuthClick, 
               <span className="font-normal text-indigo-500">n</span>
               <span className="font-medium text-indigo-500">Culture</span>
             </span>
-            <p className="text-sm text-neutral-500">© 2025 nCulture. All rights reserved.</p>
+            <p className="text-sm text-neutral-500">© 2025 Coming AI. All rights reserved.</p>
           </div>
           
           {/* 링크 */}
@@ -11592,7 +11592,7 @@ const InstructorDashboard = () => {
     { id: 1, name: '김민준', email: 'minjun.kim@gmail.com', progress: 92, creditsUsed: 45, lastActive: '오늘' },
     { id: 2, name: '이서연', email: 'seoyeon.lee@naver.com', progress: 78, creditsUsed: 32, lastActive: '오늘' },
     { id: 3, name: '박지호', email: 'jiho.park@gmail.com', progress: 45, creditsUsed: 18, lastActive: '3일 전' },
-    { id: 4, name: '최수아', email: 'sua.choi@nculture.com', progress: 100, creditsUsed: 67, lastActive: '어제' },
+    { id: 4, name: '최수아', email: 'sua.choi@comingai.com', progress: 100, creditsUsed: 67, lastActive: '어제' },
     { id: 5, name: '정예준', email: 'yejun.jung@gmail.com', progress: 12, creditsUsed: 5, lastActive: '1주 전' },
   ];
 
@@ -12661,7 +12661,7 @@ const DashboardPage = ({ user, currentRole, wallet, onStartSession, setCurrentPa
                 승인이 완료되면 등록된 이메일로 알림을 보내드립니다.
               </p>
               <p className="text-sm text-neutral-500">
-                문의사항은 <span className="text-indigo-600">support@nculture.com</span>으로 연락주세요.
+                문의사항은 <span className="text-indigo-600">support@comingai.com</span>으로 연락주세요.
               </p>
             </div>
           </div>

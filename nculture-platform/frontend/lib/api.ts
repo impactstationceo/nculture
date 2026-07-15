@@ -14,7 +14,7 @@ const mapCourseListItem = (course: any) => {
     id: course?.id,
     title: course?.title,
     description: course?.description,
-    instructor: course?.instructor?.name || course?.instructor_name || course?.instructor || 'nCulture',
+    instructor: course?.instructor?.name || course?.instructor_name || course?.instructor || 'Coming AI',
     totalSessions: sessionsCount,
     thumbnail: course?.thumbnail_url || course?.thumbnail || createPlaceholder('video', '#6366f1'),
     sessions: course?.sessions || []
@@ -39,7 +39,7 @@ const mapCourseDetail = (course: any) => {
     id: course?.id,
     title: course?.title,
     description: course?.description,
-    instructor: course?.instructor?.name || course?.instructor_name || course?.instructor || 'nCulture',
+    instructor: course?.instructor?.name || course?.instructor_name || course?.instructor || 'Coming AI',
     totalSessions: sessions.length,
     thumbnail: course?.thumbnail_url || course?.thumbnail || createPlaceholder('video', '#6366f1'),
     sessions
@@ -86,7 +86,7 @@ export const getLiveClasses = async () => {
       ...item,
       id: item?.id,
       title: item?.title,
-      instructor: item?.host?.name || item?.instructor || 'nCulture',
+      instructor: item?.host?.name || item?.instructor || 'Coming AI',
       status: item?.status || 'upcoming',
       participants: item?.participant_count || 0,
       thumbnail: item?.thumbnail_url || item?.thumbnail || createPlaceholder('live', '#dc2626'),

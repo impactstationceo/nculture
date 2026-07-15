@@ -96,7 +96,7 @@ export const CURRICULUM: Record<string, any> = {
   course1: {
     id: 'course1',
     title: "프롬프트로 AI 영상 만들기",
-    instructor: "nCulture",
+    instructor: "Coming AI",
     totalSessions: 6,
     thumbnail: createPlaceholder('video', '#6366f1'),
     description: "텍스트 프롬프트로 AI 영상을 생성하는 기초부터 고급 테크닉까지",

@@ -15,10 +15,10 @@ const LiveClassRoom = ({ classId, onExit }: { classId: number; onExit: () => voi
   const currentClass = LIVE_CLASSES.find(c => c.id === classId);
 
   const participants = [
-    { id: 1, name: "김민지", email: "minji@nculture.com", status: "online" },
+    { id: 1, name: "김민지", email: "minji@comingai.com", status: "online" },
     { id: 2, name: "홍길동", email: "hong@naver.com", status: "online" },
     { id: 3, name: "김지영", email: "jiyoung@gmail.com", status: "online" },
-    { id: 4, name: "오도윤", email: "doyun@nculture.com", status: "online" },
+    { id: 4, name: "오도윤", email: "doyun@comingai.com", status: "online" },
     { id: 5, name: "박서연", email: "seoyeon@gmail.com", status: "away" },
   ];
 
