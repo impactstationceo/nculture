@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Video, Sparkles, Zap, BookOpen, Target, Shield, ArrowRight } from 'lucide-react';
 import Header from '@/components/Header';
@@ -8,6 +9,20 @@ import { useAuth } from '@/components/AuthProvider';
 export default function HomePage() {
   const router = useRouter();
   const { isLoggedIn, user, viewMode, currentRole, wallet, userPlan, handleAuthClick, handleLogout, setCurrentPage, handleRoleSwitch, currentPage } = useAuth();
+
+  // 첫 방문(페르소나 시드 없음) 시 온보딩으로 자동 진입
+  const [onboardingChecked, setOnboardingChecked] = useState(false);
+  useEffect(() => {
+    try {
+      if (!localStorage.getItem('coming_persona_seed')) {
+        router.replace('/onboarding');
+        return;
+      }
+    } catch {
+      /* localStorage 접근 불가 시 온보딩 건너뛰고 홈 표시 */
+    }
+    setOnboardingChecked(true);
+  }, [router]);
 
   const startLearning = () => {
     if (isLoggedIn) {
@@ -24,6 +39,11 @@ export default function HomePage() {
   ];
 
   const highlights = ['실습 중심 커리큘럼', '최신 모델 실전 적용', '결과 기반 피드백'];
+
+  // 온보딩 진입 여부 확정 전에는 홈 콘텐츠 깜빡임 방지
+  if (!onboardingChecked) {
+    return <div className="min-h-screen bg-[#F9FAFB]" />;
+  }
 
   return (
     <div className="min-h-screen bg-[#F9FAFB]">
