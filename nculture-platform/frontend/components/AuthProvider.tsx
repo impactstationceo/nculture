@@ -309,7 +309,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       setShowAuthModal(false);
 
-      if (pendingAction) {
+      // 가입 직후 또는 첫 로그인(페르소나 시드 없음) 시 온보딩으로 진입
+      let needsOnboarding = action === 'signup';
+      try {
+        if (!needsOnboarding && !localStorage.getItem('coming_persona_seed')) {
+          needsOnboarding = true;
+        }
+      } catch {
+        /* localStorage 접근 불가 시 온보딩 생략 */
+      }
+
+      if (needsOnboarding) {
+        setPendingAction(null);
+        router.push('/onboarding');
+      } else if (pendingAction) {
         pendingAction();
         setPendingAction(null);
       }
