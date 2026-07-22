@@ -1,0 +1,83 @@
+name: Deploy Frontend
+
+# main 푸시 -> 프로덕션 배포
+# PR / 그 외 브랜치 푸시 -> 프리뷰 배포 (URL은 Actions 요약에 표시)
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+# 같은 브랜치에서 연속 푸시하면 이전 실행은 취소
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+# 프로젝트 식별자 (자격증명 아님 — 토큰 없이는 아무것도 못 함).
+# 프로토타입이라 시크릿 대신 여기 직접 둬서 설정 부담을 줄임.
+# 실제 비밀은 VERCEL_TOKEN 하나뿐.
+env:
+  VERCEL_ORG_ID: team_xTKmKLZtwWLxepibaMNe7qmJ
+  VERCEL_PROJECT_ID: prj_KIAoW525l22U59zAgx3eXYHPGOMJ
+
+jobs:
+  deploy:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+    # 포크에서 온 PR은 시크릿 접근이 안 되므로 건너뜀 (프로토타입: 같은 리포 브랜치만 배포)
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+
+    # ⚠️ vercel 명령은 반드시 리포 루트에서 실행할 것.
+    # Vercel 프로젝트의 Root Directory 설정이 이미 nculture-platform/frontend 이라,
+    # frontend 안에서 돌리면 경로가 중복 적용되어 빌드가 깨진다.
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: nculture-platform/frontend/package-lock.json
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Resolve environment
+        id: env
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "target=production" >> "$GITHUB_OUTPUT"
+            echo "prod_flag=--prod" >> "$GITHUB_OUTPUT"
+          else
+            echo "target=preview" >> "$GITHUB_OUTPUT"
+            echo "prod_flag=" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Vercel 프로젝트에 등록된 환경변수(NEXT_PUBLIC_SUPABASE_URL 등)를 내려받음
+      - name: Pull Vercel environment
+        run: vercel pull --yes --environment=${{ steps.env.outputs.target }} --token=${{ secrets.VERCEL_TOKEN }}
+
+      # 타입/빌드 에러가 있으면 여기서 실패 -> 잘못된 코드가 배포되지 않음
+      - name: Build
+        run: vercel build ${{ steps.env.outputs.prod_flag }} --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy
+        id: deploy
+        run: |
+          url=$(vercel deploy --prebuilt ${{ steps.env.outputs.prod_flag }} --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+      - name: Summary
+        run: |
+          {
+            echo "### ✅ 배포 완료 (${{ steps.env.outputs.target }})"
+            echo ""
+            echo "- 배포 URL: ${{ steps.deploy.outputs.url }}"
+            echo "- 커밋: \`${{ github.sha }}\`"
+            echo "- 푸시한 사람: @${{ github.actor }}"
+          } >> "$GITHUB_STEP_SUMMARY"

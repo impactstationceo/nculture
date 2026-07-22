@@ -129,17 +129,25 @@ TOSS_SECRET_KEY
 
 ### 5. Vercel 배포
 
-```bash
-# Vercel CLI
-npm install -g vercel
-cd frontend
-vercel
-```
+**프론트엔드는 자동 배포됩니다.** `main`에 푸시하면 GitHub Actions가
+빌드 후 Vercel 프로덕션으로 배포하고, PR을 올리면 프리뷰 URL이 생성됩니다.
 
-환경 변수 설정:
+- 워크플로: `.github/workflows/deploy.yml`
+- 최초 1회 설정 및 팀원 합류 방법: **[`CI_SETUP.md`](../CI_SETUP.md)**
+
+환경 변수는 GitHub이 아니라 **Vercel 프로젝트 설정**에 등록합니다
+(워크플로의 `vercel pull`이 자동으로 가져감):
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY` (서버/엣지 전용)
+
+수동 배포가 필요할 때:
+
+```bash
+npm install -g vercel
+cd frontend
+vercel --prod
+```
 
 ---
 

@@ -1,2 +1,18 @@
+# 의존성 / 빌드 산출물
+node_modules/
+.next/
+out/
+dist/
+
+# Vercel
 .vercel
+
+# 환경 변수 (절대 커밋 금지)
 .env*
+!.env.example
+
+# 로컬 도구 / OS
+.DS_Store
+.omc/
+*.log
+next-env.d.ts
