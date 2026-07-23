@@ -687,11 +687,6 @@ const SESSION_INGEST: Record<number, { video: string; ingest: any }> = {
   1: { video: LECTURE_VIDEO_URL, ingest: lectureIngest },
 };
 // mm:ss 또는 hh:mm:ss -> 초
-const STYLE_LABELS: Record<string, string> = {
-  cinematic: '시네마틱', anime: '애니메이션', photoreal: '포토리얼',
-  minimal: '미니멀', experimental: '실험적', vintage: '빈티지',
-};
-
 // 스타일 토큰 → 프롬프트 본문에서 그 취향을 알아보는 어휘 (영/한 혼용 프롬프트 대응)
 const STYLE_KEYWORDS: Record<string, RegExp> = {
   cinematic: /cinematic|film still|dramatic|movie|editorial|시네마틱|영화/i,
@@ -1074,20 +1069,23 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
     setNotification({ type: 'success', message: `평가 감사합니다! (${stars}★)` });
   };
 
-  // 좌측 '예시 프롬프트' 패널 데이터: 현재 구간 추천이 있으면 그것을, 없으면 기존 예시.
-  // 구간 추천은 회원 취향(topStyles)에 맞는 2개를 자동 선택 — 별도 '맞춤 카드' 없이 여기 반영된다.
+  // 좌측 '추천 프롬프트' 패널 데이터: ① 현재 시연 구간 추천(회원 취향 순 2개) → ② 회원 맞춤 구간 추천 → ③ 회차 기본 예시
+  // 맞춤 추천은 기존 '회원님 맞춤' 카드에서 이 패널로 흡수 — 별도 카드 없이 자리 하나로 통일
   const personalizedPick = (lecture && currentPrompt?.recommended?.length)
     ? pickPersonalizedPrompts(currentPrompt.recommended, personalize, 2)
     : null;
-  const recExamples = personalizedPick
+  const sectionRecs = personalizedPick
     ? personalizedPick.picked.map((rec: string, i: number) => ({
         label: personalizedPick.personalized ? `맞춤 ${i + 1}` : `추천 ${i + 1}`,
         prompt: rec,
       }))
     : null;
-  const panelItems: any[] = recExamples || currentSession.examples || [];
-  const panelIsRec = !!recExamples;
-  const panelIsPersonalized = !!personalizedPick?.personalized;
+  const personalRecs = (!personalize?.profile?.isCold && personalize?.ranked?.length)
+    ? personalize.ranked.map((r: any, i: number) => ({ label: `맞춤 ${i + 1} · ${r.section}`, prompt: r.text, section: r.section }))
+    : null;
+  const panelItems: any[] = sectionRecs || personalRecs || currentSession.examples || [];
+  const panelIsRec = !!(sectionRecs || personalRecs);
+  const panelIsPersonalized = !!personalizedPick?.personalized || (!sectionRecs && !!personalRecs);
 
   // 회차 제목·요약·핵심개념: 인제스트(실제 영상) 기반으로 덮어쓰기
   const displayTitle = lecture ? lecture.ingest.session_title : currentSession.title;
@@ -1886,12 +1884,12 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
                 </div>
               </div>
 
-              {/* 개인화는 별도 카드 대신 아래 '예시 프롬프트'에 자동 반영된다 (pickPersonalizedPrompts) */}
+              {/* 개인화는 별도 카드 대신 아래 '추천 프롬프트' 패널에 자동 반영된다 */}
               {panelItems.length > 0 && (
                 <div className="bg-white border border-neutral-200 rounded-2xl p-4 shadow-sm">
                   <h3 className="text-sm font-medium text-neutral-900 mb-2 flex items-center gap-2">
                     <Lightbulb className="w-4 h-4 text-amber-500" />
-                    예시 프롬프트
+                    추천 프롬프트
                     {panelIsRec && (
                       panelIsPersonalized ? (
                         <span className="ml-auto flex items-center gap-1 text-[10px] font-medium text-[#1b64da]">
@@ -1906,7 +1904,17 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
                     {panelItems.map((ex: any, i: number) => (
                       <div key={i} className="flex items-center justify-between bg-white border border-neutral-200 rounded-lg px-3 py-2 hover:border-indigo-300 transition-all">
                         <div className="flex-1 min-w-0 mr-3">
-                          <span className="text-xs text-indigo-600 font-medium">{ex.label}</span>
+                          {ex.section ? (
+                            <button
+                              onClick={() => seekLecture(parseTc(ex.section))}
+                              className="text-xs text-indigo-600 font-medium tabular-nums hover:underline"
+                              title="해당 구간으로 이동"
+                            >
+                              {ex.label}
+                            </button>
+                          ) : (
+                            <span className="text-xs text-indigo-600 font-medium">{ex.label}</span>
+                          )}
                           <p className="text-xs text-neutral-600 truncate">{ex.prompt}</p>
                         </div>
                         <button
