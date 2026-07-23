@@ -16,6 +16,21 @@ concurrency:
   group: deploy-${{ github.ref }}
   cancel-in-progress: true
 
+# ⚠️ 머지했는데 실행이 안 보여도 곧바로 수동 트리거하지 말 것.
+#
+# 실측(2026-07-23, 18건): 평소 커밋→실행 생성이 2~3초인데, 머지가 몰리는 구간에서는
+# 4~10분까지 늦어졌다(232s·398s·577s). 전부 결국 도착했다 — 누락이 아니라 지연이다.
+#   · 우리 concurrency 탓이 아니다: 대기(pending) 시간은 모두 0초, 생성되면 즉시 시작.
+#   · Actions 분 제한도 아니다: public 리포라 무제한.
+#   · 같은 구간에서 pull_request 이벤트도 함께 느려졌다(28s·37s·110s) → GitHub 측 처리 지연.
+#
+# 조급하게 workflow_dispatch 를 걸면 이미 밀린 큐에 실행을 하나 더 얹고,
+# 뒤늦게 도착한 정상 실행이 cancel-in-progress 로 취소된다(실제로 그렇게 됐다).
+# 최소 10분 기다리고, 그래도 없으면 그때 수동 트리거할 것.
+#
+# 늦어도 잘못된 성공 보고는 나지 않는다 — 아래 Verify 단계가 SHA 로 확인한다.
+# 배포 확인은 "최신 실행"이 아니라 SHA 로: curl https://ncultureclaud.vercel.app/api/version
+
 # 프로젝트 식별자 (자격증명 아님 — 토큰 없이는 아무것도 못 함).
 # 프로토타입이라 시크릿 대신 여기 직접 둬서 설정 부담을 줄임.
 # 실제 비밀은 VERCEL_TOKEN 하나뿐.

@@ -313,6 +313,31 @@ Supabase 익명 세션의 `storageKey` 를 계정별로 나눠 **데모 계정 =
   **주의**: `NEXT_PUBLIC_SUPABASE_URL/ANON_KEY`(공용 이름)는 비워둘 것 — 채우면 데모 로그인이 깨진다(§4-2).
 - **gitignore**: repo 루트가 상위 `nculture/`이고 그 `.gitignore`의 `.env*`가 하위 전체를 커버. 토큰·영상·인제스트 중간산출물 모두 제외 확인.
 
+### ⚠️ 배포 확인은 "최신 실행"이 아니라 **SHA** 로
+
+```bash
+curl https://ncultureclaud.vercel.app/api/version   # {"sha":"...","builtAt":"..."}
+```
+
+빌드 시점에 `github.sha` 를 `lib/build-info.json` 에 새기므로 **배포본에 직접 물어볼 수 있다.**
+워크플로도 배포 후 이 값을 폴링해 일치(또는 더 최신 배포에 포함)할 때까지 확인하고,
+아니면 잡을 실패시킨다 — "배포는 끝났는데 반영은 안 된" 상태가 조용히 통과하지 않는다.
+
+**"main 의 최신 실행"을 보고 판단하면 안 된다.** 이벤트가 지연되는 동안 최신 실행은
+직전 PR 의 것이라, 아직 살아있지도 않은 코드에 초록불을 보게 된다(실제로 그렇게 오판했다).
+
+### ⚠️ 머지했는데 실행이 안 보여도 바로 수동 트리거하지 말 것
+
+실측(2026-07-23, 18건): 평소 커밋→실행 생성은 **2~3초**인데, 머지가 몰리는 구간에서
+**4~10분**까지 늦어졌다(232s·398s·577s). **누락이 아니라 지연이고, 전부 결국 도착했다.**
+
+- 우리 `concurrency` 탓이 아니다 — 대기(pending) 0초, 생성되면 즉시 시작
+- Actions 분 제한도 아니다 — public 리포라 무제한
+- 같은 구간에서 `pull_request` 이벤트도 함께 느려졌다(28s·37s·110s) → GitHub 측 처리 지연
+
+조급한 `workflow_dispatch` 는 이미 밀린 큐에 실행을 더 얹고, 뒤늦게 온 정상 실행이
+`cancel-in-progress` 로 취소된다. **최소 10분 기다린 뒤** 판단할 것.
+
 ### ⚠️ Vercel 배포 함정 — `NEXT_PUBLIC_*` 는 반드시 **plain 타입**으로 등록할 것
 
 `vercel env add` 로 넣으면 `encrypted` 타입이 되는데, **`vercel pull` 이 encrypted 값을
