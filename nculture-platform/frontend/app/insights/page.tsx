@@ -7,7 +7,7 @@
  * 집계는 /api/insights (service_role) 가 한다. RLS 가 소유자 기반이라
  * 클라이언트에서는 본인 데이터만 보이기 때문.
  */
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { RefreshCw, Users, Activity, Star, Award, Clock, Sparkles, ArrowLeft } from 'lucide-react';
 import lectureIngest from '@/lib/ingest/2-3.ingest.json';
@@ -56,12 +56,27 @@ export default function InsightsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [auto, setAuto] = useState(true);
+  // 시연 중 "지금 막 들어왔다"가 보이도록, 새로 도착한 이벤트를 잠깐 강조한다
+  const [freshIds, setFreshIds] = useState<Set<number>>(new Set());
+  const seenIdsRef = useRef<Set<number> | null>(null);
 
   const load = useCallback(async () => {
     try {
       const res = await fetch('/api/insights', { cache: 'no-store' });
       const d = await res.json();
       if (!res.ok) throw new Error(d?.error || '불러오기 실패');
+
+      const ids: number[] = (d.recentEvents || []).map((e: any) => e.id).filter((v: any) => v != null);
+      if (seenIdsRef.current) {
+        const seen = seenIdsRef.current;
+        const fresh = ids.filter((id) => !seen.has(id));
+        if (fresh.length) {
+          setFreshIds(new Set(fresh));
+          setTimeout(() => setFreshIds(new Set()), 3000);
+        }
+      }
+      seenIdsRef.current = new Set(ids); // 첫 로드는 전체가 '새 것'이 되므로 강조하지 않는다
+
       setData(d);
       setError(null);
       setSelected((prev) => prev ?? d.members?.[0]?.userId ?? null);
@@ -106,6 +121,12 @@ export default function InsightsPage() {
             </Link>
             <span className="font-bold text-neutral-900">Coming<span className="text-[#3182F6]"> AI</span></span>
             <span className="text-sm text-neutral-500">개인화 인사이트</span>
+            {auto && (
+              <span className="flex items-center gap-1 text-[11px] text-emerald-600">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                LIVE
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <label className="flex items-center gap-1.5 text-xs text-neutral-500 cursor-pointer">
@@ -290,7 +311,12 @@ export default function InsightsPage() {
             <h2 className="text-sm font-semibold text-neutral-900 mb-3">최근 수집 이벤트</h2>
             <div className="space-y-1 max-h-72 overflow-y-auto">
               {data.recentEvents.map((e: any, i: number) => (
-                <div key={i} className="flex items-center gap-3 text-xs py-1.5 border-b border-neutral-100 last:border-0">
+                <div
+                  key={e.id ?? i}
+                  className={`flex items-center gap-3 text-xs py-1.5 border-b border-neutral-100 last:border-0 transition-colors duration-700 ${
+                    freshIds.has(e.id) ? 'bg-emerald-50 -mx-2 px-2 rounded-lg' : ''
+                  }`}
+                >
                   <span className="text-neutral-400 w-14 shrink-0 tabular-nums">{fmtTime(e.at)}</span>
                   <span className="w-40 shrink-0 truncate text-neutral-600">{e.label || `익명 ${e.userId.slice(0, 6)}`}</span>
                   <span className="px-2 py-0.5 rounded-full bg-[#3182F6]/10 text-[#1b64da] shrink-0">
