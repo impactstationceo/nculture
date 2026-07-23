@@ -72,6 +72,10 @@ export async function createVideoTask(input: CreateVideoInput): Promise<string> 
     duration: input.duration ?? 6,
     resolution: input.resolution ?? '768P',
   };
+  // Hailuo-2.3/02는 1080P에서 10초 조합을 지원하지 않음 → 1080P는 6초로 정규화
+  if (payload.resolution === '1080P' && payload.duration === 10) {
+    payload.duration = 6;
+  }
   if (input.firstFrameImage) {
     payload.first_frame_image = input.firstFrameImage;
   }
