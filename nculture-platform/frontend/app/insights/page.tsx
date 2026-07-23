@@ -33,6 +33,9 @@ const EVENT_LABELS: Record<string, string> = {
   rate: '별점 평가',
 };
 
+// 앱 내부값('10s')을 사람이 읽는 형태로. 저장은 앱과 동일한 값을 유지한다.
+const fmtDuration = (d: string | null) => (d ? d.replace(/^(\d+)s$/, '$1초') : null);
+
 const fmtTime = (iso: string | null) => {
   if (!iso) return '-';
   const d = new Date(iso);
@@ -262,8 +265,15 @@ export default function InsightsPage() {
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
                       <div className="bg-neutral-50 rounded-xl p-3">
-                        <div className="text-[11px] text-neutral-500 mb-1">생성 횟수</div>
-                        <div className="text-lg font-bold tabular-nums">{member.totals.generate}</div>
+                        <div className="text-[11px] text-neutral-500 mb-1">생성 성공</div>
+                        <div className="text-lg font-bold tabular-nums">
+                          {member.totals.generate}
+                          {!!member.totals.generateFailed && (
+                            <span className="ml-1.5 text-xs font-medium text-amber-600">
+                              실패 {member.totals.generateFailed}
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <div className="bg-neutral-50 rounded-xl p-3">
                         <div className="text-[11px] text-neutral-500 mb-1">추천 → 생성 전환</div>
@@ -322,7 +332,7 @@ export default function InsightsPage() {
                                     {s.resolution || '해상도 미기록'}
                                   </span>
                                   <span className="px-1.5 py-0.5 rounded-md bg-white border border-neutral-200 text-[11px] text-neutral-600">
-                                    {s.duration || '길이 미기록'}
+                                    {fmtDuration(s.duration) || '길이 미기록'}
                                   </span>
                                 </div>
                                 <span className="font-medium text-neutral-900 tabular-nums shrink-0">{s.count}회</span>
@@ -340,7 +350,7 @@ export default function InsightsPage() {
                     <h2 className="text-sm font-semibold text-neutral-900 mb-3">
                       작성한 생성 프롬프트
                       <span className="text-neutral-400 font-normal ml-1.5">
-                        {member.details?.writtenPrompts?.length || 0}건
+                        {member.details?.writtenPrompts?.length || 0}건 · 시도 기준
                       </span>
                     </h2>
                     {member.details?.writtenPrompts?.length ? (
@@ -356,13 +366,25 @@ export default function InsightsPage() {
                               )}
                               <span className="px-1.5 py-0.5 rounded-md bg-neutral-100 text-neutral-600">
                                 {w.service}{w.tier ? ` · ${w.tier}` : ''}
-                                {w.resolution ? ` · ${w.resolution}` : ''}{w.duration ? ` · ${w.duration}` : ''}
+                                {w.resolution ? ` · ${w.resolution}` : ''}{w.duration ? ` · ${fmtDuration(w.duration)}` : ''}
                               </span>
-                              {w.fromRecommendation && (
-                                <span className="px-1.5 py-0.5 rounded-md bg-[#3182F6]/10 text-[#1b64da]">추천 프롬프트</span>
+                              <span className={`px-1.5 py-0.5 rounded-md ${
+                                w.source === 'recommendation' ? 'bg-[#3182F6]/10 text-[#1b64da]'
+                                  : w.source === 'example' ? 'bg-violet-50 text-violet-600'
+                                  : 'bg-neutral-100 text-neutral-600'
+                              }`}>
+                                {w.source === 'recommendation' ? '추천 프롬프트'
+                                  : w.source === 'example' ? '예시 프롬프트' : '직접 작성'}
+                              </span>
+                              {w.status === 'failed' && (
+                                <span className="px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-700">
+                                  생성 실패 · 크레딧 환불
+                                </span>
                               )}
                             </div>
-                            <p className="text-sm text-neutral-800 leading-relaxed">{w.prompt}</p>
+                            <p className={`text-sm leading-relaxed ${w.status === 'failed' ? 'text-neutral-400' : 'text-neutral-800'}`}>
+                              {w.prompt}
+                            </p>
                           </div>
                         ))}
                       </div>
