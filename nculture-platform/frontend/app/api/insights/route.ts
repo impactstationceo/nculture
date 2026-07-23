@@ -36,7 +36,7 @@ export async function GET() {
     const [personaRes, eventRes, feedbackRes, gradingRes] = await Promise.all([
       admin.from('user_persona').select('user_id, label, seed, updated_at'),
       admin.from('learning_events')
-        .select('user_id, event_type, payload, created_at')
+        .select('id, user_id, event_type, payload, created_at')
         .order('created_at', { ascending: false })
         .limit(EVENT_CAP),
       admin.from('prompt_feedback').select('user_id, stars, timecode, prompt, created_at'),
@@ -150,6 +150,7 @@ export async function GET() {
     return NextResponse.json({
       members,
       recentEvents: events.slice(0, 40).map((e) => ({
+        id: e.id,          // 화면에서 '방금 들어온 이벤트'를 가려내는 데 쓴다
         userId: e.user_id,
         label: personas.find((p) => p.user_id === e.user_id)?.label || null,
         type: e.event_type,
