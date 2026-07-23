@@ -187,15 +187,14 @@ def main():
                  "prompt": "정리된 타깃 및 페인 포인트를 바탕으로, 맞춤형 펫 푸드 브랜드의 패키지 디자인 컨셉 5가지를 제안하고 구체적인 도출 근거를 함께 설명해줘."},
             ],
             "gradings": [
-                {"ai_score": 88, "ai_grade": "B", "minutes": 19,
-                 "video_url": "https://5z4whd1gnknvtv5m.public.blob.vercel-storage.com/sd2.mp4",
-                 "prompt": "빈티지 필름 톤의 펫 푸드 브랜드 광고 컷",
-                 "criteria": [{"axis": "프롬프트 충실도", "weight": 35, "score": 90},
-                              {"axis": "시각적 품질", "weight": 25, "score": 88},
-                              {"axis": "모션 자연스러움", "weight": 20, "score": 85},
-                              {"axis": "시간적 일관성", "weight": 20, "score": 87}],
-                 "feedback": [{"type": "positive", "text": "빈티지 필름 그레인과 색보정이 브랜드 톤과 잘 맞습니다."},
-                              {"type": "suggestion", "text": "제품 클로즈업에서 라벨 텍스트가 일부 뭉갭니다."}]},
+                # 실제 MiniMax 생성물을 Gemini 로 채점한 결과를 고정한다.
+                # 이전엔 채점표와 무관한 데모 클립이 붙어 프롬프트·점수·영상이 서로 어긋났다.
+                # 재실행마다 다시 생성하면 비용·시간이 들어 Blob URL 을 못 박아 둔다.
+                {"ai_score": 89, "ai_grade": "B", "minutes": 19,
+                 "video_url": "https://5z4whd1gnknvtv5m.public.blob.vercel-storage.com/generated/anon/1784792883258-D3OnvPSkVskJijSEiW09fXsMzHMmdW.mp4",
+                 "prompt": "빈티지 필름 톤의 펫 푸드 브랜드 광고 컷. 원목 테이블 위 패키지 클로즈업, 8mm 필름 그레인, 따뜻한 앰버 색보정, 얕은 심도",
+                 "criteria": [{"axis": "프롬프트 충실도", "weight": 35, "score": 92}, {"axis": "시각적 품질", "weight": 25, "score": 88}, {"axis": "모션 자연스러움", "weight": 20, "score": 85}, {"axis": "시간적 일관성", "weight": 20, "score": 90}],
+                 "feedback": [{"type": "positive", "text": "따뜻한 앰버 색보정과 원목 질감 표현이 뛰어나 고급스러운 필름 감성을 전달함"}, {"type": "positive", "text": "손이 등장했다 퇴장하는 과정에서 손가락 왜곡이나 모션 아티팩트가 거의 없음"}, {"type": "suggestion", "text": "패키지 표면 라벨의 텍스트가 의미 없는 가짜 문자로 생성되어 브랜드 광고로서의 가독성을 높일 필요가 있음"}, {"type": "suggestion", "text": "아티팩트: 패키지 표면의 가짜 AI 텍스트(Gibberish text)"}, {"type": "tip", "text": "프롬프트의 빈티지 감성과 필름 톤을 훌륭하게 구현하였으며, 손 동작 및 패키지 고정 상태의 일관성이 매우 뛰어난 영상입니다."}]},
             ],
         },
     ]

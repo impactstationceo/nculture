@@ -601,68 +601,72 @@ export default function InsightsPage() {
                         {member.details?.gradings?.length || 0}건
                       </span>
                     </h2>
+                    {/* 좌: 채점 대상 영상 / 우: 채점 결과 — 점수와 대상을 나란히 봐야 납득된다 */}
                     {member.details?.gradings?.length ? (
                       <div className="space-y-3">
                         {member.details.gradings.map((g: any, i: number) => (
-                          <div key={i} className="border border-neutral-200 rounded-xl p-3">
-                            <div className="flex items-center justify-between gap-2 mb-2">
-                              <div className="flex items-center gap-2 text-[11px] text-neutral-400">
+                          <div key={i} className="border border-neutral-200 rounded-xl p-3 grid grid-cols-1 md:grid-cols-[minmax(0,260px)_minmax(0,1fr)] gap-3">
+                            <div>
+                              {g.videoUrl ? (
+                                <video
+                                  src={g.videoUrl}
+                                  controls
+                                  preload="metadata"
+                                  playsInline
+                                  className="w-full rounded-xl border border-neutral-200 bg-black"
+                                />
+                              ) : (
+                                <div className="w-full aspect-video rounded-xl border border-dashed border-neutral-200 bg-neutral-50 flex items-center justify-center text-[11px] text-neutral-400">
+                                  영상 없음
+                                </div>
+                              )}
+                              <div className="flex items-center gap-2 text-[11px] text-neutral-400 mt-1.5">
                                 <span>{fmtTime(g.at)}</span>
                                 {g.model && <span>· {g.model}</span>}
-                                {g.videoUrl && (
-                                  <a href={g.videoUrl} target="_blank" rel="noreferrer"
-                                     className="text-[#3182F6] hover:underline">새 탭에서 열기</a>
-                                )}
                               </div>
-                              <span className="px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-700 tabular-nums">
-                                {g.grade} {g.score}점
-                              </span>
                             </div>
 
-                            {/* 채점 대상 영상을 그 자리에서 확인할 수 있어야 점수가 납득된다 */}
-                            {g.videoUrl && (
-                              <video
-                                src={g.videoUrl}
-                                controls
-                                preload="metadata"
-                                playsInline
-                                className="w-full max-w-sm rounded-xl border border-neutral-200 bg-black mb-2"
-                              />
-                            )}
+                            <div className="min-w-0">
+                              <div className="flex justify-end mb-2">
+                                <span className="px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-700 tabular-nums">
+                                  {g.grade} {g.score}점
+                                </span>
+                              </div>
 
-                            {g.prompt && (
-                              <p className="text-sm text-neutral-800 mb-2 leading-relaxed">{g.prompt}</p>
-                            )}
-
-                            {/* 정량 */}
-                            {!!g.criteria?.length && (
-                              <div className="space-y-1 mb-2 pb-2 border-b border-neutral-100">
-                                {g.criteria.map((c: any, ci: number) => (
-                                  <div key={ci} className="flex items-center gap-2 text-[11px]">
-                                    <span className="w-28 shrink-0 text-neutral-600">{c.axis}</span>
-                                    <span className="w-8 shrink-0 text-neutral-400 tabular-nums">{c.weight}%</span>
-                                    <div className="flex-1 h-1.5 rounded-full bg-neutral-100 overflow-hidden">
-                                      <div className="h-full bg-[#3182F6]/60" style={{ width: `${c.score}%` }} />
+                              {/* 정량 — 점수 근거가 먼저 오고, 그 다음이 채점 대상 프롬프트 */}
+                              {!!g.criteria?.length && (
+                                <div className="space-y-1 mb-2 pb-2 border-b border-neutral-100">
+                                  {g.criteria.map((c: any, ci: number) => (
+                                    <div key={ci} className="flex items-center gap-2 text-[11px]">
+                                      <span className="w-24 shrink-0 text-neutral-600 truncate">{c.axis}</span>
+                                      <span className="w-8 shrink-0 text-neutral-400 tabular-nums">{c.weight}%</span>
+                                      <div className="flex-1 h-1.5 rounded-full bg-neutral-100 overflow-hidden">
+                                        <div className="h-full bg-[#3182F6]/60" style={{ width: `${c.score}%` }} />
+                                      </div>
+                                      <span className="w-7 shrink-0 text-right font-medium text-neutral-700 tabular-nums">{c.score}</span>
                                     </div>
-                                    <span className="w-7 shrink-0 text-right font-medium text-neutral-700 tabular-nums">{c.score}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
+                                  ))}
+                                </div>
+                              )}
 
-                            {/* 정성 */}
-                            {!!g.feedback?.length && (
-                              <div className="space-y-1">
-                                {g.feedback.map((f: any, fi: number) => (
-                                  <div key={fi} className="flex gap-1.5 text-[11px] leading-relaxed">
-                                    <span className={f.type === 'positive' ? 'text-emerald-600' : f.type === 'tip' ? 'text-neutral-400' : 'text-amber-600'}>
-                                      {f.type === 'positive' ? '✓' : f.type === 'tip' ? '›' : '!'}
-                                    </span>
-                                    <span className="text-neutral-600">{f.text}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
+                              {g.prompt && (
+                                <p className="text-sm text-neutral-800 mb-2 leading-relaxed">{g.prompt}</p>
+                              )}
+
+                              {/* 정성 */}
+                              {!!g.feedback?.length && (
+                                <div className="space-y-1">
+                                  {g.feedback.map((f: any, fi: number) => (
+                                    <div key={fi} className="flex gap-1.5 text-[11px] leading-relaxed">
+                                      <span className={f.type === 'positive' ? 'text-emerald-600' : f.type === 'tip' ? 'text-neutral-400' : 'text-amber-600'}>
+                                        {f.type === 'positive' ? '✓' : f.type === 'tip' ? '›' : '!'}
+                                      </span>
+                                      <span className="text-neutral-600">{f.text}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
                           </div>
                         ))}
                       </div>
