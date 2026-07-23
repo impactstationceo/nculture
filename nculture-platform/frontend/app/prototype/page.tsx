@@ -1418,25 +1418,15 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
             .then((ev) => {
               // 실채점 실패 시에도 데모가 비어 보이지 않게 기존 목업 채점표로 폴백
               const finalEv = ev || (sd2Grade as any);
+              // 약점 축 기반 보완 클래스 추천 — 오버레이가 아니라 평가 카드 바로 아래에 함께 표시
+              const courseRec = recommendCourseFor(finalEv, personalize);
               setResults((prev) =>
                 prev.map((r: any) =>
-                  r.id === resultId ? { ...r, evaluation: finalEv, gradingPending: false } : r,
+                  r.id === resultId
+                    ? { ...r, evaluation: finalEv, gradingPending: false, courseRec }
+                    : r,
                 ),
               );
-              // 채점표를 먼저 보게 한 뒤, 약점 보완 클래스를 튜터 채팅으로 권유 (생성 1건당 1회)
-              const rec = recommendCourseFor(finalEv, personalize);
-              if (rec) {
-                setTimeout(() => {
-                  setReceivedBroadcast({
-                    type: 'recommend',
-                    from: 'AI 튜터',
-                    time: '방금',
-                    message: rec.message,
-                    courseId: rec.courseId,
-                    courseTitle: rec.courseTitle,
-                  });
-                }, 2000);
-              }
             });
         }
       } catch (error: any) {
@@ -1790,7 +1780,6 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
             receivedBroadcast.type === 'start' ? 'bg-emerald-500' :
             receivedBroadcast.type === 'end' ? 'bg-neutral-700' :
             receivedBroadcast.type === 'practice' ? 'bg-indigo-500' :
-            receivedBroadcast.type === 'recommend' ? 'bg-[#3182F6]' :
             'bg-indigo-600'
           }`}>
             <div className="flex items-start gap-3">
@@ -1799,7 +1788,6 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
                  receivedBroadcast.type === 'reminder' ? '⏰' :
                  receivedBroadcast.type === 'start' ? '🎬' :
                  receivedBroadcast.type === 'end' ? '👋' :
-                 receivedBroadcast.type === 'recommend' ? '🎓' :
                  receivedBroadcast.type === 'practice' ? '✏️' : '📢'}
               </div>
               <div className="flex-1">
@@ -1809,7 +1797,6 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
                      receivedBroadcast.type === 'reminder' ? '알림' :
                      receivedBroadcast.type === 'start' ? '수업 시작' :
                      receivedBroadcast.type === 'end' ? '수업 종료' :
-                     receivedBroadcast.type === 'recommend' ? '맞춤 강의 추천' :
                      receivedBroadcast.type === 'practice' ? '실습 안내' : '교육자 공지'}
                   </span>
                   <button 
@@ -1820,19 +1807,6 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
                   </button>
                 </div>
                 <p className="text-sm text-white/90 mb-2">{receivedBroadcast.message}</p>
-                {/* 맞춤 강의 추천이면 클래스 바로가기 버튼 */}
-                {receivedBroadcast.courseId && (
-                  <button
-                    onClick={() => window.open(`/courses/${receivedBroadcast.courseId}`, '_blank')}
-                    className="mb-2 w-full text-left bg-white/15 hover:bg-white/25 transition rounded-xl px-3 py-2"
-                  >
-                    <div className="text-[10px] text-white/60 mb-0.5">추천 클래스</div>
-                    <div className="text-sm font-semibold flex items-center justify-between gap-2">
-                      <span className="truncate">{receivedBroadcast.courseTitle}</span>
-                      <span className="shrink-0">→</span>
-                    </div>
-                  </button>
-                )}
                 <div className="text-xs text-white/60">
                   {receivedBroadcast.from} · {receivedBroadcast.time}
                 </div>
@@ -2154,6 +2128,29 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
                                 ))}
                               </div>
                             )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 맞춤 강의 추천 — 평가 바로 아래, 히스토리 흐름 안에서 다음 학습으로 연결 */}
+                      {r.evaluation && r.courseRec && (
+                        <div className="flex gap-2.5">
+                          <div className="w-7 h-7 rounded-full bg-[#E8F3FF] flex items-center justify-center flex-shrink-0 text-sm">
+                            🎓
+                          </div>
+                          <div className="flex-1 max-w-[85%] bg-white border border-[#3182F6]/30 rounded-2xl rounded-tl-sm p-3 shadow-sm">
+                            <div className="text-xs font-semibold text-[#1b64da] mb-1.5">맞춤 강의 추천</div>
+                            <p className="text-xs text-neutral-600 leading-relaxed mb-2">{r.courseRec.message}</p>
+                            <button
+                              onClick={() => window.open(`/courses/${r.courseRec.courseId}`, '_blank')}
+                              className="w-full text-left bg-[#E8F3FF] hover:bg-[#d9ebff] transition rounded-xl px-3 py-2"
+                            >
+                              <div className="text-[10px] text-[#3182F6]/80 mb-0.5">추천 클래스</div>
+                              <div className="text-xs font-semibold text-[#1b64da] flex items-center justify-between gap-2">
+                                <span className="truncate">{r.courseRec.courseTitle}</span>
+                                <span className="shrink-0">→</span>
+                              </div>
+                            </button>
                           </div>
                         </div>
                       )}
