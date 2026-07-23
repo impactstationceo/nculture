@@ -36,6 +36,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # 배포 검증이 'merge-base --is-ancestor' 로 포함 여부를 따지므로 전체 히스토리가 필요하다
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -101,6 +104,12 @@ jobs:
             got=$(curl -sf --max-time 20 "$target" | sed -n 's/.*"sha":"\([^"]*\)".*/\1/p' || true)
             if [ "$got" = "$expected" ]; then
               echo "✅ 배포 반영 확인: $got"
+              exit 0
+            fi
+            # 머지가 연달아 나면 concurrency 가 이전 실행을 취소하고 더 최신 배포가 덮어쓴다.
+            # 그때도 이 커밋은 살아있는 것이므로 '조상인가'로 판정한다(동일 비교면 헛되이 실패).
+            if [ -n "$got" ] && git merge-base --is-ancestor "$expected" "$got" 2>/dev/null; then
+              echo "✅ 더 최신 배포($got)에 포함되어 반영됨"
               exit 0
             fi
             echo "  대기 ${i}/20 — 현재 배포본 sha=${got:-응답없음}"
