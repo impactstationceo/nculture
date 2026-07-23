@@ -333,13 +333,6 @@ export default function InsightsPage() {
                       </div>
                     </div>
 
-                    <div className="mt-4 pt-4 border-t border-neutral-200 flex flex-wrap gap-1.5">
-                      {Object.entries(member.derived.eventsByType).map(([t, n]: any) => (
-                        <span key={t} className="px-2 py-1 rounded-full bg-neutral-100 text-[11px] text-neutral-600">
-                          {EVENT_LABELS[t] || t} {n}
-                        </span>
-                      ))}
-                    </div>
                   </div>
 
                   {/* 작성한 생성 프롬프트 — 집계 숫자가 아니라 실제로 무엇을 만들려 했는지 */}
@@ -366,7 +359,7 @@ export default function InsightsPage() {
                                 {w.resolution ? ` · ${w.resolution}` : ''}{w.duration ? ` · ${w.duration}` : ''}
                               </span>
                               {w.fromRecommendation && (
-                                <span className="px-1.5 py-0.5 rounded-md bg-[#3182F6]/10 text-[#1b64da]">추천에서</span>
+                                <span className="px-1.5 py-0.5 rounded-md bg-[#3182F6]/10 text-[#1b64da]">추천 프롬프트</span>
                               )}
                             </div>
                             <p className="text-sm text-neutral-800 leading-relaxed">{w.prompt}</p>
