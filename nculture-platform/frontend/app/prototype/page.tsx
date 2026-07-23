@@ -677,8 +677,12 @@ const generateImage = (prompt: string, sessionId: number) => {
 
 // ============= Session Page =============
 // [프로토타입] 강의 전사·OCR→Gemini 인제스트를 세션에 매핑. 없는 세션은 기존 동작 그대로.
+// 강의/데모 영상은 대용량이라 Vercel Blob에서 서빙 (git·배포에 미포함)
+const LECTURE_VIDEO_URL = 'https://5z4whd1gnknvtv5m.public.blob.vercel-storage.com/2-3.mp4';
+const DEMO_RESULT_VIDEO_URL = 'https://5z4whd1gnknvtv5m.public.blob.vercel-storage.com/sd2.mp4';
+
 const SESSION_INGEST: Record<number, { video: string; ingest: any }> = {
-  1: { video: '/lectures/2-3.mp4', ingest: lectureIngest },
+  1: { video: LECTURE_VIDEO_URL, ingest: lectureIngest },
 };
 // mm:ss 또는 hh:mm:ss -> 초
 const parseTc = (tc: string) => {
@@ -1211,7 +1215,7 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
           tier: tier?.name,
           prompt: prompt,
           thumbnail: generateImage(prompt, sessionId),
-          video: lecture ? '/generated/sd2.mp4' : undefined,
+          video: lecture ? DEMO_RESULT_VIDEO_URL : undefined,
           timestamp: new Date().toLocaleString(),
           duration,
           resolution,
