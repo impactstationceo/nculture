@@ -59,6 +59,13 @@ jobs:
           fi
 
       # Vercel 프로젝트에 등록된 환경변수(NEXT_PUBLIC_SUPABASE_URL 등)를 내려받음
+      #
+      # ⚠️ NEXT_PUBLIC_* 는 Vercel 에 반드시 'plain' 타입으로 등록할 것.
+      # vercel env add 로 넣으면 encrypted 가 되는데, vercel pull 은 encrypted 값을
+      # [SENSITIVE] 플레이스홀더로만 내려준다. 서버 전용 변수는 런타임에 실제 값이
+      # 주입되어 무사하지만, NEXT_PUBLIC_* 는 빌드 타임에 번들로 구워져야 하므로
+      # 플레이스홀더가 박혀 기능이 조용히 죽는다(빌드는 성공, 콘솔도 깨끗함).
+      # 확인: pull 후 .vercel/.env.<target>.local 값이 [SENSITIVE] 인지 볼 것.
       - name: Pull Vercel environment
         run: vercel pull --yes --environment=${{ steps.env.outputs.target }} --token=${{ secrets.VERCEL_TOKEN }}
 

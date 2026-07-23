@@ -313,6 +313,22 @@ Supabase 익명 세션의 `storageKey` 를 계정별로 나눠 **데모 계정 =
   **주의**: `NEXT_PUBLIC_SUPABASE_URL/ANON_KEY`(공용 이름)는 비워둘 것 — 채우면 데모 로그인이 깨진다(§4-2).
 - **gitignore**: repo 루트가 상위 `nculture/`이고 그 `.gitignore`의 `.env*`가 하위 전체를 커버. 토큰·영상·인제스트 중간산출물 모두 제외 확인.
 
+### ⚠️ Vercel 배포 함정 — `NEXT_PUBLIC_*` 는 반드시 **plain 타입**으로 등록할 것
+
+`vercel env add` 로 넣으면 `encrypted` 타입이 되는데, **`vercel pull` 이 encrypted 값을
+`[SENSITIVE]` 플레이스홀더로만 내려준다.** 서버 전용 변수는 Vercel 이 런타임에 실제 값을
+주입하므로 문제가 없지만, `NEXT_PUBLIC_*` 는 **빌드 타임에 번들로 구워져야** 하므로
+플레이스홀더가 들어가 기능이 조용히 죽는다(에러도 안 난다).
+
+증상: 배포본에서 수집이 전혀 안 되는데 콘솔은 깨끗함. `/api/grade` 같은 서버 라우트는 정상 동작.
+
+해결: `NEXT_PUBLIC_*` 는 Vercel API 로 `type: "plain"` 으로 등록한다. 어차피 브라우저 번들에
+실리는 공개값이라 숨길 이유도 없다. 서버 비밀(`SUPABASE_SERVICE_ROLE_KEY`·`GEMINI_API_KEY`)은
+`encrypted` 로 두면 된다.
+
+확인법: 리포 루트에서 `vercel pull --environment=preview` 후
+`.vercel/.env.preview.local` 을 열어 값이 `[SENSITIVE]` 인지 실제 값인지 본다.
+
 ## 9. 스크립트·산출물 위치
 
 | 위치 | 내용 |
