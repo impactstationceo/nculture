@@ -492,10 +492,12 @@ export default function InsightsPage() {
                       <h2 className="text-sm font-semibold text-neutral-900 mb-1">
                         지금 추천될 프롬프트 <span className="text-[#3182F6] font-normal">(예측)</span>
                       </h2>
-                      <p className="text-[11px] text-neutral-400 mb-4">
+                      <p className="text-[11px] text-neutral-400 mb-3">
                         위 프로필로 후보 프롬프트를 재정렬한 결과 · 개인화 반영도 <b className="text-neutral-600">{pct(member.recommendations[0].alpha)}</b>
                         <span className="ml-1">(낮으면 인기순, 높으면 개인 취향)</span>
                       </p>
+                      {/* 후보는 모두 이 회차에서 나온다 — 강의명은 한 번만(구간마다 반복하면 안 읽힌다) */}
+                      <div className="mb-2 text-[11px] text-neutral-500 truncate">1회차 · {lectureTitle}</div>
                       <div className="space-y-2">
                         {member.recommendations.map((r: any, i: number) => (
                           <div key={i} className="border border-neutral-200 rounded-xl p-3">
