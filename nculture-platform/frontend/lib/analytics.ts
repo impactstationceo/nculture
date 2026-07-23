@@ -36,6 +36,7 @@ let client: SupabaseClient | null = null;
  * 계정별로 쌓인다. 안 나누면 학생을 바꿔가며 온보딩할 때 같은 행을 덮어쓴다.
  */
 let currentIdentity = 'guest';
+let currentLabel = 'guest'; // 화면 표시용 (이름이 있으면 이름, 없으면 계정)
 
 function storageKeyFor(identity: string): string {
   const safe = identity.replace(/[^a-zA-Z0-9_.@-]/g, '_') || 'guest';
@@ -45,11 +46,22 @@ function storageKeyFor(identity: string): string {
 /**
  * 수집 신원을 데모 계정에 맞춘다. 계정이 바뀌면 클라이언트와 익명 세션을 새로 만든다.
  * (같은 값으로 여러 번 불러도 안전)
+ *
+ * identity 는 계정을 가르는 고유값(데모 email), displayName 은 화면에 보일 이름.
+ * 세션 분리는 identity 로만 하고, 이름은 라벨에만 쓴다.
  */
-export function setAnalyticsIdentity(identity: string | null | undefined): void {
+export function setAnalyticsIdentity(
+  identity: string | null | undefined,
+  displayName?: string | null,
+): void {
   const next = (identity || 'guest').toLowerCase();
-  if (next === currentIdentity) return;
+  const label = displayName || identity || 'guest';
+  if (next === currentIdentity) {
+    currentLabel = label; // 같은 계정인데 이름만 늦게 들어오는 경우
+    return;
+  }
   currentIdentity = next;
+  currentLabel = label;
   client = null;        // 다음 사용 시 새 storageKey 로 재생성
   userIdPromise = null; // 익명 세션도 계정별로 새로 확보
 }
@@ -72,6 +84,22 @@ function getClient(): SupabaseClient | null {
 // 동시에 여러 이벤트가 들어와도 익명 로그인은 한 번만 (in-flight promise 재사용)
 let userIdPromise: Promise<string | null> | null = null;
 
+/**
+ * DB 에 표시용 라벨을 남긴다. 익명 사용자는 UUID 뿐이라 이게 없으면
+ * '어느 데모 계정의 데이터인지' 알 수 없다(회원별 인사이트 화면이 이걸 쓴다).
+ * seed 는 건드리지 않는다 — 온보딩이 채우는 값이라 덮어쓰면 안 된다.
+ */
+async function tagIdentity(sb: SupabaseClient, userId: string): Promise<void> {
+  try {
+    await sb.from('user_persona').upsert(
+      { user_id: userId, label: currentLabel },
+      { onConflict: 'user_id' },
+    );
+  } catch (e) {
+    console.debug('[analytics] 라벨 기록 실패', e);
+  }
+}
+
 /** 익명 세션을 확보하고 auth.uid() 를 반환. 실패 시 null. */
 export async function getAnalyticsUserId(): Promise<string | null> {
   const sb = getClient();
@@ -80,10 +108,15 @@ export async function getAnalyticsUserId(): Promise<string | null> {
     userIdPromise = (async () => {
       try {
         const { data: existing } = await sb.auth.getSession();
-        if (existing.session?.user?.id) return existing.session.user.id;
+        if (existing.session?.user?.id) {
+          void tagIdentity(sb, existing.session.user.id);
+          return existing.session.user.id;
+        }
         const { data, error } = await sb.auth.signInAnonymously();
         if (error) throw error;
-        return data.user?.id ?? null;
+        const uid = data.user?.id ?? null;
+        if (uid) void tagIdentity(sb, uid);
+        return uid;
       } catch (e) {
         // 익명 로그인이 꺼져 있거나 네트워크 실패 — 수집만 조용히 중단
         console.debug('[analytics] 익명 세션 확보 실패', e);
