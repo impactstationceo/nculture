@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { INSTITUTION_DATA, PRICING_PLANS } from '@/lib/data';
 import { upgradePlan, updateProfile } from '@/lib/api';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { logEvent, setAnalyticsIdentity } from '@/lib/analytics';
 
 interface AuthContextType {
   user: any;
@@ -305,6 +306,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUserPlan(demoUser.plan);
         }
         localStorage.setItem('demo_session', JSON.stringify(demoUser));
+
+        // 수집 신원을 먼저 맞춘 뒤 기록해야 이 계정의 이벤트로 남는다
+        setAnalyticsIdentity(demoUser.email, demoUser.name);
+        void logEvent('login', {
+          action,                      // 'signup' | 'login'
+          role: demoUser.role,
+          plan: demoUser.plan,
+        });
       }
 
       setShowAuthModal(false);
@@ -335,6 +344,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const handleLogout = () => {
+    void logEvent('logout', { role: user?.role ?? null });
     if (isSupabaseConfigured) {
       supabase.auth.signOut().catch((error) => {
         console.error('Logout error:', error);

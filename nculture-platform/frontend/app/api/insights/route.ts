@@ -113,6 +113,23 @@ export async function GET() {
         }
       }
 
+      // ── 접속 패턴: created_at 만으로 나온다(추가 수집 불필요).
+      // created_at 은 UTC 라 그대로 시(hour)를 뽑으면 9시간 어긋난다 → KST 로 옮긴다.
+      const byWeekday = [0, 0, 0, 0, 0, 0, 0];   // 일~토
+      const byHour: number[] = Array.from({ length: 24 }, () => 0);
+      let sessionSeconds = 0;
+      let sessionCount = 0;
+      for (const e of mine) {
+        if (!e.created_at) continue;
+        const kst = new Date(new Date(e.created_at).getTime() + 9 * 3600 * 1000);
+        byWeekday[kst.getUTCDay()] += 1;
+        byHour[kst.getUTCHours()] += 1;
+        if (e.event_type === 'session_end') {
+          sessionSeconds += Number((e.payload || {}).seconds) || 0;
+          sessionCount += 1;
+        }
+      }
+
       const times = [
         ...mine.map((e) => e.created_at),
         ...myFeedback.map((f) => f.created_at),
@@ -183,6 +200,22 @@ export async function GET() {
           topSections: topN(dwellBySection, 3),
           appliedRecommendation,
           generatedFromRecommendation,
+          // 접속 패턴 (KST 기준) — 요일·시간대·평균 세션 길이
+          activity: {
+            byWeekday, byHour,
+            avgSessionSec: sessionCount ? Math.round(sessionSeconds / sessionCount) : null,
+            sessions: sessionCount,
+          },
+          // 추천/예시를 적용한 뒤 얼마나 고쳐 썼는지 — 별점보다 촘촘한 추천 품질 신호
+          promptEdit: (() => {
+            const rs = mine
+              .filter((e) => e.event_type === 'prompt_input')
+              .map((e) => (e.payload || {}))
+              .filter((p) => p.base_source && p.base_source !== 'custom' && p.edit_ratio != null);
+            if (!rs.length) return null;
+            const avg = rs.reduce((a, p) => a + Number(p.edit_ratio), 0) / rs.length;
+            return { samples: rs.length, avgEditRatio: Number(avg.toFixed(2)) };
+          })(),
           // 추천을 적용한 뒤 실제로 생성까지 간 비율
           recommendationConversion:
             appliedRecommendation > 0
