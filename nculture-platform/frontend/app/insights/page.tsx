@@ -931,74 +931,96 @@ export default function InsightsPage() {
                         {member.details?.gradings?.length || 0}건
                       </span>
                     </h2>
-                    {/* 좌: 채점 대상 영상 / 우: 채점 결과 — 점수와 대상을 나란히 봐야 납득된다 */}
+                    {/* 헤더바(메타+등급) → 좌 16:9 영상 / 우 프롬프트→점수→피드백 순서로 정돈 */}
                     {member.details?.gradings?.length ? (
                       <div className="space-y-3">
-                        {member.details.gradings.map((g: any, i: number) => (
-                          <div key={i} className="border border-neutral-200 rounded-xl p-3 grid grid-cols-1 md:grid-cols-[minmax(0,260px)_minmax(0,1fr)] gap-3">
-                            <div>
-                              {g.videoUrl ? (
-                                <video
-                                  src={g.videoUrl}
-                                  controls
-                                  preload="metadata"
-                                  playsInline
-                                  className="w-full rounded-xl border border-neutral-200 bg-black"
-                                />
-                              ) : (
-                                <div className="w-full aspect-video rounded-xl border border-dashed border-neutral-200 bg-neutral-50 flex items-center justify-center text-[11px] text-neutral-400">
-                                  영상 없음
+                        {member.details.gradings.map((g: any, i: number) => {
+                          // 등급별 색 — 항상 초록이면 B/C도 잘한 것처럼 보인다
+                          const gradeColor =
+                            g.score >= 90 ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                            : g.score >= 80 ? 'bg-[#E8F3FF] border-[#3182F6]/30 text-[#1b64da]'
+                            : g.score >= 70 ? 'bg-amber-50 border-amber-200 text-amber-700'
+                            : 'bg-red-50 border-red-200 text-red-600';
+                          return (
+                            <div key={i} className="border border-neutral-200 rounded-xl overflow-hidden">
+                              {/* 흩어져 있던 날짜·모델·등급을 헤더 한 줄로 */}
+                              <div className="flex items-center justify-between gap-2 px-3 py-2 bg-neutral-50 border-b border-neutral-200">
+                                <div className="flex items-center gap-1.5 text-[11px] text-neutral-500 min-w-0">
+                                  <span className="tabular-nums shrink-0">{fmtTime(g.at)}</span>
+                                  {g.model && <span className="truncate">· {g.model} 채점</span>}
                                 </div>
-                              )}
-                              <div className="flex items-center gap-2 text-[11px] text-neutral-400 mt-1.5">
-                                <span>{fmtTime(g.at)}</span>
-                                {g.model && <span>· {g.model}</span>}
-                              </div>
-                            </div>
-
-                            <div className="min-w-0">
-                              <div className="flex justify-end mb-2">
-                                <span className="px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-700 tabular-nums">
-                                  {g.grade} {g.score}점
+                                <span className={`px-2.5 py-0.5 rounded-full border text-xs font-bold tabular-nums shrink-0 ${gradeColor}`}>
+                                  {g.grade} · {g.score}점
                                 </span>
                               </div>
 
-                              {/* 정량 — 점수 근거가 먼저 오고, 그 다음이 채점 대상 프롬프트 */}
-                              {!!g.criteria?.length && (
-                                <div className="space-y-1 mb-2 pb-2 border-b border-neutral-100">
-                                  {g.criteria.map((c: any, ci: number) => (
-                                    <div key={ci} className="flex items-center gap-2 text-[11px]">
-                                      <span className="w-24 shrink-0 text-neutral-600 truncate">{c.axis}</span>
-                                      <span className="w-8 shrink-0 text-neutral-400 tabular-nums">{c.weight}%</span>
-                                      <div className="flex-1 h-1.5 rounded-full bg-neutral-100 overflow-hidden">
-                                        <div className="h-full bg-[#3182F6]/60" style={{ width: `${c.score}%` }} />
+                              <div className="p-3 grid grid-cols-1 md:grid-cols-[240px_minmax(0,1fr)] gap-3">
+                                {/* 영상 — 세로/가로 무관하게 16:9 프레임 고정, 모바일에서도 과대하지 않게 */}
+                                <div className="w-full max-w-[320px] md:max-w-none aspect-video rounded-lg overflow-hidden bg-black border border-neutral-200 self-start">
+                                  {g.videoUrl ? (
+                                    <video
+                                      src={g.videoUrl}
+                                      controls
+                                      preload="metadata"
+                                      playsInline
+                                      className="w-full h-full object-contain"
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-[11px] text-neutral-400 bg-neutral-50">
+                                      영상 없음
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* 읽는 순서대로: 무엇을 시켰나 → 어떻게 채점됐나 → 코멘트 */}
+                                <div className="min-w-0 space-y-2.5">
+                                  {g.prompt && (
+                                    <div>
+                                      <div className="text-[10px] font-medium text-neutral-400 mb-1">입력 프롬프트</div>
+                                      <p className="text-[13px] text-neutral-800 leading-relaxed bg-neutral-50 rounded-lg px-2.5 py-2">
+                                        {g.prompt}
+                                      </p>
+                                    </div>
+                                  )}
+
+                                  {!!g.criteria?.length && (
+                                    <div>
+                                      <div className="text-[10px] font-medium text-neutral-400 mb-1">축별 점수</div>
+                                      <div className="space-y-1">
+                                        {g.criteria.map((c: any, ci: number) => (
+                                          <div key={ci} className="flex items-center gap-2 text-[11px]">
+                                            <span className="w-24 shrink-0 text-neutral-600 truncate">{c.axis}</span>
+                                            <span className="w-8 shrink-0 text-neutral-400 tabular-nums">{c.weight}%</span>
+                                            <div className="flex-1 h-1.5 rounded-full bg-neutral-100 overflow-hidden">
+                                              <div className="h-full bg-[#3182F6]/60" style={{ width: `${c.score}%` }} />
+                                            </div>
+                                            <span className="w-7 shrink-0 text-right font-medium text-neutral-700 tabular-nums">{c.score}</span>
+                                          </div>
+                                        ))}
                                       </div>
-                                      <span className="w-7 shrink-0 text-right font-medium text-neutral-700 tabular-nums">{c.score}</span>
                                     </div>
-                                  ))}
-                                </div>
-                              )}
+                                  )}
 
-                              {g.prompt && (
-                                <p className="text-sm text-neutral-800 mb-2 leading-relaxed">{g.prompt}</p>
-                              )}
-
-                              {/* 정성 */}
-                              {!!g.feedback?.length && (
-                                <div className="space-y-1">
-                                  {g.feedback.map((f: any, fi: number) => (
-                                    <div key={fi} className="flex gap-1.5 text-[11px] leading-relaxed">
-                                      <span className={f.type === 'positive' ? 'text-emerald-600' : f.type === 'tip' ? 'text-neutral-400' : 'text-amber-600'}>
-                                        {f.type === 'positive' ? '✓' : f.type === 'tip' ? '›' : '!'}
-                                      </span>
-                                      <span className="text-neutral-600">{f.text}</span>
+                                  {!!g.feedback?.length && (
+                                    <div>
+                                      <div className="text-[10px] font-medium text-neutral-400 mb-1">AI 피드백</div>
+                                      <div className="space-y-1">
+                                        {g.feedback.map((f: any, fi: number) => (
+                                          <div key={fi} className="flex gap-1.5 text-[11px] leading-relaxed">
+                                            <span className={f.type === 'positive' ? 'text-emerald-600' : f.type === 'tip' ? 'text-neutral-400' : 'text-amber-600'}>
+                                              {f.type === 'positive' ? '✓' : f.type === 'tip' ? '›' : '!'}
+                                            </span>
+                                            <span className="text-neutral-600">{f.text}</span>
+                                          </div>
+                                        ))}
+                                      </div>
                                     </div>
-                                  ))}
+                                  )}
                                 </div>
-                              )}
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     ) : <p className="text-sm text-neutral-400">아직 채점된 영상이 없습니다</p>}
                   </div>
