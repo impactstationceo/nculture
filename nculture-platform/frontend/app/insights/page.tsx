@@ -86,6 +86,14 @@ export default function InsightsPage() {
   // 시연 중 "지금 막 들어왔다"가 보이도록, 새로 도착한 이벤트를 잠깐 강조한다
   const [freshIds, setFreshIds] = useState<Set<number>>(new Set());
   const seenIdsRef = useRef<Set<number> | null>(null);
+  // 추천 프롬프트 전체보기 토글 (userId:timecode 로 식별, 자동 새로고침에도 유지)
+  const [expandedRecs, setExpandedRecs] = useState<Set<string>>(new Set());
+  const toggleRec = (key: string) =>
+    setExpandedRecs((prev) => {
+      const next = new Set(prev);
+      next.has(key) ? next.delete(key) : next.add(key);
+      return next;
+    });
 
   const load = useCallback(async () => {
     try {
@@ -506,9 +514,27 @@ export default function InsightsPage() {
                               <span className="px-1.5 py-0.5 rounded-md bg-neutral-100 text-neutral-600 tabular-nums">{r.timecode} 구간</span>
                               <span className="text-neutral-500 truncate">{sectionInfo(r.timecode).topic}</span>
                             </div>
-                            <p className="text-sm text-neutral-800 leading-relaxed">
-                              {String(r.prompt).slice(0, 140)}{String(r.prompt).length > 140 ? '…' : ''}
-                            </p>
+                            {(() => {
+                              const recKey = `${member.userId}:${r.timecode}`;
+                              const full = String(r.prompt);
+                              const isLong = full.length > 140;
+                              const open = expandedRecs.has(recKey);
+                              return (
+                                <>
+                                  <p className="text-sm text-neutral-800 leading-relaxed whitespace-pre-wrap break-words">
+                                    {open || !isLong ? full : full.slice(0, 140) + '…'}
+                                  </p>
+                                  {isLong && (
+                                    <button
+                                      onClick={() => toggleRec(recKey)}
+                                      className="mt-1 text-[11px] font-medium text-[#3182F6] hover:underline"
+                                    >
+                                      {open ? '접기' : '더보기'}
+                                    </button>
+                                  )}
+                                </>
+                              );
+                            })()}
                             <div className="mt-2 flex items-center gap-3 text-[10px] text-neutral-400">
                               <span>개인 {pct(r.personal)}</span>
                               <span>제너럴 {pct(r.general)}</span>
