@@ -1,2 +1,4 @@
 .vercel
 .env*
+public/lectures/*.mp4
+public/generated/*.mp4

@@ -13,6 +13,15 @@ dist/
 
 # 로컬 도구 / OS
 .DS_Store
+.claude/
+nculture-platform/frontend/tsconfig.tsbuildinfo
 .omc/
 *.log
 next-env.d.ts
+
+# 인제스트 중간산출물 (재생성 가능)
+nculture-platform/scripts/ingest/*.srt
+nculture-platform/scripts/ingest/*.txt
+nculture-platform/scripts/ingest/*.ingest.json
+nculture-platform/scripts/ingest/frames*/
+nculture-platform/scripts/ingest/__pycache__/
