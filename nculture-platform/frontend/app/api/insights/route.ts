@@ -71,6 +71,12 @@ export async function GET() {
     }));
     const globalStats = computeGlobalStats(events as any);
 
+    // "개인화가 없었다면"의 순서 — 빈 프로필(α=0)로 랭킹하면 순수 인기순이 나온다.
+    // 회원 상세의 전/후 비교(인기순 → 개인화)에 쓴다. 전 회원 공통이라 한 번만 계산.
+    const popularityTop = rankPrompts(computeProfile([], null), candidates, globalStats)
+      .slice(0, 3)
+      .map((r) => ({ timecode: r.section, prompt: r.text }));
+
     const members = Array.from(userIds).map((uid) => {
       const persona = personas.find((p) => p.user_id === uid);
       const mine = events.filter((e) => e.user_id === uid);
@@ -263,6 +269,7 @@ export async function GET() {
 
     return NextResponse.json({
       members,
+      popularityTop, // 개인화 미적용(인기순) 추천 — 전/후 비교용
       recentEvents: events.slice(0, 40).map((e) => ({
         id: e.id,          // 화면에서 '방금 들어온 이벤트'를 가려내는 데 쓴다
         userId: e.user_id,
