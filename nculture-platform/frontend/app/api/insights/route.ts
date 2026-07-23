@@ -10,6 +10,7 @@
  */
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { computeProfile } from '@/lib/personalization';
 
 export const dynamic = 'force-dynamic';
 
@@ -140,6 +141,11 @@ export async function GET() {
       const stars = myFeedback.map((f) => Number(f.stars)).filter((n) => !Number.isNaN(n));
       const scores = myGradings.map((g) => Number(g.ai_score)).filter((n) => !Number.isNaN(n));
 
+      // 공유 개인화 모듈(lib/personalization)로 파생 프로필 계산.
+      // recency 가중 + 정규화 affinity(content/style/service/section) + confidence.
+      // 추천기(rankPrompts)가 쓰는 것과 '같은 프로필' — insights 표시와 추천이 일치한다.
+      const profile = computeProfile(mine as any, (persona?.seed as any) ?? null);
+
       // ── 상세 내역: 집계 숫자만으로는 '무엇에 대해 그랬는지'가 사라진다 ──
       const writtenPrompts = mine
         .filter((e) => e.event_type === 'generate' && (e.payload || {}).prompt)
@@ -224,6 +230,8 @@ export async function GET() {
           avgRating: stars.length ? Number((stars.reduce((a, b) => a + b, 0) / stars.length).toFixed(1)) : null,
           avgGradeScore: scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null,
         },
+        // 공유 개인화 모듈 산출 프로필 (정규화 affinity + confidence) — 추천기와 동일 소스
+        profile,
       };
     });
 
