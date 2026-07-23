@@ -244,6 +244,10 @@ export default function InsightsPage() {
                   <div className="text-sm font-medium text-neutral-900 truncate">
                     {m.label || `익명 ${m.userId.slice(0, 6)}`}
                   </div>
+                  {/* 동명이인이 있을 수 있어 계정을 함께 보여준다 */}
+                  <div className="text-[11px] text-neutral-400 truncate">
+                    {m.account || `uid ${m.userId.slice(0, 8)}`}
+                  </div>
                   <div className="text-[11px] text-neutral-500 mt-0.5">
                     이벤트 {m.totals.events} · {fmtTime(m.lastActiveAt)}
                   </div>
@@ -605,13 +609,24 @@ export default function InsightsPage() {
                                 {g.model && <span>· {g.model}</span>}
                                 {g.videoUrl && (
                                   <a href={g.videoUrl} target="_blank" rel="noreferrer"
-                                     className="text-[#3182F6] hover:underline">영상 보기</a>
+                                     className="text-[#3182F6] hover:underline">새 탭에서 열기</a>
                                 )}
                               </div>
                               <span className="px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-700 tabular-nums">
                                 {g.grade} {g.score}점
                               </span>
                             </div>
+
+                            {/* 채점 대상 영상을 그 자리에서 확인할 수 있어야 점수가 납득된다 */}
+                            {g.videoUrl && (
+                              <video
+                                src={g.videoUrl}
+                                controls
+                                preload="metadata"
+                                playsInline
+                                className="w-full max-w-sm rounded-xl border border-neutral-200 bg-black mb-2"
+                              />
+                            )}
 
                             {g.prompt && (
                               <p className="text-sm text-neutral-800 mb-2 leading-relaxed">{g.prompt}</p>

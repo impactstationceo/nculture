@@ -36,7 +36,7 @@ export async function GET() {
 
   try {
     const [personaRes, eventRes, feedbackRes, gradingRes] = await Promise.all([
-      admin.from('user_persona').select('user_id, label, seed, updated_at'),
+      admin.from('user_persona').select('user_id, label, account, seed, updated_at'),
       admin.from('learning_events')
         .select('id, user_id, event_type, payload, created_at')
         .order('created_at', { ascending: false })
@@ -207,6 +207,7 @@ export async function GET() {
       return {
         userId: uid,
         label: persona?.label || null,
+        account: persona?.account || null,   // 동명이인 구분용 보조 표시
         seed: persona?.seed || null,
         lastActiveAt: times[times.length - 1] || null,
         details: { writtenPrompts, ratings: ratingDetails, gradings: gradingDetails },

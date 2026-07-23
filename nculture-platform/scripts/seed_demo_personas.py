@@ -111,7 +111,7 @@ def main():
     # ── 페르소나 정의 ──────────────────────────────────────────
     personas = [
         {
-            "label": "김지민",
+            "label": "김지민", "account": "jimin@demo.test",
             "seed": {"contentTypes": ["video"], "visualStyles": ["cinematic"],
                      "purpose": "hobby", "experience": "beginner", "skipped": False,
                      "createdAt": ago(52)},
@@ -147,7 +147,7 @@ def main():
             "gradings": [],
         },
         {
-            "label": "박서준",
+            "label": "박서준", "account": "seojun@demo.test",
             "seed": {"contentTypes": ["ads_shorts"], "visualStyles": ["vintage"],
                      "purpose": "education", "experience": "pro", "skipped": False,
                      "createdAt": ago(26)},
@@ -210,7 +210,7 @@ def main():
 
         curl(f"{base}/rest/v1/user_persona", method="POST",
              headers={**admin_h, "Prefer": "resolution=merge-duplicates"},
-             body={"user_id": uid, "label": p["label"], "seed": p["seed"],
+             body={"user_id": uid, "label": p["label"], "account": p.get("account"), "seed": p["seed"],
                    "updated_at": ago(1)})
 
         curl(f"{base}/rest/v1/learning_events", method="POST", headers=admin_h,

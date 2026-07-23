@@ -113,14 +113,15 @@ function getClient(): SupabaseClient | null {
 let userIdPromise: Promise<string | null> | null = null;
 
 /**
- * DB 에 표시용 라벨을 남긴다. 익명 사용자는 UUID 뿐이라 이게 없으면
- * '어느 데모 계정의 데이터인지' 알 수 없다(회원별 인사이트 화면이 이걸 쓴다).
+ * DB 에 표시용 라벨과 계정 식별자를 남긴다. 익명 사용자는 UUID 뿐이라
+ * 이게 없으면 '어느 데모 계정의 데이터인지' 알 수 없다.
+ * label 만으론 동명이인을 못 가르므로 account(email)도 같이 남긴다.
  * seed 는 건드리지 않는다 — 온보딩이 채우는 값이라 덮어쓰면 안 된다.
  */
 async function tagIdentity(sb: SupabaseClient, userId: string): Promise<void> {
   try {
     await sb.from('user_persona').upsert(
-      { user_id: userId, label: currentLabel },
+      { user_id: userId, label: currentLabel, account: currentIdentity },
       { onConflict: 'user_id' },
     );
   } catch (e) {
