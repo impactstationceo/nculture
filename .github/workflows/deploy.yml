@@ -69,6 +69,15 @@ jobs:
       - name: Pull Vercel environment
         run: vercel pull --yes --environment=${{ steps.env.outputs.target }} --token=${{ secrets.VERCEL_TOKEN }}
 
+      # 배포본이 자기 커밋을 밝히도록 SHA 를 빌드에 새긴다.
+      # 런타임 env 는 '빌드된 코드'가 아니라 프로젝트 설정을 반영하므로 이 용도엔 못 쓴다.
+      - name: Stamp build info
+        run: |
+          printf '{ "sha": "%s", "builtAt": "%s" }\n' \
+            "${{ github.sha }}" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            > nculture-platform/frontend/lib/build-info.json
+          cat nculture-platform/frontend/lib/build-info.json
+
       # 타입/빌드 에러가 있으면 여기서 실패 -> 잘못된 코드가 배포되지 않음
       - name: Build
         run: vercel build ${{ steps.env.outputs.prod_flag }} --token=${{ secrets.VERCEL_TOKEN }}
@@ -78,6 +87,27 @@ jobs:
         run: |
           url=$(vercel deploy --prebuilt ${{ steps.env.outputs.prod_flag }} --token=${{ secrets.VERCEL_TOKEN }})
           echo "url=$url" >> "$GITHUB_OUTPUT"
+
+      # 배포가 '끝났다'와 '반영됐다'는 다르다. 실제로 그 커밋이 응답하는지 확인하고,
+      # 아니면 여기서 실패시켜 조용히 지나가지 않게 한다.
+      # 프로덕션은 별칭(ncultureclaud.vercel.app)이 SSO 없이 열려 거기서 검증한다.
+      # 프리뷰는 SSO 로 막혀 있어 배포 URL 대신 스킵한다.
+      - name: Verify deployment
+        if: steps.env.outputs.target == 'production'
+        run: |
+          expected="${{ github.sha }}"
+          target="https://ncultureclaud.vercel.app/api/version"
+          for i in $(seq 1 20); do
+            got=$(curl -sf --max-time 20 "$target" | sed -n 's/.*"sha":"\([^"]*\)".*/\1/p' || true)
+            if [ "$got" = "$expected" ]; then
+              echo "✅ 배포 반영 확인: $got"
+              exit 0
+            fi
+            echo "  대기 ${i}/20 — 현재 배포본 sha=${got:-응답없음}"
+            sleep 10
+          done
+          echo "::error::배포는 끝났지만 $target 이 아직 $expected 를 반영하지 않았습니다 (현재: ${got:-응답없음})"
+          exit 1
 
       - name: Summary
         run: |
