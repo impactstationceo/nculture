@@ -46,8 +46,10 @@ export const calculateCredits = (
 
 // 티어 ID에서 레벨 추출
 export const getTierLevel = (tierId: string) => {
-  if (tierId.includes('max') || tierId.includes('ultra') || tierId.includes('opus') || tierId.includes('405b')) return 'max';
-  if (tierId.includes('pro') || tierId.includes('hd') || tierId.includes('raw') || tierId.includes('large')) return 'pro';
+  // 'minimax' 브랜드명에 'max'가 포함돼 티어 오탐(→'max')되는 문제 방지: 서비스 접두어 제거 후 판정
+  const t = tierId.toLowerCase().replace(/^minimax/, '');
+  if (t.includes('max') || t.includes('ultra') || t.includes('opus') || t.includes('405b')) return 'max';
+  if (t.includes('pro') || t.includes('hd') || t.includes('raw') || t.includes('large')) return 'pro';
   return 'standard';
 };
 
