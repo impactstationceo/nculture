@@ -115,6 +115,7 @@ def main():
                                           "is_recommendation": True, "timecode": "10:41", "video_time": 700}, 43),
                 ("generate", {"service": "sora", "tier": "sora-2", "credits": 16,
                               "resolution": "1080p", "duration": "10초", "audio_on": True,
+                              "prompt": "너는 고객 경험(CX) 데이터 분석가야. 신규 앱 서비스의 사용자 리뷰 데이터를 분석하여 주요 불만 사항과 만족 요소를 구분하고, 서비스 개선을 위한 인사이트를 제안해줘.",
                               "from_recommendation": True, "timecode": "10:41",
                               "prompt_length": 96, "video_time": 705}, 42),
                 ("rate", {"stars": 5, "timecode": "10:41"}, 41),
@@ -122,6 +123,7 @@ def main():
                 ("regenerate", {"service": "sora", "tier": "sora-2"}, 36),
                 ("generate", {"service": "sora", "tier": "sora-2", "credits": 16,
                               "resolution": "1080p", "duration": "10초", "audio_on": True,
+                              "prompt": "해질녘 한강 산책로를 달리는 러너의 뒷모습, 시네마틱 로우앵글, 따뜻한 역광과 얕은 심도",
                               "from_recommendation": False, "timecode": "15:31",
                               "prompt_length": 64, "video_time": 950}, 35),
                 ("save", {"timecode": "15:31"}, 34),
@@ -144,6 +146,7 @@ def main():
                                           "is_recommendation": True, "timecode": "18:53", "video_time": 1140}, 20),
                 ("generate", {"service": "minimax", "tier": "hailuo-2.3", "credits": 24,
                               "resolution": "720p", "duration": "5초", "audio_on": False,
+                              "prompt": "이제 너는 감각적이고 혁신적인 UI/UX 디자이너야. 모바일 웰니스 앱의 사용자 경험 컨셉을 도출하기 위해 클라이언트에게 요청해야 할 필수 정보는 무엇일까?",
                               "from_recommendation": True, "timecode": "18:53",
                               "prompt_length": 118, "video_time": 1145}, 19),
                 ("rate", {"stars": 4, "timecode": "18:53"}, 18),
@@ -152,6 +155,7 @@ def main():
                                           "is_recommendation": True, "timecode": "20:17", "video_time": 1225}, 13),
                 ("generate", {"service": "minimax", "tier": "hailuo-2.3", "credits": 24,
                               "resolution": "1080p", "duration": "6초", "audio_on": False,
+                              "prompt": "빈티지 필름 톤의 펫 푸드 브랜드 광고 컷. 원목 테이블 위 패키지 클로즈업, 8mm 필름 그레인, 따뜻한 앰버 색보정, 얕은 심도",
                               "from_recommendation": True, "timecode": "20:17",
                               "prompt_length": 132, "video_time": 1230}, 12),
                 ("rate", {"stars": 4, "timecode": "20:17"}, 11),
@@ -165,6 +169,7 @@ def main():
             ],
             "gradings": [
                 {"ai_score": 88, "ai_grade": "B", "minutes": 19,
+                 "video_url": "https://5z4whd1gnknvtv5m.public.blob.vercel-storage.com/sd2.mp4",
                  "prompt": "빈티지 필름 톤의 펫 푸드 브랜드 광고 컷",
                  "criteria": [{"axis": "프롬프트 충실도", "weight": 35, "score": 90},
                               {"axis": "시각적 품질", "weight": 25, "score": 88},
@@ -201,7 +206,7 @@ def main():
 
         if p["gradings"]:
             curl(f"{base}/rest/v1/video_gradings", method="POST", headers=admin_h,
-                 body=[{"user_id": uid, "session_id": SESSION_ID, "prompt": g["prompt"],
+                 body=[{"user_id": uid, "session_id": SESSION_ID, "prompt": g["prompt"], "video_url": g.get("video_url"),
                         "ai_score": g["ai_score"], "ai_grade": g["ai_grade"],
                         "ai_criteria": g["criteria"], "ai_feedback": g["feedback"],
                         "ai_model": "gemini-3.6-flash", "created_at": ago(g["minutes"])}

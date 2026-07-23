@@ -342,6 +342,132 @@ export default function InsightsPage() {
                     </div>
                   </div>
 
+                  {/* 작성한 생성 프롬프트 — 집계 숫자가 아니라 실제로 무엇을 만들려 했는지 */}
+                  <div className="bg-white border border-neutral-200 rounded-2xl p-5">
+                    <h2 className="text-sm font-semibold text-neutral-900 mb-3">
+                      작성한 생성 프롬프트
+                      <span className="text-neutral-400 font-normal ml-1.5">
+                        {member.details?.writtenPrompts?.length || 0}건
+                      </span>
+                    </h2>
+                    {member.details?.writtenPrompts?.length ? (
+                      <div className="space-y-2">
+                        {member.details.writtenPrompts.map((w: any, i: number) => (
+                          <div key={i} className="border border-neutral-200 rounded-xl p-3">
+                            <div className="flex flex-wrap items-center gap-1.5 mb-1.5 text-[11px]">
+                              <span className="text-neutral-400 tabular-nums">{fmtTime(w.at)}</span>
+                              {w.timecode && (
+                                <span className="px-1.5 py-0.5 rounded-md bg-neutral-100 text-neutral-600 tabular-nums">
+                                  {w.timecode} 구간
+                                </span>
+                              )}
+                              <span className="px-1.5 py-0.5 rounded-md bg-neutral-100 text-neutral-600">
+                                {w.service}{w.tier ? ` · ${w.tier}` : ''}
+                                {w.resolution ? ` · ${w.resolution}` : ''}{w.duration ? ` · ${w.duration}` : ''}
+                              </span>
+                              {w.fromRecommendation && (
+                                <span className="px-1.5 py-0.5 rounded-md bg-[#3182F6]/10 text-[#1b64da]">추천에서</span>
+                              )}
+                            </div>
+                            <p className="text-sm text-neutral-800 leading-relaxed">{w.prompt}</p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : <p className="text-sm text-neutral-400">아직 생성 이력이 없습니다</p>}
+                  </div>
+
+                  {/* 추천 프롬프트 별점 — 어떤 추천에 몇 점인지 */}
+                  <div className="bg-white border border-neutral-200 rounded-2xl p-5">
+                    <h2 className="text-sm font-semibold text-neutral-900 mb-3">
+                      추천 프롬프트 평가
+                      <span className="text-neutral-400 font-normal ml-1.5">
+                        {member.details?.ratings?.length || 0}건
+                      </span>
+                    </h2>
+                    {member.details?.ratings?.length ? (
+                      <div className="space-y-2">
+                        {member.details.ratings.map((r: any, i: number) => (
+                          <div key={i} className="border border-neutral-200 rounded-xl p-3">
+                            <div className="flex items-center gap-2 mb-1.5 text-[11px]">
+                              <span className="text-amber-500 tracking-tight">
+                                {'★'.repeat(r.stars)}<span className="text-neutral-300">{'★'.repeat(5 - r.stars)}</span>
+                              </span>
+                              <span className="font-medium text-neutral-700 tabular-nums">{r.stars}점</span>
+                              {r.timecode && <span className="text-neutral-400 tabular-nums">· {r.timecode} 구간 추천</span>}
+                              <span className="text-neutral-400">· {fmtTime(r.at)}</span>
+                            </div>
+                            <p className="text-sm text-neutral-700 leading-relaxed">{r.prompt}</p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : <p className="text-sm text-neutral-400">아직 평가한 추천이 없습니다</p>}
+                  </div>
+
+                  {/* 영상 채점 — 정량(축별 점수) + 정성(코멘트 원문) 전부 */}
+                  <div className="bg-white border border-neutral-200 rounded-2xl p-5">
+                    <h2 className="text-sm font-semibold text-neutral-900 mb-3">
+                      영상 채점 결과
+                      <span className="text-neutral-400 font-normal ml-1.5">
+                        {member.details?.gradings?.length || 0}건
+                      </span>
+                    </h2>
+                    {member.details?.gradings?.length ? (
+                      <div className="space-y-3">
+                        {member.details.gradings.map((g: any, i: number) => (
+                          <div key={i} className="border border-neutral-200 rounded-xl p-3">
+                            <div className="flex items-center justify-between gap-2 mb-2">
+                              <div className="flex items-center gap-2 text-[11px] text-neutral-400">
+                                <span>{fmtTime(g.at)}</span>
+                                {g.model && <span>· {g.model}</span>}
+                                {g.videoUrl && (
+                                  <a href={g.videoUrl} target="_blank" rel="noreferrer"
+                                     className="text-[#3182F6] hover:underline">영상 보기</a>
+                                )}
+                              </div>
+                              <span className="px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-700 tabular-nums">
+                                {g.grade} {g.score}점
+                              </span>
+                            </div>
+
+                            {g.prompt && (
+                              <p className="text-sm text-neutral-800 mb-2 leading-relaxed">{g.prompt}</p>
+                            )}
+
+                            {/* 정량 */}
+                            {!!g.criteria?.length && (
+                              <div className="space-y-1 mb-2 pb-2 border-b border-neutral-100">
+                                {g.criteria.map((c: any, ci: number) => (
+                                  <div key={ci} className="flex items-center gap-2 text-[11px]">
+                                    <span className="w-28 shrink-0 text-neutral-600">{c.axis}</span>
+                                    <span className="w-8 shrink-0 text-neutral-400 tabular-nums">{c.weight}%</span>
+                                    <div className="flex-1 h-1.5 rounded-full bg-neutral-100 overflow-hidden">
+                                      <div className="h-full bg-[#3182F6]/60" style={{ width: `${c.score}%` }} />
+                                    </div>
+                                    <span className="w-7 shrink-0 text-right font-medium text-neutral-700 tabular-nums">{c.score}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+
+                            {/* 정성 */}
+                            {!!g.feedback?.length && (
+                              <div className="space-y-1">
+                                {g.feedback.map((f: any, fi: number) => (
+                                  <div key={fi} className="flex gap-1.5 text-[11px] leading-relaxed">
+                                    <span className={f.type === 'positive' ? 'text-emerald-600' : f.type === 'tip' ? 'text-neutral-400' : 'text-amber-600'}>
+                                      {f.type === 'positive' ? '✓' : f.type === 'tip' ? '›' : '!'}
+                                    </span>
+                                    <span className="text-neutral-600">{f.text}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ) : <p className="text-sm text-neutral-400">아직 채점된 영상이 없습니다</p>}
+                  </div>
+
                 </>
               )}
             </section>

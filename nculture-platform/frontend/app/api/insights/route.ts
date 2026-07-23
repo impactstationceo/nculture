@@ -40,7 +40,9 @@ export async function GET() {
         .order('created_at', { ascending: false })
         .limit(EVENT_CAP),
       admin.from('prompt_feedback').select('user_id, stars, timecode, prompt, created_at'),
-      admin.from('video_gradings').select('user_id, ai_score, ai_grade, created_at'),
+      // 채점은 정량(ai_criteria)·정성(ai_feedback) 원문까지 그대로 내린다
+      admin.from('video_gradings')
+        .select('user_id, ai_score, ai_grade, ai_criteria, ai_feedback, ai_model, prompt, video_url, created_at'),
     ]);
     for (const r of [personaRes, eventRes, feedbackRes, gradingRes]) {
       if (r.error) throw r.error;
@@ -115,11 +117,46 @@ export async function GET() {
       const stars = myFeedback.map((f) => Number(f.stars)).filter((n) => !Number.isNaN(n));
       const scores = myGradings.map((g) => Number(g.ai_score)).filter((n) => !Number.isNaN(n));
 
+      // ── 상세 내역: 집계 숫자만으로는 '무엇에 대해 그랬는지'가 사라진다 ──
+      const writtenPrompts = mine
+        .filter((e) => e.event_type === 'generate' && (e.payload || {}).prompt)
+        .slice(0, 10)
+        .map((e) => {
+          const p = e.payload || {};
+          return {
+            prompt: p.prompt,
+            service: p.service ?? null, tier: p.tier ?? null,
+            resolution: p.resolution ?? null, duration: p.duration ?? null,
+            timecode: p.timecode ?? null,
+            fromRecommendation: !!p.from_recommendation,
+            at: e.created_at,
+          };
+        });
+
+      const ratingDetails = myFeedback
+        .slice()
+        .sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''))
+        .slice(0, 10)
+        .map((f) => ({ stars: f.stars, timecode: f.timecode, prompt: f.prompt, at: f.created_at }));
+
+      const gradingDetails = myGradings
+        .slice()
+        .sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''))
+        .slice(0, 5)
+        .map((g) => ({
+          score: g.ai_score, grade: g.ai_grade, model: g.ai_model,
+          prompt: g.prompt, videoUrl: g.video_url,
+          criteria: g.ai_criteria || [],   // 정량 (축·가중치·점수)
+          feedback: g.ai_feedback || [],   // 정성 (원문 코멘트)
+          at: g.created_at,
+        }));
+
       return {
         userId: uid,
         label: persona?.label || null,
         seed: persona?.seed || null,
         lastActiveAt: times[times.length - 1] || null,
+        details: { writtenPrompts, ratings: ratingDetails, gradings: gradingDetails },
         totals: {
           events: mine.length,
           generate: generateCount,
