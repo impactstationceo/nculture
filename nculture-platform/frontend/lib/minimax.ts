@@ -72,9 +72,14 @@ export async function createVideoTask(input: CreateVideoInput): Promise<string> 
     duration: input.duration ?? 6,
     resolution: input.resolution ?? '768P',
   };
-  // Hailuo-2.3/02는 1080P에서 10초 조합을 지원하지 않음 → 1080P는 6초로 정규화
-  if (payload.resolution === '1080P' && payload.duration === 10) {
-    payload.duration = 6;
+  // 현재 크레딧 플랜은 Hailuo 1080P를 지원하지 않고(error 2061), 1080P+10s는 유효 조합도 아님(2013).
+  // → Hailuo 계열은 플랜이 지원하는 768P로 정규화한다. (플랜을 1080P 지원으로 올리면 이 캡을 재검토)
+  if (
+    typeof payload.model === 'string' &&
+    payload.model.startsWith('MiniMax-Hailuo') &&
+    payload.resolution === '1080P'
+  ) {
+    payload.resolution = '768P';
   }
   if (input.firstFrameImage) {
     payload.first_frame_image = input.firstFrameImage;
