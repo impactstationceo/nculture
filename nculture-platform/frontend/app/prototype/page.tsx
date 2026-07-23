@@ -726,6 +726,42 @@ const parseTc = (tc: string) => {
   return p.length === 3 ? p[0] * 3600 + p[1] * 60 + p[2] : p[0] * 60 + p[1];
 };
 
+// ── 채점 약점 축 → 보완 커리큘럼 매핑 (CURRICULUM 3개 클래스, /courses/<id>) ──
+const COURSE_BY_WEAK_AXIS: Record<string, { id: string; reason: string }> = {
+  '프롬프트 충실도': { id: 'course1', reason: '프롬프트 4요소(주체·행동·공간·분위기) 훈련으로 의도를 정확히 담는 법을 배워요' },
+  '시각적 품질': { id: 'course2', reason: '이미지·영상 생성 도구별 스타일 제어로 비주얼 완성도를 끌어올려요' },
+  '모션 자연스러움': { id: 'course1', reason: '행동·동작 지시(6회차)로 움직임 묘사를 구체화하면 좋아져요' },
+  '시간적 일관성': { id: 'course1', reason: '장면 분할 설계(5회차)로 장면 간 연결을 안정화할 수 있어요' },
+};
+
+/**
+ * 채점 결과(약점 축) + 개인화 취향(topStyles)으로 다음에 들을 클래스를 고른다.
+ * 채점 → 약점 → 보완 강의 → 재학습으로 이어지는 개인화 루프의 마지막 연결.
+ */
+const recommendCourseFor = (evaluation: any, personalize: any) => {
+  const crits: any[] = evaluation?.criteria || [];
+  if (!crits.length) return null;
+  const weakest = crits.slice().sort((a, b) => (a.score ?? 100) - (b.score ?? 100))[0];
+  if (!weakest?.axis) return null;
+  const base = COURSE_BY_WEAK_AXIS[weakest.axis] || COURSE_BY_WEAK_AXIS['프롬프트 충실도'];
+  const course = (CURRICULUM as any)[base.id];
+  if (!course) return null;
+  // 취향 문구 — 개인화 데이터가 있으면 권유가 '내 얘기'로 들린다
+  const styleKo: Record<string, string> = {
+    cinematic: '시네마틱', anime: '애니메이션', photoreal: '포토리얼',
+    minimal: '미니멀', experimental: '실험적', vintage: '빈티지',
+  };
+  const topStyle = personalize?.topStyles?.[0]?.token;
+  const styleNote = topStyle && styleKo[topStyle]
+    ? ` 평소 ${styleKo[topStyle]} 스타일을 즐겨 쓰시니 더 도움이 될 거예요.`
+    : '';
+  return {
+    courseId: base.id,
+    courseTitle: course.title,
+    message: `이번 영상은 「${weakest.axis}」(${weakest.score}점)가 아쉬웠어요. ${base.reason}.${styleNote}`,
+  };
+};
+
 
 const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, userPlan, onShowUpgradeModal, user, currentRole, isLoggedIn, onAuthClick }: any) => {
   const [activeTab, setActiveTab] = useState('create');
@@ -1381,13 +1417,26 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
           void gradeGeneratedVideo({ videoUrl: downloadUrl, prompt: gradedPrompt, aiJobId: null })
             .then((ev) => {
               // 실채점 실패 시에도 데모가 비어 보이지 않게 기존 목업 채점표로 폴백
+              const finalEv = ev || (sd2Grade as any);
               setResults((prev) =>
                 prev.map((r: any) =>
-                  r.id === resultId
-                    ? { ...r, evaluation: ev || (sd2Grade as any), gradingPending: false }
-                    : r,
+                  r.id === resultId ? { ...r, evaluation: finalEv, gradingPending: false } : r,
                 ),
               );
+              // 채점표를 먼저 보게 한 뒤, 약점 보완 클래스를 튜터 채팅으로 권유 (생성 1건당 1회)
+              const rec = recommendCourseFor(finalEv, personalize);
+              if (rec) {
+                setTimeout(() => {
+                  setReceivedBroadcast({
+                    type: 'recommend',
+                    from: 'AI 튜터',
+                    time: '방금',
+                    message: rec.message,
+                    courseId: rec.courseId,
+                    courseTitle: rec.courseTitle,
+                  });
+                }, 2000);
+              }
             });
         }
       } catch (error: any) {
@@ -1741,6 +1790,7 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
             receivedBroadcast.type === 'start' ? 'bg-emerald-500' :
             receivedBroadcast.type === 'end' ? 'bg-neutral-700' :
             receivedBroadcast.type === 'practice' ? 'bg-indigo-500' :
+            receivedBroadcast.type === 'recommend' ? 'bg-[#3182F6]' :
             'bg-indigo-600'
           }`}>
             <div className="flex items-start gap-3">
@@ -1749,6 +1799,7 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
                  receivedBroadcast.type === 'reminder' ? '⏰' :
                  receivedBroadcast.type === 'start' ? '🎬' :
                  receivedBroadcast.type === 'end' ? '👋' :
+                 receivedBroadcast.type === 'recommend' ? '🎓' :
                  receivedBroadcast.type === 'practice' ? '✏️' : '📢'}
               </div>
               <div className="flex-1">
@@ -1758,6 +1809,7 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
                      receivedBroadcast.type === 'reminder' ? '알림' :
                      receivedBroadcast.type === 'start' ? '수업 시작' :
                      receivedBroadcast.type === 'end' ? '수업 종료' :
+                     receivedBroadcast.type === 'recommend' ? '맞춤 강의 추천' :
                      receivedBroadcast.type === 'practice' ? '실습 안내' : '교육자 공지'}
                   </span>
                   <button 
@@ -1768,6 +1820,19 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
                   </button>
                 </div>
                 <p className="text-sm text-white/90 mb-2">{receivedBroadcast.message}</p>
+                {/* 맞춤 강의 추천이면 클래스 바로가기 버튼 */}
+                {receivedBroadcast.courseId && (
+                  <button
+                    onClick={() => window.open(`/courses/${receivedBroadcast.courseId}`, '_blank')}
+                    className="mb-2 w-full text-left bg-white/15 hover:bg-white/25 transition rounded-xl px-3 py-2"
+                  >
+                    <div className="text-[10px] text-white/60 mb-0.5">추천 클래스</div>
+                    <div className="text-sm font-semibold flex items-center justify-between gap-2">
+                      <span className="truncate">{receivedBroadcast.courseTitle}</span>
+                      <span className="shrink-0">→</span>
+                    </div>
+                  </button>
+                )}
                 <div className="text-xs text-white/60">
                   {receivedBroadcast.from} · {receivedBroadcast.time}
                 </div>
