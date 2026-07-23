@@ -171,8 +171,13 @@ export async function saveRating(
       stars: args.stars,
     });
     if (error) throw error;
-    // 별점 행위 자체도 이벤트로 남겨 개인화 신호에 포함
-    void logEvent('rate', { stars: args.stars, timecode: args.timecode ?? null });
+    // 별점 행위 자체도 이벤트로 남겨 개인화 신호에 포함.
+    // 어떤 추천에 준 점수인지 프롬프트 원문까지 같이 남긴다 (점수만으로는 추천 개선에 못 쓴다).
+    void logEvent('rate', {
+      stars: args.stars,
+      timecode: args.timecode ?? null,
+      prompt: args.prompt,
+    });
     return true;
   } catch (e) {
     console.debug('[analytics] saveRating 실패', e);

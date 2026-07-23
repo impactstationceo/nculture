@@ -1050,6 +1050,8 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
       resolution,
       duration,
       audio_on: audioOn,
+      // 프롬프트 원문을 남긴다 — 길이만으로는 '무엇을 만들려 했는지'가 사라진다
+      prompt,
       prompt_length: prompt.length,
       from_recommendation: !!recSource,
       timecode: currentPrompt?.timecode ?? null,
