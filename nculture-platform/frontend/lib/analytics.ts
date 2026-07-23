@@ -30,6 +30,30 @@ export type LearningEventType =
 
 let client: SupabaseClient | null = null;
 
+/**
+ * 데모 계정 식별자. 데모 로그인은 user.id 가 항상 'demo' 라 email 로 구분한다.
+ * 계정마다 익명 세션(=DB 사용자)을 분리해야 user_persona(PK=user_id)가
+ * 계정별로 쌓인다. 안 나누면 학생을 바꿔가며 온보딩할 때 같은 행을 덮어쓴다.
+ */
+let currentIdentity = 'guest';
+
+function storageKeyFor(identity: string): string {
+  const safe = identity.replace(/[^a-zA-Z0-9_.@-]/g, '_') || 'guest';
+  return `coming_analytics_auth__${safe}`;
+}
+
+/**
+ * 수집 신원을 데모 계정에 맞춘다. 계정이 바뀌면 클라이언트와 익명 세션을 새로 만든다.
+ * (같은 값으로 여러 번 불러도 안전)
+ */
+export function setAnalyticsIdentity(identity: string | null | undefined): void {
+  const next = (identity || 'guest').toLowerCase();
+  if (next === currentIdentity) return;
+  currentIdentity = next;
+  client = null;        // 다음 사용 시 새 storageKey 로 재생성
+  userIdPromise = null; // 익명 세션도 계정별로 새로 확보
+}
+
 function getClient(): SupabaseClient | null {
   if (!analyticsEnabled) return null;
   if (!client) {
@@ -37,8 +61,8 @@ function getClient(): SupabaseClient | null {
       auth: {
         persistSession: true,
         autoRefreshToken: true,
-        // 앱 공용 클라이언트와 저장소 키가 겹치지 않도록 분리
-        storageKey: 'coming_analytics_auth',
+        // 앱 공용 클라이언트와 겹치지 않게 + 데모 계정별로 분리
+        storageKey: storageKeyFor(currentIdentity),
       },
     });
   }
@@ -120,6 +144,63 @@ export async function saveRating(
   } catch (e) {
     console.debug('[analytics] saveRating 실패', e);
     return false;
+  }
+}
+
+/**
+ * 온보딩 스타일 선호(회원 초기 리드)를 user_persona.seed 에 저장.
+ * PK 가 user_id 라 재실행 시 upsert. 데모 계정별로 분리되려면
+ * 호출 전에 setAnalyticsIdentity() 로 신원이 맞춰져 있어야 한다.
+ */
+export async function savePersonaSeed(seed: Record<string, unknown>): Promise<boolean> {
+  const sb = getClient();
+  if (!sb) return false;
+  try {
+    const userId = await getAnalyticsUserId();
+    if (!userId) return false;
+    const { error } = await sb
+      .from('user_persona')
+      .upsert({ user_id: userId, seed, updated_at: new Date().toISOString() },
+              { onConflict: 'user_id' });
+    if (error) throw error;
+    return true;
+  } catch (e) {
+    console.debug('[analytics] savePersonaSeed 실패', e);
+    return false;
+  }
+}
+
+/**
+ * 생성 영상 채점 요청. 실제 채점(Gemini)과 DB 기록은 서버 라우트가 한다.
+ *   - Gemini 키가 서버 전용이고,
+ *   - video_gradings 는 쓰기 정책이 없어 service_role 로만 기록 가능하기 때문.
+ * 반환: 프론트 평가 카드 객체(sd2.grade.json 과 같은 스키마) 또는 null.
+ */
+export async function gradeGeneratedVideo(args: {
+  videoUrl: string;
+  prompt: string;
+  aiJobId?: string | null;
+  sessionId?: string;
+}): Promise<any | null> {
+  try {
+    const userId = await getAnalyticsUserId();
+    const res = await fetch('/api/grade', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        videoUrl: args.videoUrl,
+        prompt: args.prompt,
+        userId,
+        aiJobId: args.aiJobId ?? null,
+        sessionId: args.sessionId ?? SESSION_UUID,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data?.error || `채점 실패 (${res.status})`);
+    return data.evaluation ?? null;
+  } catch (e) {
+    console.debug('[analytics] gradeGeneratedVideo 실패', e);
+    return null;
   }
 }
 
