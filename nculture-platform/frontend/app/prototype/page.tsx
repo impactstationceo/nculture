@@ -10,7 +10,7 @@ import { isSupabaseConfigured } from '@/lib/supabase';
 import { apiReserveCredits, apiGenerateJob, apiCaptureCredits, apiRefundCredits, calculateCredits, checkPlanLimits, getTierLevel, generatePracticeEvaluation } from '@/lib/utils';
 import lectureIngest from '@/lib/ingest/2-3.ingest.json';
 import sd2Grade from '@/lib/ingest/sd2.grade.json';
-import { logEvent, saveRating, setAnalyticsIdentity, gradeGeneratedVideo, editDistanceRatio } from '@/lib/analytics';
+import { logEvent, saveRating, setAnalyticsIdentity, gradeGeneratedVideo, editDistanceRatio, getAnalyticsUserId } from '@/lib/analytics';
 import {
   Play,
   Pause,
@@ -687,6 +687,11 @@ const SESSION_INGEST: Record<number, { video: string; ingest: any }> = {
   1: { video: LECTURE_VIDEO_URL, ingest: lectureIngest },
 };
 // mm:ss 또는 hh:mm:ss -> 초
+const STYLE_LABELS: Record<string, string> = {
+  cinematic: '시네마틱', anime: '애니메이션', photoreal: '포토리얼',
+  minimal: '미니멀', experimental: '실험적', vintage: '빈티지',
+};
+
 const parseTc = (tc: string) => {
   const p = tc.split(':').map(Number);
   return p.length === 3 ? p[0] * 3600 + p[1] * 60 + p[2] : p[0] * 60 + p[1];
@@ -714,6 +719,9 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
   const [isGenerating, setIsGenerating] = useState(false);
   const [tutorOpen, setTutorOpen] = useState(false);
   const [modelPickerOpen, setModelPickerOpen] = useState(false);
+  // 개인화 추천 (프로필 기반 생성 설정·구간·스타일)
+  const [personalize, setPersonalize] = useState<any>(null);
+  const [setupApplied, setSetupApplied] = useState(false);
   const [notification, setNotification] = useState<any>(null);
   const [runningJobs, setRunningJobs] = useState(0);
 
@@ -881,6 +889,41 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
     }
     dwellRef.current = { tc, start: Date.now() };
   }, [currentPrompt?.timecode]);
+
+  // 개인화 추천을 받아온다.
+  //
+  // 신원을 여기서 먼저 맞춘다. 래퍼(SessionPage)의 effect 에 맡기면 늦다 —
+  // React 는 자식 effect 를 부모보다 먼저 돌리므로, 그 사이에 getAnalyticsUserId() 가
+  // 'guest' 세션을 새로 만들어 이력 0 인 사용자로 조회하게 된다(실제로 guest 행이 생겼었다).
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        setAnalyticsIdentity(user?.email, user?.name);
+        const uid = await getAnalyticsUserId();
+        if (!uid || !alive) return;
+        const res = await fetch('/api/personalize', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: uid, availableServices: services.map((x: any) => x.id) }),
+        });
+        const d = await res.json();
+        if (!res.ok || !alive) return;
+        setPersonalize(d);
+
+        // 콜드 유저(이력 거의 없음)는 '추천'을 내세우지 않고 기본값만 조용히 맞춘다.
+        // 어차피 기본값은 있어야 하므로 선호를 반영하는 편이 자연스럽다.
+        if (d?.profile?.isCold && d?.setup?.service) {
+          handleModelApply(d.setup.service, d.setup.tier || selectedTier);
+          setSetupApplied(true);
+        }
+      } catch {
+        /* 추천 실패가 수업을 막지 않도록 조용히 통과 */
+      }
+    })();
+    return () => { alive = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [services.length, user?.email]);
 
   // 접속 세션: 요일·시간대·세션 길이 분석의 근거.
   // 로그인 이벤트로는 못 잡는다 — 로그인 상태가 유지되면 재방문이 안 찍힌다.
@@ -1801,6 +1844,41 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
                 </div>
               </div>
 
+              {/* 개인화: 이 사람에게 맞는 대목 + 프롬프트에서 뽑은 스타일 취향 */}
+              {personalize && !personalize.profile?.isCold && (personalize.ranked?.length || personalize.topStyles?.length) && (
+                <div className="bg-white border border-[#3182F6]/25 rounded-2xl p-4 shadow-sm mb-4">
+                  <h3 className="text-sm font-medium text-neutral-900 mb-2 flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-[#3182F6]" />
+                    회원님 맞춤
+                  </h3>
+                  {!!personalize.topStyles?.length && (
+                    <div className="flex flex-wrap items-center gap-1.5 mb-2">
+                      <span className="text-[11px] text-neutral-500">자주 쓰는 스타일</span>
+                      {personalize.topStyles.map((s: any) => (
+                        <span key={s.token} className="px-1.5 py-0.5 rounded-md bg-neutral-100 text-[11px] text-neutral-700">
+                          {STYLE_LABELS[s.token] || s.token}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {!!personalize.ranked?.length && (
+                    <div className="space-y-1">
+                      <span className="text-[11px] text-neutral-500">먼저 해볼 만한 구간</span>
+                      {personalize.ranked.slice(0, 2).map((r: any) => (
+                        <button
+                          key={r.id}
+                          onClick={() => seekLecture(parseTc(r.section))}
+                          className="w-full text-left flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-neutral-50 transition"
+                        >
+                          <span className="text-xs font-medium text-[#1b64da] tabular-nums shrink-0">{r.section}</span>
+                          <span className="text-xs text-neutral-600 truncate">{r.text}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
               {panelItems.length > 0 && (
                 <div className="bg-white border border-neutral-200 rounded-2xl p-4 shadow-sm">
                   <h3 className="text-sm font-medium text-neutral-900 mb-2 flex items-center gap-2">
@@ -2014,6 +2092,40 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
           <div className="w-1/2 border-r border-[#E5E8EB] bg-[#F9FAFB] overflow-y-auto">
             <div className="p-4">
               <h3 className="text-sm font-semibold text-neutral-900 mb-3">생성 설정</h3>
+
+              {/* 개인화 추천: 이력이 쌓인 사용자에게만 제안한다.
+                  자동으로 바꿔버리면 '내가 안 바꿨는데?' 가 되므로 적용은 사용자가 누른다. */}
+              {personalize?.setup && !personalize.profile?.isCold && !setupApplied && (
+                <div className="mb-3 rounded-xl border border-[#3182F6]/25 bg-[#3182F6]/5 p-3">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <Sparkles className="w-3.5 h-3.5 text-[#1b64da]" />
+                    <span className="text-xs font-semibold text-[#1b64da]">추천 설정</span>
+                  </div>
+                  <div className="text-sm font-medium text-neutral-900 mb-0.5">
+                    {(services.find((x: any) => x.id === personalize.setup.service)?.name) || personalize.setup.service}
+                    {personalize.setup.resolution ? ` · ${personalize.setup.resolution}` : ''}
+                    {personalize.setup.duration ? ` · ${String(personalize.setup.duration).replace(/^(\d+)s$/, '$1초')}` : ''}
+                  </div>
+                  <p className="text-[11px] text-neutral-500 mb-2">{personalize.setup.reason}</p>
+                  <button
+                    onClick={() => {
+                      const st = personalize.setup;
+                      handleModelApply(st.service, st.tier || selectedTier);
+                      if (st.resolution) setResolution(st.resolution);
+                      if (st.duration) setDuration(st.duration);
+                      setSetupApplied(true);
+                      void logEvent('param_select', {
+                        field: 'recommended_setup', value: st.service,
+                        resolution: st.resolution, duration: st.duration, basis: st.basis,
+                      });
+                      setNotification({ type: 'success', message: '추천 설정을 적용했습니다' });
+                    }}
+                    className="w-full py-1.5 rounded-lg bg-[#3182F6] hover:bg-[#1b64da] text-white text-xs font-medium transition"
+                  >
+                    이 설정으로 맞추기
+                  </button>
+                </div>
+              )}
 
               <div className="space-y-3">
                 <ModelPicker

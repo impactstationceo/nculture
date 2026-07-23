@@ -8,6 +8,7 @@
  *    service/section 은 행동 기반(강한 신호). 추천은 section 축을 주로 쓴다.
  */
 import type { LearningEvent, PersonaSeed, Profile, AffinityMap } from './types';
+import { detectStyles } from './style';
 
 const HALF_LIFE_DAYS = 14;
 const K_CONFIDENCE = 25; // 이벤트 이만큼 쌓이면 confidence 0.5
@@ -58,6 +59,7 @@ export function computeProfile(
   const style: Record<string, number> = {};
   const service: Record<string, number> = {};
   const section: Record<string, number> = {};
+  const setup: Record<string, number> = {};
 
   // 시드 prior (선언) — content/style/purpose/experience
   (seed?.contentTypes || []).forEach((c) => add(content, c, SEED_WEIGHT));
@@ -75,11 +77,19 @@ export function computeProfile(
         add(service, p.service, w);
         behavioral++;
         break;
-      case 'generate':
+      case 'generate': {
+        // 실패(크레딧 환불)는 선호가 아니다 — 같은 프롬프트 재시도가 선호처럼 잡힌다
+        if (p.status === 'failed') { behavioral++; break; }
         add(service, p.service, w * 2); // 실제로 사용 = 강한 신호
         add(section, p.timecode, w * 1.5);
+        if (p.service) {
+          add(setup, [p.service, p.tier ?? '', p.resolution ?? '', p.duration ?? ''].join('|'), w * 2);
+        }
+        // 실제로 만든 프롬프트에서 스타일 취향을 뽑는다(선언보다 정직)
+        detectStyles(p.prompt).forEach((t) => add(style, t, w * 1.5));
         behavioral++;
         break;
+      }
       case 'regenerate':
         add(service, p.service, w);
         behavioral++;
@@ -91,6 +101,10 @@ export function computeProfile(
         break;
       case 'apply_recommendation':
         add(section, p.timecode, w * 1.2);
+        behavioral++;
+        break;
+      case 'param_select':
+        // 해상도/길이를 직접 바꾼 것 자체가 약한 선호 신호
         behavioral++;
         break;
       case 'rate':
@@ -118,6 +132,7 @@ export function computeProfile(
       style: normalize(style),
       service: normalize(service),
       section: normalize(section),
+      setup: normalize(setup),
     },
     purpose: seed?.purpose ?? null,
     experience: seed?.experience ?? null,

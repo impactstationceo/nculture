@@ -28,6 +28,11 @@ export interface Profile {
     style: AffinityMap;    // 주로 시드 기반
     service: AffinityMap;  // 행동 기반 (model_select/generate)
     section: AffinityMap;  // 행동 기반 (dwell/generate/rate/save…) — 추천 랭킹의 핵심 축
+    /**
+     * 생성 설정 선호. 키 = `service|tier|resolution|duration` (성공한 generate 만).
+     * 모델만 따로 보면 "1080p 10초로 만드는 사람"인지가 사라져서 한 세트로 묶는다.
+     */
+    setup: AffinityMap;
   };
   purpose: string | null;
   experience: string | null;
@@ -55,4 +60,18 @@ export interface RankedPrompt extends PromptCandidate {
   personal: number;  // 개인화 성분
   general: number;    // 제너럴 성분
   alpha: number;     // 개인화 가중 (증거량 기반)
+}
+
+/** 강의실에서 바로 적용할 수 있는 생성 설정 추천 */
+export interface SetupRecommendation {
+  service: string;
+  tier: string | null;
+  resolution: string | null;
+  duration: string | null;
+  /** 0..1 — 이 조합이 그 사람 이력에서 차지하는 비중 */
+  weight: number;
+  /** 'behavior' = 실제 생성 이력, 'seed' = 온보딩 선언 기반 추정, 'global' = 전체 인기 */
+  basis: 'behavior' | 'seed' | 'global';
+  /** 화면에 그대로 보여줄 근거 문구 */
+  reason: string;
 }

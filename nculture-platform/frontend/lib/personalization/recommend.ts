@@ -12,6 +12,8 @@ import type {
   GlobalStats,
   RankedPrompt,
   LearningEvent,
+  AffinityMap,
+  SetupRecommendation,
 } from './types';
 
 const K_ALPHA = 20; // evidence 이만큼이면 개인화 가중 0.5
@@ -95,4 +97,100 @@ export function rankPrompts(
       return { ...c, score: +score.toFixed(6), personal, general: +general.toFixed(6), alpha: +alpha.toFixed(4) };
     })
     .sort((a, b) => b.score - a.score);
+}
+
+/**
+ * 생성 설정(모델·티어·해상도·길이) 추천.
+ *
+ * 우선순위:
+ *   1) 본인이 실제로 성공시킨 조합 (behavior) — 가장 강한 근거
+ *   2) 이력이 없으면 온보딩 선언에서 추정 (seed)
+ *   3) 그것도 없으면 전체에서 가장 많이 쓰인 조합 (global)
+ *
+ * 마진 우선 모델 선택은 넣지 않았다(대표님 미결정 사항). 순수하게 사용자 신호만 쓴다.
+ */
+export function recommendSetup(
+  profile: Profile,
+  opts: {
+    /** 선택 가능한 모델 id 목록 — 여기 없는 모델은 추천하지 않는다 */
+    availableServices?: string[];
+    /** 전체 사용자 setup 인기 (콜드스타트 폴백) */
+    globalSetups?: AffinityMap;
+    /** 콘텐츠 종류 → 기본 모델 (시드 폴백용) */
+    seedServiceHint?: Record<string, string>;
+  } = {},
+): SetupRecommendation | null {
+  const allowed = opts.availableServices;
+  const ok = (svc: string) => !allowed || allowed.includes(svc);
+
+  const parse = (key: string) => {
+    const [service, tier, resolution, duration] = key.split('|');
+    return {
+      service,
+      tier: tier || null,
+      resolution: resolution || null,
+      duration: duration || null,
+    };
+  };
+
+  // 1) 행동 기반 — 본인이 실제로 성공시킨 조합
+  const own = Object.entries(profile.affinity.setup || {})
+    .sort((a, b) => b[1] - a[1])
+    .find(([k]) => ok(parse(k).service));
+  if (own) {
+    const s = parse(own[0]);
+    const pct = Math.round(own[1] * 100);
+    return {
+      ...s,
+      weight: own[1],
+      basis: 'behavior',
+      reason: `직접 만든 영상의 ${pct}%를 이 설정으로 작업하셨어요`,
+    };
+  }
+
+  // 2) 시드 기반 — 관심 콘텐츠에서 모델만 추정 (해상도·길이는 앱 기본값에 맡긴다)
+  const hint = opts.seedServiceHint || {};
+  const contentTop = Object.entries(profile.affinity.content || {})
+    .sort((a, b) => b[1] - a[1])
+    .map(([k]) => hint[k])
+    .find((svc) => svc && ok(svc));
+  if (contentTop) {
+    return {
+      service: contentTop,
+      tier: null,
+      resolution: null,
+      duration: null,
+      weight: 0,
+      basis: 'seed',
+      reason: '온보딩에서 고르신 관심 분야에 맞춘 기본 모델이에요',
+    };
+  }
+
+  // 3) 전체 인기
+  const glob = Object.entries(opts.globalSetups || {})
+    .sort((a, b) => b[1] - a[1])
+    .find(([k]) => ok(parse(k).service));
+  if (glob) {
+    const s = parse(glob[0]);
+    return {
+      ...s,
+      weight: glob[1],
+      basis: 'global',
+      reason: '다른 수강생들이 가장 많이 쓰는 설정이에요',
+    };
+  }
+
+  return null;
+}
+
+/** 전체 사용자 이벤트에서 setup 인기 집계 (콜드스타트 폴백용) */
+export function computeGlobalSetups(allEvents: LearningEvent[]): AffinityMap {
+  const m: Record<string, number> = {};
+  for (const ev of allEvents) {
+    if (ev.event_type !== 'generate') continue;
+    const p = ev.payload || {};
+    if (p.status === 'failed' || !p.service) continue;
+    addTo(m, [p.service, p.tier ?? '', p.resolution ?? '', p.duration ?? ''].join('|'), 1);
+  }
+  return normalize(m);
 }
