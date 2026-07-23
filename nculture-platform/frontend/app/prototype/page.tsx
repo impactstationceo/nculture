@@ -10,6 +10,7 @@ import { isSupabaseConfigured } from '@/lib/supabase';
 import { apiReserveCredits, apiGenerateJob, apiCaptureCredits, apiRefundCredits, calculateCredits, checkPlanLimits, getTierLevel, generatePracticeEvaluation } from '@/lib/utils';
 import lectureIngest from '@/lib/ingest/2-3.ingest.json';
 import sd2Grade from '@/lib/ingest/sd2.grade.json';
+import { logEvent, saveRating } from '@/lib/analytics';
 import {
   Play,
   Pause,
@@ -845,13 +846,8 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
     prevResultsRef.current = results.length;
   }, [results.length, recSource]);
 
-  const currentSession = Object.values(CURRICULUM)
-    .flatMap((stage: any) => stage.sessions)
-    .find((s: any) => s.id === sessionId);
-
-  if (!currentSession) return null;
-
   // 시연 구간 동안에만 노출: 프롬프트 등장 시점부터 (다음 프롬프트 전 or 최대 표시창) 까지
+  // (조기 반환보다 위에 둔다 — 아래 체류시간 훅이 같은 값을 써야 하고, 훅은 조건부일 수 없다)
   const PROMPT_WINDOW = 150; // 시연 표시 최대 구간(초)
   const sortedPrompts: any[] = lecture
     ? lecture.ingest.on_screen_prompts
@@ -865,6 +861,40 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
     const end = next ? Math.min(next.sec, p.sec + PROMPT_WINDOW) : p.sec + PROMPT_WINDOW;
     if (videoTime >= p.sec && videoTime < end) { currentPrompt = p; break; }
   }
+
+  // 체류시간 수집: 시연 구간이 바뀌면 직전 구간에 머문 시간을 기록
+  // (대표님 기획 "어느 부분에 얼마나 머물렀는지" — 개인화 학습의 핵심 신호)
+  const dwellRef = useRef<{ tc: string | null; start: number }>({ tc: null, start: 0 });
+  useEffect(() => {
+    const tc: string | null = currentPrompt?.timecode ?? null;
+    const prev = dwellRef.current;
+    if (prev.tc === tc) return;
+    if (prev.tc !== null) {
+      const seconds = Math.round((Date.now() - prev.start) / 1000);
+      if (seconds >= 2) void logEvent('dwell', { section: prev.tc, seconds });
+    }
+    dwellRef.current = { tc, start: Date.now() };
+  }, [currentPrompt?.timecode]);
+
+  // 마지막 구간은 이탈 시점에 기록 (구간 전환이 일어나지 않으므로)
+  useEffect(() => {
+    const flush = () => {
+      const { tc, start } = dwellRef.current;
+      if (!tc) return;
+      const seconds = Math.round((Date.now() - start) / 1000);
+      if (seconds >= 2) void logEvent('dwell', { section: tc, seconds, final: true });
+      dwellRef.current = { tc: null, start: 0 };
+    };
+    window.addEventListener('pagehide', flush);
+    return () => { window.removeEventListener('pagehide', flush); flush(); };
+  }, []);
+
+  const currentSession = Object.values(CURRICULUM)
+    .flatMap((stage: any) => stage.sessions)
+    .find((s: any) => s.id === sessionId);
+
+  if (!currentSession) return null;
+
   const seekLecture = (sec: number) => {
     if (lectureVideoRef.current) {
       lectureVideoRef.current.currentTime = sec + 0.1;
@@ -885,6 +915,12 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
   const applyExample = (text: string, isRec: boolean) => {
     setPrompt(text);
     setRecSource(isRec ? text : null);
+    void logEvent('apply_recommendation', {
+      prompt: text,
+      is_recommendation: isRec,
+      timecode: currentPrompt?.timecode ?? null,
+      video_time: Math.round(videoTime),
+    });
   };
   // 사용자가 프롬프트를 직접 수정하면 별점 대상 해제
   const onPromptChange = (v: string) => {
@@ -892,12 +928,16 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
     if (recSource && v !== recSource) setRecSource(null);
   };
   const submitRating = (stars: number) => {
+    // 로컬 백업(오프라인/수집 비활성 대비) + DB 기록(추천 품질 피드백 루프)
     try {
       const key = 'coming_prompt_ratings';
       const arr = JSON.parse(localStorage.getItem(key) || '[]');
       arr.push({ prompt: ratingFor, stars, at: new Date().toISOString(), sessionId });
       localStorage.setItem(key, JSON.stringify(arr));
     } catch {}
+    if (ratingFor) {
+      void saveRating({ prompt: ratingFor, stars, timecode: currentPrompt?.timecode ?? null });
+    }
     setRatingFor(null);
     setHoverStar(0);
     setNotification({ type: 'success', message: `평가 감사합니다! (${stars}★)` });
@@ -968,6 +1008,12 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
     const selectedSvc = services.find((s: any) => s.id === service);
     const selectedTierData = selectedSvc?.tiers.find((t: any) => t.id === tier);
     setAudioOn(selectedTierData?.audioSupported || false);
+    // Minimax Hailuo는 현재 크레딧 플랜 지원값으로 자동 세팅 (720p→768P, 5s→6s)
+    if (service === 'minimax') {
+      setResolution('720p');
+      setDuration('5s');
+    }
+    void logEvent('model_select', { service, tier });
   };
 
   const handleGenerate = async () => {
@@ -991,7 +1037,19 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
     
     const jobId = `job_${Date.now()}`;
     const creditsToUse = estimatedCredits;
-    
+
+    // 개인화 신호: 무엇을·어떤 모델로·추천을 썼는지·강의 어느 지점에서 생성했는지
+    void logEvent('generate', {
+      job_id: jobId,
+      credits: creditsToUse,
+      service: selectedService,
+      tier: selectedTier,
+      prompt_length: prompt.length,
+      from_recommendation: !!recSource,
+      timecode: currentPrompt?.timecode ?? null,
+      video_time: Math.round(videoTime),
+    });
+
     setWallet((prev: any) => ({ ...prev, balance: prev.balance - creditsToUse }));
     addLedgerEntry({
       id: Date.now(),
@@ -1100,7 +1158,9 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
       // Fast 모델은 이미지→영상 전용(텍스트→영상 미지원)이므로, 텍스트 프롬프트 생성에는 Hailuo-2.3 사용
       const model = 'MiniMax-Hailuo-2.3';
       const apiResolution = resolution === '1080p' ? '1080P' : '768P';
-      const apiDuration = (parseInt(String(duration), 10) || 6) >= 10 ? 10 : 6;
+      // Hailuo-2.3는 1080P에서 10초 미지원 → 1080P는 6초로 고정
+      const apiDuration =
+        apiResolution === '1080P' ? 6 : (parseInt(String(duration), 10) || 6) >= 10 ? 10 : 6;
 
       try {
         // 1) 태스크 제출
