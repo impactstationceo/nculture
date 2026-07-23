@@ -765,6 +765,8 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
   const [isPlaying, setIsPlaying] = useState(false);
   // 추천 프롬프트 별점 평가 (대표님 기획: 추천 품질 피드백 루프)
   const [recSource, setRecSource] = useState<string | null>(null);
+  // 프롬프트 출처: 구간 추천 / 회차 기본 예시 / 직접 작성(실습)
+  const [promptOrigin, setPromptOrigin] = useState<'recommendation' | 'example' | 'custom'>('custom');
   const [ratingFor, setRatingFor] = useState<string | null>(null);
   const [hoverStar, setHoverStar] = useState(0);
   const prevResultsRef = useRef(0);
@@ -916,6 +918,9 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
   const applyExample = (text: string, isRec: boolean) => {
     setPrompt(text);
     setRecSource(isRec ? text : null);
+    // 구간 추천 / 회차 기본 예시 / 직접 작성을 구분해 둔다.
+    // from_recommendation(불리언)만으로는 '예시에서 온 것'과 '직접 쓴 것'이 뭉개진다.
+    setPromptOrigin(isRec ? 'recommendation' : 'example');
     void logEvent('apply_recommendation', {
       prompt: text,
       is_recommendation: isRec,
@@ -923,10 +928,11 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
       video_time: Math.round(videoTime),
     });
   };
-  // 사용자가 프롬프트를 직접 수정하면 별점 대상 해제
+  // 사용자가 프롬프트를 직접 수정하면 별점 대상 해제 + 출처를 '직접 작성'으로
   const onPromptChange = (v: string) => {
     setPrompt(v);
     if (recSource && v !== recSource) setRecSource(null);
+    setPromptOrigin((prev) => (prev === 'custom' ? prev : 'custom'));
   };
   const submitRating = (stars: number) => {
     // 로컬 백업(오프라인/수집 비활성 대비) + DB 기록(추천 품질 피드백 루프)
@@ -1040,7 +1046,10 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
     const creditsToUse = estimatedCredits;
 
     // 개인화 신호: 무엇을·어떤 모델로·추천을 썼는지·강의 어느 지점에서 생성했는지
-    void logEvent('generate', {
+    // 생성 이벤트는 '시도'가 아니라 '결과'가 확정된 뒤에 남긴다.
+    // 시도 시점에 남기면 실패(크레딧 환불)도 성공처럼 집계돼 생성 횟수가 부풀려진다.
+    // 여기서는 메타만 붙잡아 두고, 아래 각 분기의 성공/실패 지점에서 status 와 함께 기록한다.
+    const genMeta = {
       job_id: jobId,
       credits: creditsToUse,
       // 모델·해상도·길이는 생성 시점 기준으로 함께 남긴다 — 셋이 한 세트여야
@@ -1053,10 +1062,13 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
       // 프롬프트 원문을 남긴다 — 길이만으로는 '무엇을 만들려 했는지'가 사라진다
       prompt,
       prompt_length: prompt.length,
-      from_recommendation: !!recSource,
+      prompt_source: promptOrigin,
+      from_recommendation: promptOrigin === 'recommendation',
       timecode: currentPrompt?.timecode ?? null,
       video_time: Math.round(videoTime),
-    });
+    };
+    const logGenerate = (status: 'success' | 'failed', reason?: string) =>
+      void logEvent('generate', { ...genMeta, status, ...(reason ? { error: reason } : {}) });
 
     setWallet((prev: any) => ({ ...prev, balance: prev.balance - creditsToUse }));
     addLedgerEntry({
@@ -1138,6 +1150,7 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
           evaluation
         }]);
         
+        logGenerate('success');
         setNotification({ type: 'success', message: `생성 완료! ${creditsToUse} 크레딧 사용` });
       } catch (error: any) {
         setWallet((prev: any) => ({ ...prev, balance: prev.balance + creditsToUse }));
@@ -1151,6 +1164,7 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
           tierId: selectedTier
         });
         
+        logGenerate('failed', error?.message);
         setNotification({ type: 'error', message: `생성 실패. ${creditsToUse} 크레딧 환불됨` });
         console.error('Generate error:', error);
       } finally {
@@ -1230,6 +1244,7 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
             gradingPending: !!lecture,
           },
         ]);
+        logGenerate('success');
         setNotification({ type: 'success', message: `생성 완료! ${creditsToUse} 크레딧 사용` });
 
         if (lecture) {
@@ -1258,6 +1273,7 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
           providerId: selectedService,
           tierId: selectedTier,
         });
+        logGenerate('failed', error?.message);
         setNotification({ type: 'error', message: `생성 실패: ${error?.message || '오류'} (크레딧 환불됨)` });
         console.error('Hailuo generate error:', error);
       } finally {
@@ -1306,6 +1322,7 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
           evaluation
         }]);
         
+        logGenerate('success');
         setNotification({ type: 'success', message: `생성 완료! ${creditsToUse} 크레딧 사용` });
       } else {
         await apiRefundCredits(jobId);
@@ -1320,6 +1337,7 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
           tierId: selectedTier
         });
         
+        logGenerate('failed', '생성 실패(목업)');
         setNotification({ type: 'error', message: `생성 실패. ${creditsToUse} 크레딧 환불됨` });
       }
       

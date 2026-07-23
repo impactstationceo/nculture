@@ -74,14 +74,16 @@ export async function GET() {
       let appliedRecommendation = 0;
       let generatedFromRecommendation = 0;
       let generateCount = 0;
+      let generateFailed = 0;
       let creditsUsed = 0;
 
       for (const e of mine) {
         byType[e.event_type] = (byType[e.event_type] || 0) + 1;
         const p = e.payload || {};
-        // 생성 설정은 '실제로 영상을 만든 시점'(generate)만 센다.
-        // 모델·해상도·길이를 한 세트로 묶어야 "이 사람이 어떤 설정으로 만드는지"가 나온다.
-        if (e.event_type === 'generate' && p.service) {
+        // 생성 설정은 '성공한 생성'만 센다. 실패는 크레딧이 환불되고 결과물도 없어서
+        // 선호 신호로 쓰면 안 된다(같은 프롬프트를 재시도한 것이 3회 선택처럼 잡힘).
+        // status 가 없는 과거 이벤트는 성공으로 간주한다(그때는 성공만 기록됐거나 구분이 없었음).
+        if (e.event_type === 'generate' && p.status !== 'failed' && p.service) {
           const k = JSON.stringify({
             service: p.service, tier: p.tier ?? null,
             resolution: p.resolution ?? null, duration: p.duration ?? null,
@@ -100,9 +102,13 @@ export async function GET() {
             if (p.is_recommendation) appliedRecommendation += 1;
             break;
           case 'generate':
-            generateCount += 1;
-            creditsUsed += Number(p.credits) || 0;
-            if (p.from_recommendation) generatedFromRecommendation += 1;
+            if (p.status === 'failed') {
+              generateFailed += 1;   // 실패는 별도로 — 재시도 빈발은 UX 신호이지 선호가 아니다
+            } else {
+              generateCount += 1;
+              creditsUsed += Number(p.credits) || 0;
+              if (p.from_recommendation) generatedFromRecommendation += 1;
+            }
             break;
         }
       }
@@ -128,7 +134,10 @@ export async function GET() {
             service: p.service ?? null, tier: p.tier ?? null,
             resolution: p.resolution ?? null, duration: p.duration ?? null,
             timecode: p.timecode ?? null,
-            fromRecommendation: !!p.from_recommendation,
+            // 'recommendation' | 'example' | 'custom' — 없으면 과거 이벤트라 불리언으로 되짚는다
+            source: p.prompt_source ?? (p.from_recommendation ? 'recommendation' : 'custom'),
+            status: p.status ?? 'success',
+            error: p.error ?? null,
             at: e.created_at,
           };
         });
@@ -159,7 +168,8 @@ export async function GET() {
         details: { writtenPrompts, ratings: ratingDetails, gradings: gradingDetails },
         totals: {
           events: mine.length,
-          generate: generateCount,
+          generate: generateCount,      // 성공한 생성만
+          generateFailed,               // 실패(크레딧 환불) 건수
           creditsUsed,
           ratings: stars.length,
           gradings: scores.length,
