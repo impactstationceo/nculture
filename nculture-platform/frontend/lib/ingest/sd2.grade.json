@@ -1,0 +1,58 @@
+{
+  "grade": "A",
+  "gradeColor": "text-emerald-600 bg-emerald-50 border-emerald-200",
+  "score": 92,
+  "focus": "화려한 황금 갑옷 변신과 연출, 역동적인 전투 액션과 안정적인 배경 일관성을 보여주는 매우 우수한 품질의 AI 생성 영상입니다.",
+  "criteria": [
+    {
+      "axis": "프롬프트 충실도",
+      "weight": 35,
+      "score": 95
+    },
+    {
+      "axis": "시각적 품질",
+      "weight": 25,
+      "score": 92
+    },
+    {
+      "axis": "모션 자연스러움",
+      "weight": 20,
+      "score": 88
+    },
+    {
+      "axis": "시간적 일관성",
+      "weight": 20,
+      "score": 90
+    }
+  ],
+  "feedbacks": [
+    {
+      "type": "positive",
+      "text": "눈 발광 및 황금 갑옷 변신 시각효과(VFX)의 압도적인 퀄리티"
+    },
+    {
+      "type": "positive",
+      "text": "장면 전환 속에서도 피사체의 얼굴과 박물관 배경 일관성 완벽 유지"
+    },
+    {
+      "type": "suggestion",
+      "text": "검을 휘두르며 화염을 방출하는 초반 모션에서의 신체 및 유기적 프레임 보정 필요"
+    },
+    {
+      "type": "suggestion",
+      "text": "아티팩트: 액션 전환 구간에서의 검 및 손 부위 프레임 뭉개짐"
+    },
+    {
+      "type": "tip",
+      "text": "화려한 황금 갑옷 변신과 연출, 역동적인 전투 액션과 안정적인 배경 일관성을 보여주는 매우 우수한 품질의 AI 생성 영상입니다."
+    }
+  ],
+  "matchedKeywords": [],
+  "inferred_prompt": "Cinematic fantasy scene inside a grand museum: a young female student reading a book notices a giant stone gargoyle coming to life. Her eyes glow bright gold, and she transforms into a golden armored warrior with a flowing cape. She unleashes a blast of fire from a glowing golden sword, shattering the gargoyle into pieces, before transforming back into her casual clothes and continuing to read.",
+  "metricComments": {
+    "프롬프트 충실도": "박물관에서 책을 읽다 가고일에 맞서 황금 전사로 변신하고, 검에서 에너지를 방출해 석상을 파괴한 뒤 다시 일상으로 돌아오는 복잡한 연출 요구사항을 정확히 이행했습니다.",
+    "시각적 품질": "갑옷의 메탈릭한 질감, 눈과 검의 빛 효과, 폭발 시 박살 나는 석상 파편의 입자 디테일 등 시각적 완성도와 조명이 정교합니다.",
+    "모션 자연스러움": "변신 과정의 오버레이 연출과 화염 방출 모션이 유기적이나, 검을 휘두르는 격렬한 액션 컷에서 모션  blur 및 인체 왜곡이 다소 발생합니다.",
+    "시간적 일관성": "여러 컷 전환에도 인물의 이목구비, 박물관 배경, 벤치 및 책 소품 등의 일관성이 고도로 유지됩니다."
+  }
+}
