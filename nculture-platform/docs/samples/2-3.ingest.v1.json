@@ -1,0 +1,88 @@
+{
+  "session_title": "AI와 디자인 씽킹: 생성형 AI를 활용한 문제 정의 및 디자인 컨셉 도출",
+  "learning_objectives": [
+    "디자인 씽킹(Design Thinking) 프로세스에 생성형 AI를 결합하는 방법 이해하기",
+    "POV(관점 서술문)와 HMW(How Might We) 기법을 통한 사용자 중심 문제 정의 습득",
+    "AI 역할 부여(Role Prompting)를 활용하여 가상 페르소나 및 페인 포인트 정의하기",
+    "페르소나 분석 결과에 기반한 브랜드 디자인 컨셉 및 시각 프롬프트 도출하기"
+  ],
+  "key_concepts": [
+    "디자인 씽킹",
+    "POV 관점 서술문",
+    "How Might We (HMW)",
+    "역할 부여 (Role Prompting)",
+    "페르소나",
+    "페인 포인트",
+    "디자인 컨셉 도출"
+  ],
+  "on_screen_prompts": [
+    {
+      "timecode": "00:01:13",
+      "prompt": "Light blue oversized sweatshirt with 10 fur brooches arranged in a pattern of white daisy flowers, inspired by Takashi Murakami. High-fashion editorial style, supreme look-book aesthetic, white background.",
+      "lang": "en"
+    },
+    {
+      "timecode": "00:02:12",
+      "prompt": "Futuristic interior design for a perfume brand's pop-up store greenhouse-inspired walls with a starry galaxy aesthetic. Bioluminescent plants integrated with fiber optic lighting Divided into sections representing different constellations, each linked to a unique fragrance. Pathways lit by soft, glowing lights. Interactive elements allow guests to 'pluck' stars to release fragrance. Live fragrance blending sessions under a replica of the night sky Cosmic ambiance with a green and pink color scheme",
+      "lang": "en"
+    },
+    {
+      "timecode": "00:10:41",
+      "prompt": "너는 데이터 분석 전문가야. 유튜브 내 덧글을 분석해서 긍정어와 부정어를 나누고, 인사이트를 제안해줘",
+      "lang": "ko"
+    },
+    {
+      "timecode": "00:11:42",
+      "prompt": "POV(Point of View, 관점 서술문) : (Who)는 (What)이다. 왜냐하면 (Why) 때문이다. 이를 바탕으로 그 문제를 해결하기 위해 어떻게 행동할 것인지 How Might We 문장을 작성해줘",
+      "lang": "ko"
+    }
+  ],
+  "example_prompts": {
+    "beginner": {
+      "label": "초급",
+      "prompt": "너는 브랜딩 전략 매니저야. 친환경 라이프스타일 브랜드를 주로 구매하는 20대 자취생 타깃의 가상 페르소나 1명을 생성해줘. 이름, 나이, 직업, 주요 관심사와 일상에서 느끼는 페인 포인트 3가지를 포함해줘."
+    },
+    "intermediate": {
+      "label": "중급",
+      "prompt": "너는 브랜드 전략 매니저야. '휴식이 필요한 30대 직장인'을 타깃으로 한 프리미엄 디퓨저 브랜드의 POV 문장을 만들어줘. (형식: [Who]는 [What]을 원한다. 왜냐하면 [Why]이기 때문이다.) 작성된 POV를 기반으로 제품 디자인 문제를 해결하기 위한 How Might We(HMW) 질문 3가지와 이에 어울리는 핵심 디자인 컨셉 방향 3가지를 제안해줘."
+    },
+    "advanced": {
+      "label": "고급",
+      "prompt": "너는 수석 그래픽 디자이너이자 이미지 프롬프트 엔지니어야. 앞서 수립한 '우주 은하수 테마의 팝업스토어 인테리어 컨셉'을 이미지 생성 AI(미드저니/DALL-E) 프롬프트로 변환해줘. 조명 방식(바이오루미네센스, 광섬유), 공간 구조, 재질, 키 컬러(초록과 분홍 광원), 공간 연출 및 고해상도 스타일 키워드를 포함한 완벽한 영문 프롬프트를 작성해줘."
+    }
+  },
+  "rubric": {
+    "focus": "생성형 AI를 활용한 디자인 씽킹 단계별 프롬프트 구조화 및 디자인 컨셉 도출 능력 평가",
+    "keywords_expected": [
+      "POV",
+      "How Might We",
+      "역할 부여",
+      "페르소나",
+      "페인 포인트",
+      "디자인 컨셉",
+      "키 컬러"
+    ],
+    "criteria": [
+      {
+        "axis": "프롬프트 품질",
+        "weight": 30,
+        "check": "AI에게 적절한 역할(Role)을 부여하고 POV/HMW 등 구조화된 프레임워크를 명확히 제시했는가?"
+      },
+      {
+        "axis": "의도 일치도",
+        "weight": 40,
+        "check": "분석된 타깃 페르소나의 페인 포인트와 연결되는 타당한 디자인 컨셉 및 해결책을 도출했는가?"
+      },
+      {
+        "axis": "과제 적합도",
+        "weight": 20,
+        "check": "텍스트 기획 단계(LLM)에서 얻은 결과물이 시각 이미지 프롬프트로 유기적으로 연계되었는가?"
+      },
+      {
+        "axis": "창의성",
+        "weight": 10,
+        "check": "도출된 디자인 컨셉 및 시각적 연출 키워드가 독창적이고 디테일한가?"
+      }
+    ]
+  }
+}

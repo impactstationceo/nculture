@@ -1,0 +1,158 @@
+{
+  "session_title": "AI와 디자인 씽킹을 활용한 디자인 컨셉 및 페르소나 도출",
+  "learning_objectives": [
+    "생성형 AI와 디자인 씽킹(Design Thinking) 프로세스의 결합 방식을 이해한다.",
+    "POV(관점 서술문)와 HMW(How Might We) 프레임을 활용해 고객 문제를 정확히 정의한다.",
+    "LLM에 역할(Role)을 부여하여 타깃 페르소나와 핵심 페인 포인트를 도출할 수 있다.",
+    "분석된 페르소나 인사이트를 바탕으로 구체적인 디자인 컨셉과 근거를 추출할 수 있다."
+  ],
+  "key_concepts": [
+    "디자인 씽킹(Design Thinking)",
+    "POV(Point of View, 관점 서술문)",
+    "HMW(How Might We)",
+    "역할 부여 프롬프팅(Role Prompting)",
+    "타깃 페르소나(Target Persona)",
+    "페인 포인트(Pain Point)",
+    "디자인 컨셉 도출(Design Concept Extraction)"
+  ],
+  "on_screen_prompts": [
+    {
+      "timecode": "01:14",
+      "prompt": "Light blue oversized sweatshirt with 10 fur brooches arranged in a pattern of white daisy flowers, inspired by Takashi Murakami. High-fashion editorial style, supreme look-book aesthetic, white background.",
+      "lang": "en",
+      "recommended": [
+        "Dark green oversized bomber jacket with neon circuit board embroidery across the back, inspired by Cyberpunk aesthetic. High-fashion editorial style, Vogue look-book aesthetic, concrete background.",
+        "Terracotta knit cardigan with handcrafted clay buttons in geometric patterns, inspired by Memphis Design group. Minimalist fashion editorial style, Kinfolk look-book aesthetic, warm beige studio background."
+      ]
+    },
+    {
+      "timecode": "02:12",
+      "prompt": "Futuristic interior design for a perfume brand's pop-up store, greenhouse-inspired walls with a starry galaxy aesthetic. Bioluminescent plants integrated with fiber optic lighting. Divided into sections representing different constellations, each linked to a unique fragrance. Pathways lit by soft, glowing lights. Interactive elements allow guests to 'pluck' stars to release fragrance. Live fragrance blending sessions under a replica of the night sky. Cosmic ambiance with a green and pink color scheme.",
+      "lang": "en",
+      "recommended": [
+        "Eco-friendly interior design for a sustainable sneaker brand's flagship store, ocean-inspired walls made of recycled marine plastic. Water-ripple projection lighting integrated with hanging vertical kelp gardens. Divided into zones representing different marine ecosystems, each linked to a shoe collection made from ocean waste. Interactive floor tiles that light up when walked on to showcase shoe cushioning technology. Live shoe-upcycling workshops under a canopy of suspended LED sea jellies. Marine ambiance with a deep blue and turquoise color scheme.",
+        "Retro-futuristic interior design for an artisanal tea lounge, traditional teahouse architecture blended with a cyberpunk vaporwave aesthetic. Holographic bamboo trees integrated with soft neon strip lighting. Divided into tea-tasting pods representing ancient tea regions, each equipped with automated tea brewing bots. Interactive smart tea tables that display origin stories when teacups are placed on them. Zen ambiance with a matte black and warm amber color scheme."
+      ]
+    },
+    {
+      "timecode": "10:41",
+      "prompt": "너는 데이터 분석 전문가야. 유튜브 내 댓글을 분석해서 긍정어와 부정어를 나누고, 인사이트를 제안해줘.",
+      "lang": "ko",
+      "recommended": [
+        "너는 고객 경험(CX) 데이터 분석가야. 신규 앱 서비스의 사용자 리뷰 데이터를 분석하여 주요 불만 사항과 만족 요소를 구분하고, 서비스 개선을 위한 인사이트를 제안해줘.",
+        "너는 소셜 미디어 트렌드 분석가야. 최근 인스타그램에서 급상승하는 숏폼 패션 하울 콘텐츠의 댓글 데이터를 바탕으로 소비자의 구매 유발 포인트와 부작용 언급을 분류해 분석해줘."
+      ]
+    },
+    {
+      "timecode": "12:33",
+      "prompt": "POV(Point of View, 관점 서술문) : (Who)는 (What)이다. 왜냐하면 (Why) 때문이다. 이를 바탕으로 그 문제를 해결하기 위해 어떻게 행동할 것인지 How Might We 문장을 작성해줘.",
+      "lang": "ko",
+      "recommended": [
+        "POV(Point of View, 관점 서술문) : (Who) 2030 자취생은 (What) 퇴근 후 배달 음식에 의존한다. 왜냐하면 (Why) 직접 요리할 시간과 기력이 부족하기 때문이다. 이 POV를 바탕으로 자취생의 건강한 식습관 문제를 해결하기 위한 How Might We(HMW) 질문 3개를 작성해줘.",
+        "POV(Point of View, 관점 서술문) : (Who) 친환경 제품 구매자는 (What) 온라인 쇼핑 시 죄책감을 느낀다. 왜냐하면 (Why) 친환경 상품조차 과도한 비닐 포장재로 배송되기 때문이다. 이를 해결하기 위한 How Might We(HMW) 문장을 작성해줘."
+      ]
+    },
+    {
+      "timecode": "15:31",
+      "prompt": "너는 AI 피부 분석 기술을 활용해 맞춤형 스킨케어 제품을 제공하는 뷰티 브랜드의 전략팀 매니저야. 개인의 피부 상태를 분석해 최적의 제품 조합을 추천하는 것이 핵심 서비스야. 브랜드의 타겟 고객층을 정의하고, 프리미엄과 대중적 접근성 사이에서 포지셔닝을 고민하여, 브랜드 아이덴티티와 디자인을 개발하는 것이 네 역할이야.",
+      "lang": "ko",
+      "recommended": [
+        "너는 AI 기반 운동 자세 교정 기술을 제공하는 홈 트레이닝 스타트업의 브랜딩 총괄 디렉터야. 개인 맞춤형 피트니스 루틴과 실시간 피드백이 핵심 서비스야. 브랜드의 타깃 고객층을 정의하고, 오프라인 피트니스 센터와 홈트 앱 사이에서 포지셔닝을 고민하여 브랜드 아이덴티티와 수립 방향을 제안해줘.",
+        "너는 아동용 맞춤형 AI 사운드북 서비스를 제공하는 에듀테크 기업의 신규 사업 팀장이야. 아이의 발달 단계와 반응에 맞춰 동화를 재구성하는 것이 핵심이야. 주요 학부모 타깃을 구체화하고, 프리미엄 교육 도구와 일반 장난감 사이에서의 브랜딩 전략 및 브랜딩 컨셉을 도출해줘."
+      ]
+    },
+    {
+      "timecode": "16:19",
+      "prompt": "타겟 고객을 발견하고 고객에게 적합한 브랜드 전략을 세우기 위한 페르소나를 만들고 싶어. 주요 고객을 정하고 페르소나를 만들어줘.",
+      "lang": "ko",
+      "recommended": [
+        "도심 속 친환경 공유 오피스 브랜드를 이용할 가장 유력한 타깃 고객을 선정하고, 라이프스타일과 업무 가치관이 포함된 페르소나를 만들어줘.",
+        "반려동물 전용 건강 맞춤식 구독 서비스를 이용할 핵심 구매자를 정하고, 그에 알맞은 구체적인 타깃 페르소나를 생성해줘."
+      ]
+    },
+    {
+      "timecode": "18:21",
+      "prompt": "해당 페르소나의 페인 포인트는 뭐야?",
+      "lang": "ko",
+      "recommended": [
+        "앞서 정의한 '도심 속 친환경 공유 오피스 사용자' 페르소나가 기존 오피스 공간에서 겪고 있는 핵심 페인 포인트(Pain Point) 3가지는 뭐야?",
+        "앞서 만든 '반려동물 건강 맞춤식 구독 서비스 이용자' 페르소나가 사료 선택 및 구매 과정에서 느끼는 주요 불편함과 불안 요소(Pain Point)를 정리해줘."
+      ]
+    },
+    {
+      "timecode": "18:53",
+      "prompt": "이제 너는 트렌디하고 창의적인 그래픽 디자이너야. 효과적인 디자인 컨셉을 추출하는데 어떠한 정보가 필요할까?",
+      "lang": "ko",
+      "recommended": [
+        "이제 너는 감각적이고 혁신적인 UI/UX 디자이너야. 모바일 웰니스 앱의 사용자 경험 컨셉을 도출하기 위해 클라이언트에게 요청해야 할 필수 정보는 무엇일까?",
+        "이제 너는 경험 중심의 패키지 디자이너야. 친환경 친환경 수제 화장품 브랜드의 패키지 디자인 컨셉을 개발하기 위해 미리 조사해야 할 핵심 요소들을 알려줘."
+      ]
+    },
+    {
+      "timecode": "19:48",
+      "prompt": "OO의 페르소나를 해당 브랜드에 적용하여 필요한 정보를 작성해줘.",
+      "lang": "ko",
+      "recommended": [
+        "앞서 작성한 '친환경 공유 오피스 사용자' 페르소나를 해당 공간 브랜드 전략에 대입하여, 디자인 컨셉 도출에 필요한 실제 답변 데이터를 작성해줘.",
+        "앞서 도출한 '반려동물 맞춤식 이용자' 페르소나를 펫 푸드 브랜드에 적용하여, 컨셉 추출에 요구되는 정보들을 구체적으로 입력해줘."
+      ]
+    },
+    {
+      "timecode": "20:17",
+      "prompt": "디자인 컨셉을 5가지 제안해 주고 근거도 함께 제시해줘.",
+      "lang": "ko",
+      "recommended": [
+        "수집된 페르소나 정보를 바탕으로, 친환경 공유 오피스 브랜드를 위한 공간 디자인 컨셉 5가지를 제안하고 각각의 선정이유와 명분을 제시해줘.",
+        "정리된 타깃 및 페인 포인트를 바탕으로, 맞춤형 펫 푸드 브랜드의 패키지 디자인 컨셉 5가지를 제안하고 구체적인 도출 근거를 함께 설명해줘."
+      ]
+    }
+  ],
+  "example_prompts": {
+    "beginner": {
+      "label": "초급",
+      "prompt": "너는 친환경 브랜딩 전문가야. 20대 대학생을 타깃으로 하는 제로웨이스트 텀블러 브랜드의 타깃 페르소나 1명을 만들어줘. 이름, 나이, 직업, 라이프스타일, 핵심 불편함(페인포인트)을 포함해줘."
+    },
+    "intermediate": {
+      "label": "중급",
+      "prompt": "너는 브랜드 전략 매니저야. '자취하는 20대 대학생' 페르소나의 불편함(텀블러 세척의 번거로움과 무거운 무게)을 바탕으로, POV(관점 서술문: Who는 What이다, 왜냐하면 Why 때문이다) 프레임과 HMW(How Might We) 질문 3개를 작성해줘."
+    },
+    "advanced": {
+      "label": "고급",
+      "prompt": "너는 트렌디한 수석 그래픽 디자이너야. [20대 자취 대학생 타깃 제로웨이스트 텀블러]의 페르소나 및 페인포인트 분석 결과를 바탕으로, 브랜드 디자인 컨셉 5가지를 제안해줘. 각 컨셉별 디자인 에센스, 키 컬러(Hex 코드 포함), 비주얼 키워드, 도출 근거를 명확히 작성해줘."
+    }
+  },
+  "rubric": {
+    "focus": "AI에 역할을 부여하여 디자인 씽킹 단계(공감-문제정의-페르소나-컨셉도출)를 논리적으로 수행하고 구체적인 디자인 컨셉을 도출하는지 평가",
+    "keywords_expected": [
+      "역할 부여",
+      "POV",
+      "HMW",
+      "페르소나",
+      "페인 포인트",
+      "디자인 컨셉",
+      "키 컬러"
+    ],
+    "criteria": [
+      {
+        "axis": "프롬프트 품질",
+        "weight": 30,
+        "check": "AI에게 적절한 역할(Role)을 부여하고 POV, HMW, 페르소나 등 디자인 씽킹 프레임워크를 명확히 활용했는가?"
+      },
+      {
+        "axis": "의도 일치도",
+        "weight": 40,
+        "check": "도출된 타깃 페르소나의 페인 포인트와 브랜드 특성이 최종 디자인 컨셉에 논리적으로 연결되어 반영되었는가?"
+      },
+      {
+        "axis": "과제 적합도",
+        "weight": 20,
+        "check": "디자인 컨셉 제시 시 키 컬러, 비주얼 키워드, 제안 근거 등 필요한 필수 요소가 명확히 포함되어 있는가?"
+      },
+      {
+        "axis": "창의성",
+        "weight": 10,
+        "check": "타깃 분석에 기초한 디자인 컨셉이 독창적이고 브랜드 포지셔닝에 효과적인가?"
+      }
+    ]
+  }
+}

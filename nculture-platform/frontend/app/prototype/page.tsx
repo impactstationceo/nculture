@@ -10,10 +10,11 @@ import { isSupabaseConfigured } from '@/lib/supabase';
 import { apiReserveCredits, apiGenerateJob, apiCaptureCredits, apiRefundCredits, calculateCredits, checkPlanLimits, getTierLevel, generatePracticeEvaluation } from '@/lib/utils';
 import lectureIngest from '@/lib/ingest/2-3.ingest.json';
 import sd2Grade from '@/lib/ingest/sd2.grade.json';
-import { logEvent, saveRating } from '@/lib/analytics';
+import { logEvent, saveRating, setAnalyticsIdentity, gradeGeneratedVideo } from '@/lib/analytics';
 import {
   Play,
   Pause,
+  Loader2,
   Star,
   ChevronRight,
   ChevronDown,
@@ -1201,14 +1202,14 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
 
         const service = services.find((s: any) => s.id === selectedService);
         const tier = service?.tiers.find((t: any) => t.id === selectedTier);
-        const evaluation = lecture
-          ? (sd2Grade as any)
-          : generatePracticeEvaluation(prompt, sessionId, currentCategory);
+        const resultId = Date.now();
+        const gradedPrompt = prompt; // finally 에서 setPrompt('') 하므로 값을 붙잡아 둔다
 
+        // 실제로 생성된 영상만 진짜 채점한다. 채점은 수십 초 걸리므로 결과를 먼저 노출.
         setResults((prev) => [
           ...prev,
           {
-            id: Date.now(),
+            id: resultId,
             service: service?.name,
             tier: tier?.name,
             prompt,
@@ -1218,10 +1219,25 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
             duration,
             resolution,
             creditsUsed: creditsToUse,
-            evaluation,
+            evaluation: lecture ? undefined : generatePracticeEvaluation(prompt, sessionId, currentCategory),
+            gradingPending: !!lecture,
           },
         ]);
         setNotification({ type: 'success', message: `생성 완료! ${creditsToUse} 크레딧 사용` });
+
+        if (lecture) {
+          void gradeGeneratedVideo({ videoUrl: downloadUrl, prompt: gradedPrompt, aiJobId: null })
+            .then((ev) => {
+              // 실채점 실패 시에도 데모가 비어 보이지 않게 기존 목업 채점표로 폴백
+              setResults((prev) =>
+                prev.map((r: any) =>
+                  r.id === resultId
+                    ? { ...r, evaluation: ev || (sd2Grade as any), gradingPending: false }
+                    : r,
+                ),
+              );
+            });
+        }
       } catch (error: any) {
         // 실패 — 예약 크레딧 환불
         await apiRefundCredits(jobId);
@@ -1797,6 +1813,21 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
                         </div>
                       </div>
                       
+                      {/* 실제 생성 영상은 Gemini 채점이 수십 초 걸린다 — 결과를 먼저 띄우고 점수를 나중에 채운다 */}
+                      {r.gradingPending && !r.evaluation && (
+                        <div className="flex gap-2.5">
+                          <div className="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                            <Award className="w-3.5 h-3.5 text-emerald-600" />
+                          </div>
+                          <div className="flex-1 max-w-[85%] bg-white border border-neutral-200 rounded-2xl rounded-tl-sm p-3 shadow-sm">
+                            <div className="flex items-center gap-2 text-xs text-neutral-500">
+                              <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-600" />
+                              AI가 생성된 영상을 채점하고 있어요…
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
                       {r.evaluation && (
                         <div className="flex gap-2.5">
                           <div className="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
@@ -1804,7 +1835,14 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
                           </div>
                           <div className="flex-1 max-w-[85%] bg-white border border-neutral-200 rounded-2xl rounded-tl-sm p-3 shadow-sm">
                             <div className="flex items-center justify-between mb-2">
-                              <span className="text-xs font-semibold text-emerald-600">AI 평가</span>
+                              <span className="text-xs font-semibold text-emerald-600">
+                                AI 평가
+                                {r.evaluation.isRealGrading && (
+                                  <span className="ml-1.5 px-1.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-[10px] font-medium">
+                                    실채점
+                                  </span>
+                                )}
+                              </span>
                               <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full border text-xs ${r.evaluation.gradeColor}`}>
                                 <span className="font-bold">{r.evaluation.grade}</span>
                                 <span className="font-medium">{r.evaluation.score}점</span>
@@ -2060,6 +2098,12 @@ export default function SessionPage() {
 
   // [프로토타입] 로그인 계정 역할과 무관하게 항상 '학생 스튜디오'로 고정
   const protoUser = { ...(user || {}), role: 'student', name: (user && user.name) || '데모 학생' };
+
+  // 수집 신원을 데모 계정에 맞춘다. 데모 로그인은 user.id 가 항상 'demo' 라 email 로 구분.
+  // 계정별로 익명 세션(=DB 사용자)이 갈려야 학생마다 개인화 데이터가 따로 쌓인다.
+  useEffect(() => {
+    setAnalyticsIdentity(user?.email);
+  }, [user?.email]);
 
   return (
     <>
