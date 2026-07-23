@@ -204,6 +204,9 @@ def build_user(rng, arch, idx, now, days, prompts_by_tc):
             "service": svc, "tier": tier, "credits": rng.choice([10, 16, 24]),
             "resolution": res, "duration": dur, "audio_on": rng.random() < 0.5,
             "from_recommendation": from_rec, "timecode": tc,
+            # /insights writtenPrompts + prompt_source/status 컨벤션(PR #20)과 일치
+            "prompt": prompt, "prompt_source": "recommendation" if from_rec else "custom",
+            "status": "success",
             "prompt_length": len(prompt), "video_time": tc_to_sec(tc), "source": "synthetic",
         }, s_min))
         # 별점: 관심 구간일수록 높게 + 관대함 + 노이즈
