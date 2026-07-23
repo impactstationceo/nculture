@@ -692,6 +692,40 @@ const STYLE_LABELS: Record<string, string> = {
   minimal: '미니멀', experimental: '실험적', vintage: '빈티지',
 };
 
+// 스타일 토큰 → 프롬프트 본문에서 그 취향을 알아보는 어휘 (영/한 혼용 프롬프트 대응)
+const STYLE_KEYWORDS: Record<string, RegExp> = {
+  cinematic: /cinematic|film still|dramatic|movie|editorial|시네마틱|영화/i,
+  anime: /anime|illustration|cartoon|manga|2d|애니|일러스트|만화/i,
+  photoreal: /photoreal|realistic|photograph|hyper-?real|실사|포토리얼|사진/i,
+  minimal: /minimal|clean|simple|modern|미니멀|모던|심플/i,
+  experimental: /abstract|surreal|experimental|avant|추상|실험|초현실/i,
+  vintage: /vintage|retro|film grain|analog|8mm|빈티지|레트로|필름/i,
+};
+
+/**
+ * 현재 구간의 추천 프롬프트들 중 '이 회원 취향(topStyles)'에 맞는 순서로 골라낸다.
+ * 별도 카드 대신 예시 프롬프트 패널에 조용히 반영하기 위한 선택기.
+ * 취향 신호가 없으면(콜드) 원래 순서 그대로 — 결과는 항상 앞에서 n개.
+ */
+const pickPersonalizedPrompts = (prompts: string[], personalize: any, n: number): { picked: string[]; personalized: boolean } => {
+  const styles: Array<{ token: string; weight: number }> = personalize?.topStyles || [];
+  if (!styles.length || personalize?.profile?.isCold) {
+    return { picked: prompts.slice(0, n), personalized: false };
+  }
+  const scored = prompts.map((p, i) => {
+    let score = 0;
+    for (const s of styles) {
+      const re = STYLE_KEYWORDS[s.token];
+      if (re && re.test(p)) score += s.weight;
+    }
+    return { p, i, score };
+  });
+  // 취향 매칭 점수 우선, 동점이면 원래(강의 제작) 순서 존중
+  const ordered = scored.slice().sort((a, b) => b.score - a.score || a.i - b.i);
+  const personalized = ordered.some((s, idx) => s.i !== idx && s.score > 0);
+  return { picked: ordered.slice(0, n).map((s) => s.p), personalized };
+};
+
 const parseTc = (tc: string) => {
   const p = tc.split(':').map(Number);
   return p.length === 3 ? p[0] * 3600 + p[1] * 60 + p[2] : p[0] * 60 + p[1];
@@ -1040,12 +1074,20 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
     setNotification({ type: 'success', message: `평가 감사합니다! (${stars}★)` });
   };
 
-  // 좌측 '예시 프롬프트' 패널 데이터: 현재 구간 추천이 있으면 그것을, 없으면 기존 예시
-  const recExamples = (lecture && currentPrompt?.recommended?.length)
-    ? currentPrompt.recommended.map((rec: string, i: number) => ({ label: `추천 ${i + 1}`, prompt: rec }))
+  // 좌측 '예시 프롬프트' 패널 데이터: 현재 구간 추천이 있으면 그것을, 없으면 기존 예시.
+  // 구간 추천은 회원 취향(topStyles)에 맞는 2개를 자동 선택 — 별도 '맞춤 카드' 없이 여기 반영된다.
+  const personalizedPick = (lecture && currentPrompt?.recommended?.length)
+    ? pickPersonalizedPrompts(currentPrompt.recommended, personalize, 2)
+    : null;
+  const recExamples = personalizedPick
+    ? personalizedPick.picked.map((rec: string, i: number) => ({
+        label: personalizedPick.personalized ? `맞춤 ${i + 1}` : `추천 ${i + 1}`,
+        prompt: rec,
+      }))
     : null;
   const panelItems: any[] = recExamples || currentSession.examples || [];
   const panelIsRec = !!recExamples;
+  const panelIsPersonalized = !!personalizedPick?.personalized;
 
   // 회차 제목·요약·핵심개념: 인제스트(실제 영상) 기반으로 덮어쓰기
   const displayTitle = lecture ? lecture.ingest.session_title : currentSession.title;
@@ -1844,47 +1886,21 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
                 </div>
               </div>
 
-              {/* 개인화: 이 사람에게 맞는 대목 + 프롬프트에서 뽑은 스타일 취향 */}
-              {personalize && !personalize.profile?.isCold && (personalize.ranked?.length || personalize.topStyles?.length) && (
-                <div className="bg-white border border-[#3182F6]/25 rounded-2xl p-4 shadow-sm mb-4">
-                  <h3 className="text-sm font-medium text-neutral-900 mb-2 flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-[#3182F6]" />
-                    회원님 맞춤
-                  </h3>
-                  {!!personalize.topStyles?.length && (
-                    <div className="flex flex-wrap items-center gap-1.5 mb-2">
-                      <span className="text-[11px] text-neutral-500">자주 쓰는 스타일</span>
-                      {personalize.topStyles.map((s: any) => (
-                        <span key={s.token} className="px-1.5 py-0.5 rounded-md bg-neutral-100 text-[11px] text-neutral-700">
-                          {STYLE_LABELS[s.token] || s.token}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  {!!personalize.ranked?.length && (
-                    <div className="space-y-1">
-                      <span className="text-[11px] text-neutral-500">먼저 해볼 만한 구간</span>
-                      {personalize.ranked.slice(0, 2).map((r: any) => (
-                        <button
-                          key={r.id}
-                          onClick={() => seekLecture(parseTc(r.section))}
-                          className="w-full text-left flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-neutral-50 transition"
-                        >
-                          <span className="text-xs font-medium text-[#1b64da] tabular-nums shrink-0">{r.section}</span>
-                          <span className="text-xs text-neutral-600 truncate">{r.text}</span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
+              {/* 개인화는 별도 카드 대신 아래 '예시 프롬프트'에 자동 반영된다 (pickPersonalizedPrompts) */}
               {panelItems.length > 0 && (
                 <div className="bg-white border border-neutral-200 rounded-2xl p-4 shadow-sm">
                   <h3 className="text-sm font-medium text-neutral-900 mb-2 flex items-center gap-2">
                     <Lightbulb className="w-4 h-4 text-amber-500" />
                     예시 프롬프트
-                    {panelIsRec && <span className="ml-auto text-[10px] font-medium text-indigo-500">이 구간 추천</span>}
+                    {panelIsRec && (
+                      panelIsPersonalized ? (
+                        <span className="ml-auto flex items-center gap-1 text-[10px] font-medium text-[#1b64da]">
+                          <Sparkles className="w-3 h-3" /> 회원님 맞춤
+                        </span>
+                      ) : (
+                        <span className="ml-auto text-[10px] font-medium text-indigo-500">이 구간 추천</span>
+                      )
+                    )}
                   </h3>
                   <div className="space-y-1.5">
                     {panelItems.map((ex: any, i: number) => (
