@@ -1043,8 +1043,13 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
     void logEvent('generate', {
       job_id: jobId,
       credits: creditsToUse,
+      // 모델·해상도·길이는 생성 시점 기준으로 함께 남긴다 — 셋이 한 세트여야
+      // "이 사람이 어떤 설정으로 만드는지"가 나온다 (모델만 보면 반쪽)
       service: selectedService,
       tier: selectedTier,
+      resolution,
+      duration,
+      audio_on: audioOn,
       prompt_length: prompt.length,
       from_recommendation: !!recSource,
       timecode: currentPrompt?.timecode ?? null,

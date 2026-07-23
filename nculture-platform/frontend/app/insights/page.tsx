@@ -9,7 +9,7 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { RefreshCw, Users, Activity, Star, Award, Clock, Sparkles, ArrowLeft } from 'lucide-react';
+import { RefreshCw, Users, Activity, Star, Award, Clock, ArrowLeft } from 'lucide-react';
 import lectureIngest from '@/lib/ingest/2-3.ingest.json';
 
 const SEED_LABELS: Record<string, string> = {
@@ -99,17 +99,18 @@ export default function InsightsPage() {
     [data, selected],
   );
 
-  // 가장 오래 머문 구간의 실제 인제스트 추천을 끌어와 "그래서 이걸 추천한다"로 연결
-  const nextSuggestion = useMemo(() => {
-    if (!member) return null;
-    const topSection = member.derived?.topSections?.[0]?.key;
+  // 체류 구간을 '어느 강의의 어느 대목인지'로 풀어준다. 타임코드만 보면 무슨 내용인지 알 수 없다.
+  const sectionInfo = useCallback((timecode: string) => {
     const prompts: any[] = (lectureIngest as any).on_screen_prompts || [];
-    const matched = prompts.find((p) => p.timecode === topSection);
-    const pick = matched || prompts[0];
-    return pick?.recommended?.[0]
-      ? { timecode: pick.timecode, prompt: pick.recommended[0], matched: !!matched }
-      : null;
-  }, [member]);
+    const hit = prompts.find((p) => p.timecode === timecode);
+    const raw = hit?.prompt ? String(hit.prompt).replace(/\s+/g, ' ') : '';
+    return {
+      lecture: (lectureIngest as any).session_title as string,
+      topic: raw ? raw.slice(0, 46) + (raw.length > 46 ? '…' : '') : '해당 구간 시연',
+    };
+  }, []);
+
+  const lectureTitle = (lectureIngest as any).session_title as string;
 
   return (
     <div className="min-h-screen bg-neutral-50">
@@ -143,6 +144,44 @@ export default function InsightsPage() {
       <main className="max-w-6xl mx-auto px-5 py-6">
         {error && (
           <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-sm text-red-700">{error}</div>
+        )}
+
+        {/* 실시간 이벤트 모니터 — 시연의 핵심이라 맨 위. 아래 회원 비교가 밀리지 않게 높이를 조인다. */}
+        {!!data?.recentEvents?.length && (
+          <div className="mb-4 bg-white border border-neutral-200 rounded-2xl p-4">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-sm font-semibold text-neutral-900 flex items-center gap-1.5">
+                <Activity className="w-3.5 h-3.5 text-neutral-400" />
+                실시간 수집 이벤트
+              </h2>
+              <span className="text-[11px] text-neutral-400">
+                최근 {data.recentEvents.length}건 · 5초마다 갱신
+              </span>
+            </div>
+            <div className="space-y-1 max-h-44 overflow-y-auto">
+              {data.recentEvents.map((e: any, i: number) => (
+                <div
+                  key={e.id ?? i}
+                  className={`flex items-center gap-3 text-xs py-1.5 border-b border-neutral-100 last:border-0 transition-colors duration-700 ${
+                    freshIds.has(e.id) ? 'bg-emerald-50 -mx-2 px-2 rounded-lg' : ''
+                  }`}
+                >
+                  <span className="text-neutral-400 w-14 shrink-0 tabular-nums">{fmtTime(e.at)}</span>
+                  <span className="w-32 shrink-0 truncate text-neutral-600">{e.label || `익명 ${e.userId.slice(0, 6)}`}</span>
+                  <span className="px-2 py-0.5 rounded-full bg-[#3182F6]/10 text-[#1b64da] shrink-0">
+                    {EVENT_LABELS[e.type] || e.type}
+                  </span>
+                  <span className="text-neutral-500 truncate">
+                    {e.payload?.section ? `${e.payload.section} · ${e.payload.seconds}초`
+                      : e.payload?.service ? `${e.payload.service}${e.payload.tier ? ` · ${e.payload.tier}` : ''}`
+                      : e.payload?.prompt ? String(e.payload.prompt).slice(0, 60)
+                      : e.payload?.stars ? `${e.payload.stars}★`
+                      : ''}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
 
         <div className="flex gap-3 mb-5">
@@ -242,34 +281,55 @@ export default function InsightsPage() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-4">
                       <div>
                         <div className="text-xs font-medium text-neutral-700 mb-2 flex items-center gap-1">
                           <Clock className="w-3.5 h-3.5 text-neutral-400" /> 오래 머문 구간
                         </div>
                         {member.derived.topSections.length ? (
-                          <div className="space-y-1.5">
+                          <div className="border border-neutral-200 rounded-xl overflow-hidden">
+                            {/* 강의명은 한 번만 — 구간마다 반복하면 정작 어느 대목인지가 안 읽힌다 */}
+                            <div className="px-3 py-1.5 bg-neutral-50 border-b border-neutral-200 text-[11px] text-neutral-500 truncate">
+                              1회차 · {lectureTitle}
+                            </div>
                             {member.derived.topSections.map((s: any) => (
-                              <div key={s.key} className="flex items-center justify-between text-sm">
-                                <span className="text-neutral-600 tabular-nums">{s.key}</span>
-                                <span className="font-medium text-neutral-900 tabular-nums">{s.value}초</span>
+                              <div key={s.key} className="flex items-center justify-between gap-3 px-3 py-2 border-b border-neutral-100 last:border-0">
+                                <div className="text-sm text-neutral-900 min-w-0">
+                                  <span className="tabular-nums font-medium">{s.key}</span>
+                                  <span className="text-neutral-400 mx-1.5">·</span>
+                                  <span className="text-neutral-600">{sectionInfo(s.key).topic}</span>
+                                </div>
+                                <span className="font-medium text-neutral-900 tabular-nums shrink-0">{s.value}초</span>
                               </div>
                             ))}
                           </div>
                         ) : <p className="text-sm text-neutral-400">—</p>}
                       </div>
+
                       <div>
-                        <div className="text-xs font-medium text-neutral-700 mb-2">자주 고른 모델</div>
-                        {member.derived.topModels.length ? (
+                        <div className="text-xs font-medium text-neutral-700 mb-2">
+                          자주 고른 생성 설정 <span className="text-neutral-400 font-normal">(영상 생성 시점 기준)</span>
+                        </div>
+                        {member.derived.topSetups?.length ? (
                           <div className="space-y-1.5">
-                            {member.derived.topModels.map((s: any) => (
-                              <div key={s.key} className="flex items-center justify-between text-sm">
-                                <span className="text-neutral-600">{s.key}</span>
-                                <span className="font-medium text-neutral-900 tabular-nums">{s.value}회</span>
+                            {member.derived.topSetups.map((s: any, i: number) => (
+                              <div key={i} className="flex items-center justify-between gap-3 bg-neutral-50 rounded-xl px-3 py-2">
+                                <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+                                  <span className="text-sm text-neutral-900 font-medium truncate">
+                                    {s.service}{s.tier ? ` · ${s.tier}` : ''}
+                                  </span>
+                                  <span className="px-1.5 py-0.5 rounded-md bg-white border border-neutral-200 text-[11px] text-neutral-600">
+                                    {s.resolution || '해상도 미기록'}
+                                  </span>
+                                  <span className="px-1.5 py-0.5 rounded-md bg-white border border-neutral-200 text-[11px] text-neutral-600">
+                                    {s.duration || '길이 미기록'}
+                                  </span>
+                                </div>
+                                <span className="font-medium text-neutral-900 tabular-nums shrink-0">{s.count}회</span>
                               </div>
                             ))}
                           </div>
-                        ) : <p className="text-sm text-neutral-400">—</p>}
+                        ) : <p className="text-sm text-neutral-400">아직 생성 이력이 없습니다</p>}
                       </div>
                     </div>
 
@@ -282,58 +342,12 @@ export default function InsightsPage() {
                     </div>
                   </div>
 
-                  {/* 그래서 다음엔 */}
-                  {nextSuggestion && (
-                    <div className="bg-[#3182F6]/5 border border-[#3182F6]/20 rounded-2xl p-5">
-                      <h2 className="text-sm font-semibold text-[#1b64da] mb-2 flex items-center gap-1.5">
-                        <Sparkles className="w-4 h-4" /> 그래서 다음엔 이걸 추천합니다
-                      </h2>
-                      <p className="text-[11px] text-neutral-500 mb-3">
-                        {nextSuggestion.matched
-                          ? `가장 오래 머문 ${nextSuggestion.timecode} 구간의 개념을 아직 연습하지 않았습니다.`
-                          : '아직 체류 데이터가 부족해 회차 기본 추천을 보여줍니다.'}
-                        {member.seed?.visualStyles?.length ? ` 선호 스타일(${member.seed.visualStyles.join(', ')})도 함께 반영합니다.` : ''}
-                      </p>
-                      <div className="bg-white border border-neutral-200 rounded-xl p-3 text-sm text-neutral-800 leading-relaxed">
-                        {nextSuggestion.prompt}
-                      </div>
-                    </div>
-                  )}
                 </>
               )}
             </section>
           </div>
         )}
 
-        {/* 실시간 스트림 */}
-        {!!data?.recentEvents?.length && (
-          <div className="mt-4 bg-white border border-neutral-200 rounded-2xl p-5">
-            <h2 className="text-sm font-semibold text-neutral-900 mb-3">최근 수집 이벤트</h2>
-            <div className="space-y-1 max-h-72 overflow-y-auto">
-              {data.recentEvents.map((e: any, i: number) => (
-                <div
-                  key={e.id ?? i}
-                  className={`flex items-center gap-3 text-xs py-1.5 border-b border-neutral-100 last:border-0 transition-colors duration-700 ${
-                    freshIds.has(e.id) ? 'bg-emerald-50 -mx-2 px-2 rounded-lg' : ''
-                  }`}
-                >
-                  <span className="text-neutral-400 w-14 shrink-0 tabular-nums">{fmtTime(e.at)}</span>
-                  <span className="w-40 shrink-0 truncate text-neutral-600">{e.label || `익명 ${e.userId.slice(0, 6)}`}</span>
-                  <span className="px-2 py-0.5 rounded-full bg-[#3182F6]/10 text-[#1b64da] shrink-0">
-                    {EVENT_LABELS[e.type] || e.type}
-                  </span>
-                  <span className="text-neutral-500 truncate">
-                    {e.payload?.section ? `${e.payload.section} · ${e.payload.seconds}초`
-                      : e.payload?.service ? `${e.payload.service}${e.payload.tier ? ` · ${e.payload.tier}` : ''}`
-                      : e.payload?.prompt ? String(e.payload.prompt).slice(0, 60)
-                      : e.payload?.stars ? `${e.payload.stars}★`
-                      : ''}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </main>
     </div>
   );

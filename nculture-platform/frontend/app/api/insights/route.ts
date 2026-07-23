@@ -77,13 +77,14 @@ export async function GET() {
       for (const e of mine) {
         byType[e.event_type] = (byType[e.event_type] || 0) + 1;
         const p = e.payload || {};
-        // 모델 선호는 '고른 것'(model_select)뿐 아니라 '실제로 쓴 것'(generate)도 세야
-        // 실제 사용 패턴이 잡힌다. 피커를 안 열고 기본 모델로 생성하는 경우가 흔하다.
-        if (e.event_type === 'model_select' || e.event_type === 'generate') {
-          if (p.service) {
-            const k = `${p.service}${p.tier ? ` · ${p.tier}` : ''}`;
-            models[k] = (models[k] || 0) + 1;
-          }
+        // 생성 설정은 '실제로 영상을 만든 시점'(generate)만 센다.
+        // 모델·해상도·길이를 한 세트로 묶어야 "이 사람이 어떤 설정으로 만드는지"가 나온다.
+        if (e.event_type === 'generate' && p.service) {
+          const k = JSON.stringify({
+            service: p.service, tier: p.tier ?? null,
+            resolution: p.resolution ?? null, duration: p.duration ?? null,
+          });
+          models[k] = (models[k] || 0) + 1;
         }
 
         switch (e.event_type) {
@@ -128,7 +129,8 @@ export async function GET() {
         },
         derived: {
           eventsByType: byType,
-          topModels: topN(models, 3),
+          // 생성 설정 Top3 — 화면에서 모델/해상도/길이를 나눠 보여줄 수 있게 풀어서 넘긴다
+          topSetups: topN(models, 3).map(({ key, value }) => ({ ...JSON.parse(key), count: value })),
           topStyles: topN(styles, 3),
           // 어느 구간에 얼마나 머물렀는지 — 개인화의 핵심 신호
           topSections: topN(dwellBySection, 3),
