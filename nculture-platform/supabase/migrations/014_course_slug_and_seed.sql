@@ -90,5 +90,7 @@ JOIN LATERAL (
     (6, '최종 실습', '결과물 완성 및 피드백',
       '["완성도 체크리스트", "수정 포인트"]'::jsonb,
       '[{"label":"실습","prompt":"미래 도시의 일출, 시네마틱 톤"}]'::jsonb)
-) AS session_data(session_number, title, summary, concepts, examples)
+) AS session_data(session_number, title, summary, concepts, examples) ON TRUE
+-- ON TRUE 필수: 없으면 Postgres가 아래 ON CONFLICT 의 ON 을 이 LATERAL 조인의
+-- 조인 조건으로 파싱해 "syntax error at or near DO" 로 실패한다.
 ON CONFLICT (course_id, session_number) DO NOTHING;
