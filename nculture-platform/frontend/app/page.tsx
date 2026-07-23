@@ -150,7 +150,7 @@ export default function HomePage() {
                 <span className="font-normal text-[#3182F6]">Coming</span>
                 <span className="font-medium text-[#191F28]"> AI</span>
               </span>
-              <p className="text-sm text-[#8B95A1]">© 2025 Coming AI. All rights reserved.</p>
+              <p className="text-sm text-[#8B95A1]">© 2025 Coming AI. All rights reserved</p>
             </div>
 
             <div className="flex items-center gap-6 text-sm text-[#6B7684]">
