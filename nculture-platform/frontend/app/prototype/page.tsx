@@ -2102,8 +2102,8 @@ export default function SessionPage() {
   // 수집 신원을 데모 계정에 맞춘다. 데모 로그인은 user.id 가 항상 'demo' 라 email 로 구분.
   // 계정별로 익명 세션(=DB 사용자)이 갈려야 학생마다 개인화 데이터가 따로 쌓인다.
   useEffect(() => {
-    setAnalyticsIdentity(user?.email);
-  }, [user?.email]);
+    setAnalyticsIdentity(user?.email, user?.name);
+  }, [user?.email, user?.name]);
 
   return (
     <>

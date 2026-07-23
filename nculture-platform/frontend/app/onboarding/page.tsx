@@ -119,7 +119,7 @@ export default function OnboardingPage() {
     // 회원 초기 리드 수집: user_persona.seed 에 적재 (실패해도 진행은 막지 않음)
     try {
       const demo = JSON.parse(localStorage.getItem('demo_session') || 'null');
-      setAnalyticsIdentity(demo?.email); // 데모 계정별로 페르소나를 분리해 저장
+      setAnalyticsIdentity(demo?.email, demo?.name); // 데모 계정별로 페르소나를 분리해 저장
     } catch {
       /* 데모 세션이 없으면 guest 신원으로 저장된다 */
     }
