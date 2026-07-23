@@ -61,6 +61,22 @@ const Stat = ({ icon, label, value }: any) => (
   </div>
 );
 
+const pct = (v: number) => `${Math.round((v || 0) * 100)}%`;
+
+// 정규화 affinity 한 줄 막대
+const AffBar = ({ label, value, color = '#3182F6' }: any) => (
+  <div className="flex items-center gap-2">
+    <span className="w-28 shrink-0 text-xs text-neutral-600 truncate" title={label}>{label}</span>
+    <div className="flex-1 h-1.5 rounded-full bg-neutral-100 overflow-hidden">
+      <div className="h-full rounded-full" style={{ width: pct(value), background: color }} />
+    </div>
+    <span className="w-9 text-right text-[11px] text-neutral-500 tabular-nums">{pct(value)}</span>
+  </div>
+);
+
+const sortedEntries = (m: Record<string, number> | undefined, n: number) =>
+  Object.entries(m || {}).sort((a, b) => b[1] - a[1]).slice(0, n);
+
 export default function InsightsPage() {
   const [data, setData] = useState<any>(null);
   const [selected, setSelected] = useState<string | null>(null);
@@ -419,6 +435,84 @@ export default function InsightsPage() {
                     </div>
 
                   </div>
+
+                  {/* 개인화 프로필 — 공유 모듈(computeProfile)이 계산한 정규화 선호도(추천 엔진 입력) */}
+                  {member.profile && (
+                    <div className="bg-white border border-neutral-200 rounded-2xl p-5">
+                      <h2 className="text-sm font-semibold text-neutral-900 mb-1">
+                        개인화 프로필 <span className="text-neutral-400 font-normal">(추천 엔진 입력 · 시드+행동 종합)</span>
+                      </h2>
+                      <p className="text-[11px] text-neutral-400 mb-4">
+                        lib/personalization 이 계산한 정규화 affinity. 이 화면과 추천이 <b>같은 프로필</b>을 씁니다.
+                      </p>
+
+                      <div className="flex items-center gap-2 mb-4">
+                        <span className="w-28 shrink-0 text-xs text-neutral-600">데이터 신뢰도</span>
+                        <div className="flex-1 h-1.5 rounded-full bg-neutral-100 overflow-hidden">
+                          <div className="h-full rounded-full bg-emerald-500" style={{ width: pct(member.profile.confidence) }} />
+                        </div>
+                        <span className="w-9 text-right text-[11px] text-neutral-500 tabular-nums">{pct(member.profile.confidence)}</span>
+                      </div>
+
+                      <div className="grid md:grid-cols-2 gap-x-6 gap-y-4">
+                        <div>
+                          <div className="text-xs font-medium text-neutral-700 mb-2">관심 구간 <span className="text-neutral-400 font-normal">(행동 기반)</span></div>
+                          <div className="space-y-1.5">
+                            {sortedEntries(member.profile.affinity.section, 4).map(([sec, v]) => (
+                              <AffBar key={sec} label={`${sec} · ${sectionInfo(sec).topic}`} value={v} />
+                            ))}
+                            {!sortedEntries(member.profile.affinity.section, 1).length && <p className="text-sm text-neutral-400">아직 행동 신호 없음</p>}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-xs font-medium text-neutral-700 mb-2">선호 모델 <span className="text-neutral-400 font-normal">(행동 기반)</span></div>
+                          <div className="space-y-1.5">
+                            {sortedEntries(member.profile.affinity.service, 4).map(([svc, v]) => (
+                              <AffBar key={svc} label={svc} value={v} color="#8B5CF6" />
+                            ))}
+                            {!sortedEntries(member.profile.affinity.service, 1).length && <p className="text-sm text-neutral-400">—</p>}
+                          </div>
+                          <div className="mt-3 flex flex-wrap gap-1.5">
+                            {[...Object.keys(member.profile.affinity.content || {}), ...Object.keys(member.profile.affinity.style || {})].map((k) => (
+                              <span key={k} className="px-2 py-0.5 rounded-md bg-neutral-100 text-[11px] text-neutral-600">{k}</span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 지금 추천될 프롬프트 — 예측 뷰(rankPrompts 출력) */}
+                  {!!member.recommendations?.length && (
+                    <div className="bg-white border border-[#3182F6]/30 rounded-2xl p-5">
+                      <h2 className="text-sm font-semibold text-neutral-900 mb-1">
+                        지금 추천될 프롬프트 <span className="text-[#3182F6] font-normal">(예측)</span>
+                      </h2>
+                      <p className="text-[11px] text-neutral-400 mb-4">
+                        위 프로필로 후보 프롬프트를 재정렬한 결과 · 개인화 반영도 <b className="text-neutral-600">{pct(member.recommendations[0].alpha)}</b>
+                        <span className="ml-1">(낮으면 인기순, 높으면 개인 취향)</span>
+                      </p>
+                      <div className="space-y-2">
+                        {member.recommendations.map((r: any, i: number) => (
+                          <div key={i} className="border border-neutral-200 rounded-xl p-3">
+                            <div className="flex items-center gap-2 mb-1.5 text-[11px]">
+                              <span className="w-5 h-5 shrink-0 rounded-full bg-[#3182F6] text-white flex items-center justify-center font-bold">{i + 1}</span>
+                              <span className="px-1.5 py-0.5 rounded-md bg-neutral-100 text-neutral-600 tabular-nums">{r.timecode} 구간</span>
+                              <span className="text-neutral-500 truncate">{sectionInfo(r.timecode).topic}</span>
+                            </div>
+                            <p className="text-sm text-neutral-800 leading-relaxed">
+                              {String(r.prompt).slice(0, 140)}{String(r.prompt).length > 140 ? '…' : ''}
+                            </p>
+                            <div className="mt-2 flex items-center gap-3 text-[10px] text-neutral-400">
+                              <span>개인 {pct(r.personal)}</span>
+                              <span>제너럴 {pct(r.general)}</span>
+                              <span className="tabular-nums">score {Number(r.score).toFixed(3)}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* 작성한 생성 프롬프트 — 집계 숫자가 아니라 실제로 무엇을 만들려 했는지 */}
                   <div className="bg-white border border-neutral-200 rounded-2xl p-5">
