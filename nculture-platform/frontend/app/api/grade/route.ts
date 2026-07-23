@@ -68,6 +68,36 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: '영상이 너무 큽니다(18MB 초과).' }, { status: 413 });
     }
 
+    // 1-2) 결과물을 우리 스토리지로 옮긴다.
+    //   생성 모델(MiniMax 등)의 추론 CDN URL 은 우리가 수명을 보장할 수 없다.
+    //   채점 기록은 남는데 영상만 사라지면 반쪽이 되므로, 채점하려고 이미 받아둔
+    //   버퍼를 그대로 Blob 에 올려 영구 URL 을 쓴다(추가 다운로드 없음).
+    //   업로드 실패는 채점을 막지 않는다 — 원본 URL 로 폴백.
+    //   @vercel/blob SDK 는 Next 14.0.4 번들러가 파싱하지 못해(빌드 실패) REST 로 직접 올린다.
+    let storedUrl = videoUrl;
+    const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
+    if (blobToken) {
+      try {
+        const safeId = String(aiJobId || Date.now()).replace(/[^a-zA-Z0-9_-]/g, '') || 'clip';
+        const path = `generated/${(userId || 'anon').slice(0, 8)}/${safeId}.mp4`;
+        const up = await fetch(`https://blob.vercel-storage.com/${path}`, {
+          method: 'PUT',
+          headers: {
+            authorization: `Bearer ${blobToken}`,
+            'x-api-version': '7',
+            'x-content-type': 'video/mp4',
+            'x-add-random-suffix': '1',
+          },
+          body: buf,
+        });
+        if (!up.ok) throw new Error(`blob ${up.status} ${(await up.text()).slice(0, 120)}`);
+        const blob = await up.json();
+        if (blob?.url) storedUrl = blob.url;
+      } catch (e: any) {
+        console.error('[grade] Blob 업로드 실패, 원본 URL 유지:', e?.message || e);
+      }
+    }
+
     // 2) Gemini 채점 — 학생이 입력한 프롬프트를 함께 줘서 '충실도'를 실제로 대조시킨다
     const userParts: any[] = [
       { inlineData: { mimeType: 'video/mp4', data: buf.toString('base64') }, videoMetadata: { fps: 3 } },
@@ -121,11 +151,18 @@ export async function POST(req: Request) {
     if (svcKey && url && userId) {
       try {
         const admin = createClient(url, svcKey, { auth: { persistSession: false } });
+        // ai_job_id/session_id 는 UUID 컬럼이다. 형식이 안 맞는 값이 오면
+        // insert 가 통째로 실패해 채점 결과가 조용히 유실된다 → null 로 떨군다.
+        const asUuid = (v: any) =>
+          typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v)
+            ? v
+            : null;
+
         const { error } = await admin.from('video_gradings').insert({
           user_id: userId,
-          session_id: sessionId || null,
-          ai_job_id: aiJobId || null,
-          video_url: videoUrl,
+          session_id: asUuid(sessionId),
+          ai_job_id: asUuid(aiJobId),
+          video_url: storedUrl,
           prompt: prompt || null,
           ai_score: score,
           ai_grade: grade,
@@ -142,6 +179,7 @@ export async function POST(req: Request) {
     const usage = gJson.usageMetadata || {};
     return NextResponse.json({
       evaluation,
+      videoUrl: storedUrl,
       usage: { input: usage.promptTokenCount, output: usage.candidatesTokenCount },
     });
   } catch (e: any) {
