@@ -954,26 +954,25 @@ export default function InsightsPage() {
                                 </span>
                               </div>
 
-                              <div className="p-3 grid grid-cols-1 md:grid-cols-[240px_minmax(0,1fr)] gap-3">
-                                {/* 영상 — 세로/가로 무관하게 16:9 프레임 고정, 모바일에서도 과대하지 않게 */}
-                                <div className="w-full max-w-[320px] md:max-w-none aspect-video rounded-lg overflow-hidden bg-black border border-neutral-200 self-start">
-                                  {g.videoUrl ? (
-                                    <video
-                                      src={g.videoUrl}
-                                      controls
-                                      preload="metadata"
-                                      playsInline
-                                      className="w-full h-full object-contain"
-                                    />
-                                  ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-[11px] text-neutral-400 bg-neutral-50">
-                                      영상 없음
-                                    </div>
-                                  )}
-                                </div>
-
-                                {/* 읽는 순서대로: 무엇을 시켰나 → 어떻게 채점됐나 → 코멘트 */}
-                                <div className="min-w-0 space-y-2.5">
+                              {/* 좌: 제출물(프롬프트→영상) / 우: 판정(점수+피드백) — 좌우 높이 균형도 맞는다 */}
+                              <div className="p-3 grid grid-cols-1 md:grid-cols-[280px_minmax(0,1fr)] gap-3">
+                                <div className="space-y-2 self-start">
+                                  {/* 영상 — 세로/가로 무관하게 16:9 프레임 고정, 모바일에서도 과대하지 않게 */}
+                                  <div className="w-full max-w-[320px] md:max-w-none aspect-video rounded-lg overflow-hidden bg-black border border-neutral-200">
+                                    {g.videoUrl ? (
+                                      <video
+                                        src={g.videoUrl}
+                                        controls
+                                        preload="metadata"
+                                        playsInline
+                                        className="w-full h-full object-contain"
+                                      />
+                                    ) : (
+                                      <div className="w-full h-full flex items-center justify-center text-[11px] text-neutral-400 bg-neutral-50">
+                                        영상 없음
+                                      </div>
+                                    )}
+                                  </div>
                                   {g.prompt && (
                                     <div>
                                       <div className="text-[10px] font-medium text-neutral-400 mb-1">입력 프롬프트</div>
@@ -982,7 +981,10 @@ export default function InsightsPage() {
                                       </p>
                                     </div>
                                   )}
+                                </div>
 
+                                {/* 우: 판정 — 축별 점수 → AI 피드백 */}
+                                <div className="min-w-0 space-y-2.5">
                                   {!!g.criteria?.length && (
                                     <div>
                                       <div className="text-[10px] font-medium text-neutral-400 mb-1">축별 점수</div>
