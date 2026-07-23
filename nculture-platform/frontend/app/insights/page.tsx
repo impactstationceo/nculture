@@ -31,7 +31,15 @@ const EVENT_LABELS: Record<string, string> = {
   publish: '갤러리 공개',
   apply_recommendation: '추천 적용',
   rate: '별점 평가',
+  session_start: '접속',
+  session_end: '이탈',
+  login: '로그인',
+  logout: '로그아웃',
+  video_seek: '구간 이동',
+  tutor_question: '튜터 질문',
 };
+
+const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
 // 앱 내부값('10s')을 사람이 읽는 형태로. 저장은 앱과 동일한 값을 유지한다.
 const fmtDuration = (d: string | null) => (d ? d.replace(/^(\d+)s$/, '$1초') : null);
@@ -292,6 +300,73 @@ export default function InsightsPage() {
                     </div>
 
                     <div className="space-y-4">
+                      {/* 접속 패턴 — created_at 만으로 나온다(추가 수집 불필요), KST 기준 */}
+                      {!!member.derived.activity && (
+                        <div>
+                          <div className="text-xs font-medium text-neutral-700 mb-2">
+                            접속 패턴 <span className="text-neutral-400 font-normal">(KST)</span>
+                            {member.derived.activity.avgSessionSec != null && (
+                              <span className="text-neutral-400 font-normal ml-1.5">
+                                · 평균 체류 {Math.round(member.derived.activity.avgSessionSec / 60)}분
+                                · 방문 {member.derived.activity.sessions}회
+                              </span>
+                            )}
+                          </div>
+                          <div className="bg-neutral-50 rounded-xl p-3 space-y-2.5">
+                            <div>
+                              <div className="text-[10px] text-neutral-400 mb-1">요일</div>
+                              <div className="flex gap-1">
+                                {member.derived.activity.byWeekday.map((n: number, i: number) => {
+                                  const max = Math.max(1, ...member.derived.activity.byWeekday);
+                                  return (
+                                    <div key={i} className="flex-1 text-center">
+                                      <div className="h-8 flex items-end justify-center">
+                                        <div className="w-full rounded-sm bg-[#3182F6]"
+                                             style={{ height: `${Math.max(n ? 12 : 2, (n / max) * 100)}%`,
+                                                      opacity: n ? 0.25 + 0.75 * (n / max) : 0.12 }} />
+                                      </div>
+                                      <div className="text-[10px] text-neutral-500 mt-0.5">{WEEKDAYS[i]}</div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                            <div>
+                              <div className="text-[10px] text-neutral-400 mb-1">시간대</div>
+                              <div className="flex gap-[2px]">
+                                {member.derived.activity.byHour.map((n: number, h: number) => {
+                                  const max = Math.max(1, ...member.derived.activity.byHour);
+                                  return (
+                                    <div key={h} className="flex-1" title={`${h}시 · ${n}건`}>
+                                      <div className="h-6 rounded-sm bg-[#3182F6]"
+                                           style={{ opacity: n ? 0.2 + 0.8 * (n / max) : 0.08 }} />
+                                      {h % 6 === 0 && <div className="text-[9px] text-neutral-400 mt-0.5">{h}</div>}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 추천을 얼마나 고쳐 썼는가 — 별점보다 촘촘한 품질 신호 */}
+                      {!!member.derived.promptEdit && (
+                        <div className="bg-neutral-50 rounded-xl px-3 py-2 flex items-center justify-between">
+                          <div className="text-xs text-neutral-600">
+                            추천/예시를 고쳐 쓴 정도
+                            <span className="text-neutral-400 ml-1.5">{member.derived.promptEdit.samples}회 기준</span>
+                          </div>
+                          <div className="text-sm font-medium text-neutral-900 tabular-nums">
+                            {Math.round(member.derived.promptEdit.avgEditRatio * 100)}%
+                            <span className="text-[11px] text-neutral-400 ml-1">
+                              {member.derived.promptEdit.avgEditRatio < 0.2 ? '거의 그대로'
+                                : member.derived.promptEdit.avgEditRatio < 0.5 ? '일부 수정' : '많이 수정'}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
                       <div>
                         <div className="text-xs font-medium text-neutral-700 mb-2 flex items-center gap-1">
                           <Clock className="w-3.5 h-3.5 text-neutral-400" /> 오래 머문 구간

@@ -10,7 +10,7 @@ import { isSupabaseConfigured } from '@/lib/supabase';
 import { apiReserveCredits, apiGenerateJob, apiCaptureCredits, apiRefundCredits, calculateCredits, checkPlanLimits, getTierLevel, generatePracticeEvaluation } from '@/lib/utils';
 import lectureIngest from '@/lib/ingest/2-3.ingest.json';
 import sd2Grade from '@/lib/ingest/sd2.grade.json';
-import { logEvent, saveRating, setAnalyticsIdentity, gradeGeneratedVideo } from '@/lib/analytics';
+import { logEvent, saveRating, setAnalyticsIdentity, gradeGeneratedVideo, editDistanceRatio } from '@/lib/analytics';
 import {
   Play,
   Pause,
@@ -767,6 +767,9 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
   const [recSource, setRecSource] = useState<string | null>(null);
   // 프롬프트 출처: 구간 추천 / 회차 기본 예시 / 직접 작성(실습)
   const [promptOrigin, setPromptOrigin] = useState<'recommendation' | 'example' | 'custom'>('custom');
+  // 적용 당시 원문 — 학생이 얼마나 고쳐 썼는지(편집 정도) 계산 기준
+  const appliedPromptRef = useRef<{ text: string; source: string } | null>(null);
+  const promptInputTimer = useRef<any>(null);
   const [ratingFor, setRatingFor] = useState<string | null>(null);
   const [hoverStar, setHoverStar] = useState(0);
   const prevResultsRef = useRef(0);
@@ -879,6 +882,37 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
     dwellRef.current = { tc, start: Date.now() };
   }, [currentPrompt?.timecode]);
 
+  // 접속 세션: 요일·시간대·세션 길이 분석의 근거.
+  // 로그인 이벤트로는 못 잡는다 — 로그인 상태가 유지되면 재방문이 안 찍힌다.
+  useEffect(() => {
+    const startedAt = Date.now();
+    void logEvent('session_start', { page: 'classroom', session_no: sessionId });
+    const end = () => {
+      void logEvent('session_end', {
+        page: 'classroom',
+        seconds: Math.round((Date.now() - startedAt) / 1000),
+      });
+    };
+    window.addEventListener('pagehide', end);
+    return () => { window.removeEventListener('pagehide', end); end(); };
+  }, [sessionId]);
+
+  // 되감아 다시 본 구간 = 어려워하는 지점. 체류시간보다 강한 신호라 따로 남긴다.
+  const lastSeekRef = useRef(0);
+  const onLectureSeeked = () => {
+    const v = lectureVideoRef.current;
+    if (!v) return;
+    const to = Math.round(v.currentTime);
+    const from = lastSeekRef.current;
+    lastSeekRef.current = to;
+    if (Math.abs(to - from) < 3) return;   // 미세 이동은 무시
+    void logEvent('video_seek', {
+      from_sec: from, to_sec: to,
+      direction: to < from ? 'backward' : 'forward',
+      timecode: currentPrompt?.timecode ?? null,
+    });
+  };
+
   // 마지막 구간은 이탈 시점에 기록 (구간 전환이 일어나지 않으므로)
   useEffect(() => {
     const flush = () => {
@@ -921,6 +955,7 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
     // 구간 추천 / 회차 기본 예시 / 직접 작성을 구분해 둔다.
     // from_recommendation(불리언)만으로는 '예시에서 온 것'과 '직접 쓴 것'이 뭉개진다.
     setPromptOrigin(isRec ? 'recommendation' : 'example');
+    appliedPromptRef.current = { text, source: isRec ? 'recommendation' : 'example' };
     void logEvent('apply_recommendation', {
       prompt: text,
       is_recommendation: isRec,
@@ -933,6 +968,18 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
     setPrompt(v);
     if (recSource && v !== recSource) setRecSource(null);
     setPromptOrigin((prev) => (prev === 'custom' ? prev : 'custom'));
+    // 타이핑 중 매번 쏘지 않도록 멈춘 뒤 한 번만 (900ms)
+    clearTimeout(promptInputTimer.current);
+    promptInputTimer.current = setTimeout(() => {
+      const base = appliedPromptRef.current;
+      void logEvent('prompt_input', {
+        length: v.length,
+        // 추천/예시를 적용한 뒤 고쳐 쓴 경우, 얼마나 바꿨는지가 추천 품질 신호
+        base_source: base?.source ?? 'custom',
+        edit_ratio: base ? Number(editDistanceRatio(base.text, v).toFixed(3)) : null,
+        timecode: currentPrompt?.timecode ?? null,
+      });
+    }, 900);
   };
   const submitRating = (stars: number) => {
     // 로컬 백업(오프라인/수집 비활성 대비) + DB 기록(추천 품질 피드백 루프)
@@ -1661,6 +1708,7 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
                     onPlay={() => setIsPlaying(true)}
                     onPause={() => setIsPlaying(false)}
                     onTimeUpdate={e => setVideoTime(Math.floor(e.currentTarget.currentTime))}
+                    onSeeked={onLectureSeeked}
                     onLoadedMetadata={e => setLectureDuration(Math.floor(e.currentTarget.duration) || 1431)}
                   />
 
@@ -1824,11 +1872,28 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
                           <div className="p-2.5 flex items-center justify-between">
                             <span className="text-xs text-neutral-500">✨ {r.creditsUsed} 크레딧</span>
                             <div className="flex gap-1.5">
-                              <button className="px-2.5 py-1 text-xs bg-neutral-100 hover:bg-neutral-200 rounded-lg font-medium text-neutral-600">
+                              <button
+                                onClick={() => {
+                                  // 결과물이 마음에 들었다는 신호 — 모델별 만족도 비교에 쓰인다
+                                  void logEvent('save', {
+                                    prompt: r.prompt, service: r.service ?? null, tier: r.tier ?? null,
+                                    score: r.evaluation?.score ?? null,
+                                  });
+                                  setNotification({ type: 'success', message: '결과물을 저장했습니다' });
+                                }}
+                                className="px-2.5 py-1 text-xs bg-neutral-100 hover:bg-neutral-200 rounded-lg font-medium text-neutral-600"
+                              >
                                 <Save className="w-3 h-3 inline mr-1" />저장
                               </button>
                               <button 
-                                onClick={() => setPrompt(r.prompt)}
+                                onClick={() => {
+                                  setPrompt(r.prompt);
+                                  // 결과가 마음에 안 들어 다시 만든다는 신호 (만족도 반대편)
+                                  void logEvent('regenerate', {
+                                    prompt: r.prompt, service: r.service ?? null, tier: r.tier ?? null,
+                                    had_evaluation: !!r.evaluation,
+                                  });
+                                }}
                                 className="px-2.5 py-1 text-xs bg-indigo-100 hover:bg-indigo-200 rounded-lg text-indigo-700 font-medium"
                               >
                                 <RefreshCw className="w-3 h-3 inline mr-1" />재생성
@@ -1963,8 +2028,14 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
                     <DurationResolutionControls
                       duration={duration}
                       resolution={resolution}
-                      onDurationChange={setDuration}
-                      onResolutionChange={setResolution}
+                      onDurationChange={(v: string) => {
+                        setDuration(v);
+                        void logEvent('param_select', { field: 'duration', value: v, service: selectedService, tier: selectedTier });
+                      }}
+                      onResolutionChange={(v: string) => {
+                        setResolution(v);
+                        void logEvent('param_select', { field: 'resolution', value: v, service: selectedService, tier: selectedTier });
+                      }}
                       userPlan={userPlan}
                     />
                     <div className="grid grid-cols-2 gap-2">
@@ -2052,7 +2123,14 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
 
             <div className="flex-shrink-0 p-4 pt-3 border-t border-[#E5E8EB] flex justify-end">
               <button
-                onClick={() => setTutorOpen(true)}
+                onClick={() => {
+                  setTutorOpen(true);
+                  // 막힌 지점 직접 신호 — 어느 구간에서 질문했는지가 중요
+                  void logEvent('tutor_question', {
+                    timecode: currentPrompt?.timecode ?? null,
+                    video_time: Math.round(videoTime),
+                  });
+                }}
                 className="px-4 py-2 bg-[#F2F4F6] text-[#6B7684] font-medium rounded-lg text-sm hover:bg-[#E5E8EB] transition-colors flex items-center gap-2"
               >
                 <MessageSquare className="w-4 h-4" />

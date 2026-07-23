@@ -96,8 +96,17 @@ def main():
         return
 
     now = datetime.now(timezone.utc)
+
     def ago(minutes):
         return (now - timedelta(minutes=minutes)).isoformat()
+
+    # 요일·시간대 패턴이 드러나려면 이벤트가 여러 날에 흩어져야 한다.
+    # (일 전, KST 시, 분) 을 UTC 로 환산 — 저장은 UTC, 분석 화면에서 KST 로 되돌린다.
+    def at(days_ago, kst_hour, minute=0):
+        kst_now = now + timedelta(hours=9)
+        day = (kst_now - timedelta(days=days_ago)).replace(
+            hour=kst_hour, minute=minute, second=0, microsecond=0)
+        return (day - timedelta(hours=9)).isoformat()
 
     # ── 페르소나 정의 ──────────────────────────────────────────
     personas = [
@@ -107,26 +116,31 @@ def main():
                      "purpose": "hobby", "experience": "beginner", "skipped": False,
                      "createdAt": ago(52)},
             "events": [
+                ("login", {"action": "signup", "role": "student", "plan": "free"}, at(12, 21, 5)),
+                ("session_start", {"page": "classroom", "session_no": 1}, at(12, 21, 8)),
                 ("style_select", {"content_types": ["video"], "visual_styles": ["cinematic"],
-                                  "purpose": "hobby", "experience": "beginner", "skipped": False}, 52),
-                ("dwell", {"section": "01:14", "seconds": 88}, 48),
-                ("dwell", {"section": "10:41", "seconds": 143}, 44),
+                                  "purpose": "hobby", "experience": "beginner", "skipped": False}, at(12, 21, 12)),
+                ("dwell", {"section": "01:14", "seconds": 88}, at(12, 21, 20)),
+                ("dwell", {"section": "10:41", "seconds": 143}, at(9, 22, 10)),
                 ("apply_recommendation", {"prompt": "너는 고객 경험(CX) 데이터 분석가야...",
-                                          "is_recommendation": True, "timecode": "10:41", "video_time": 700}, 43),
+                                          "is_recommendation": True, "timecode": "10:41", "video_time": 700}, at(9, 22, 15)),
                 ("generate", {"service": "sora", "tier": "sora-2", "credits": 16,
                               "resolution": "1080p", "duration": "10s", "audio_on": True,
                               "prompt": "너는 고객 경험(CX) 데이터 분석가야. 신규 앱 서비스의 사용자 리뷰 데이터를 분석하여 주요 불만 사항과 만족 요소를 구분하고, 서비스 개선을 위한 인사이트를 제안해줘.",
                               "from_recommendation": True, "timecode": "10:41",
-                              "prompt_length": 96, "video_time": 705}, 42),
-                ("rate", {"stars": 5, "timecode": "10:41"}, 41),
-                ("dwell", {"section": "15:31", "seconds": 121}, 38),
-                ("regenerate", {"service": "sora", "tier": "sora-2"}, 36),
+                              "prompt_length": 96, "video_time": 705}, at(9, 22, 18)),
+                ("rate", {"stars": 5, "timecode": "10:41"}, at(9, 22, 22)),
+                ("dwell", {"section": "15:31", "seconds": 121}, at(5, 23, 5)),
+                ("regenerate", {"service": "sora", "tier": "sora-2"}, at(5, 23, 12)),
                 ("generate", {"service": "sora", "tier": "sora-2", "credits": 16,
                               "resolution": "1080p", "duration": "10s", "audio_on": True,
                               "prompt": "해질녘 한강 산책로를 달리는 러너의 뒷모습, 시네마틱 로우앵글, 따뜻한 역광과 얕은 심도",
                               "from_recommendation": False, "timecode": "15:31",
-                              "prompt_length": 64, "video_time": 950}, 35),
-                ("save", {"timecode": "15:31"}, 34),
+                              "prompt_length": 64, "video_time": 950}, at(5, 23, 18)),
+                ("save", {"timecode": "15:31"}, at(5, 23, 25)),
+                ("video_seek", {"from_sec": 950, "to_sec": 700, "direction": "backward", "timecode": "10:41"}, at(9, 22, 30)),
+                ("prompt_input", {"length": 96, "base_source": "recommendation", "edit_ratio": 0.08, "timecode": "10:41"}, at(9, 22, 16)),
+                ("session_end", {"page": "classroom", "seconds": 1180}, at(5, 23, 40)),
             ],
             "ratings": [{"stars": 5, "timecode": "10:41",
                          "prompt": "너는 고객 경험(CX) 데이터 분석가야. 신규 앱 서비스의 사용자 리뷰 데이터를 분석하여 주요 불만 사항과 만족 요소를 구분해줘."}],
@@ -139,27 +153,32 @@ def main():
                      "createdAt": ago(26)},
             "events": [
                 ("style_select", {"content_types": ["ads_shorts"], "visual_styles": ["vintage"],
-                                  "purpose": "education", "experience": "pro", "skipped": False}, 26),
-                ("model_select", {"service": "minimax", "tier": "hailuo-2.3"}, 24),
-                ("dwell", {"section": "18:53", "seconds": 205}, 22),
+                                  "purpose": "education", "experience": "pro", "skipped": False}, at(6, 14, 6)),
+                ("login", {"action": "login", "role": "student", "plan": "pro"}, at(6, 14, 0)),
+                ("session_start", {"page": "classroom", "session_no": 1}, at(6, 14, 3)),
+                ("model_select", {"service": "minimax", "tier": "hailuo-2.3"}, at(6, 14, 12)),
+                ("param_select", {"field": "resolution", "value": "1080p", "service": "minimax"}, at(6, 14, 15)),
+                ("dwell", {"section": "18:53", "seconds": 205}, at(6, 14, 25)),
                 ("apply_recommendation", {"prompt": "이제 너는 감각적이고 혁신적인 UI/UX 디자이너야...",
-                                          "is_recommendation": True, "timecode": "18:53", "video_time": 1140}, 20),
+                                          "is_recommendation": True, "timecode": "18:53", "video_time": 1140}, at(6, 14, 32)),
                 ("generate", {"service": "minimax", "tier": "hailuo-2.3", "credits": 24,
                               "resolution": "720p", "duration": "5s", "audio_on": False,
                               "prompt": "이제 너는 감각적이고 혁신적인 UI/UX 디자이너야. 모바일 웰니스 앱의 사용자 경험 컨셉을 도출하기 위해 클라이언트에게 요청해야 할 필수 정보는 무엇일까?",
                               "from_recommendation": True, "timecode": "18:53",
-                              "prompt_length": 118, "video_time": 1145}, 19),
-                ("rate", {"stars": 4, "timecode": "18:53"}, 18),
-                ("dwell", {"section": "20:17", "seconds": 167}, 15),
+                              "prompt_length": 118, "video_time": 1145}, at(6, 14, 36)),
+                ("rate", {"stars": 4, "timecode": "18:53"}, at(6, 14, 40)),
+                ("dwell", {"section": "20:17", "seconds": 167}, at(2, 12, 10)),
                 ("apply_recommendation", {"prompt": "정리된 타깃 및 페인 포인트를 바탕으로...",
-                                          "is_recommendation": True, "timecode": "20:17", "video_time": 1225}, 13),
+                                          "is_recommendation": True, "timecode": "20:17", "video_time": 1225}, at(2, 12, 18)),
                 ("generate", {"service": "minimax", "tier": "hailuo-2.3", "credits": 24,
                               "resolution": "1080p", "duration": "6s", "audio_on": False,
                               "prompt": "빈티지 필름 톤의 펫 푸드 브랜드 광고 컷. 원목 테이블 위 패키지 클로즈업, 8mm 필름 그레인, 따뜻한 앰버 색보정, 얕은 심도",
                               "from_recommendation": True, "timecode": "20:17",
-                              "prompt_length": 132, "video_time": 1230}, 12),
-                ("rate", {"stars": 4, "timecode": "20:17"}, 11),
-                ("publish", {"timecode": "20:17"}, 10),
+                              "prompt_length": 132, "video_time": 1230}, at(2, 12, 22)),
+                ("rate", {"stars": 4, "timecode": "20:17"}, at(2, 12, 26)),
+                ("tutor_question", {"timecode": "20:17", "video_time": 1230}, at(2, 12, 30)),
+                ("prompt_input", {"length": 132, "base_source": "recommendation", "edit_ratio": 0.42, "timecode": "20:17"}, at(2, 12, 20)),
+                ("session_end", {"page": "classroom", "seconds": 960}, at(2, 12, 40)),
             ],
             "ratings": [
                 {"stars": 4, "timecode": "18:53",
@@ -196,7 +215,7 @@ def main():
 
         curl(f"{base}/rest/v1/learning_events", method="POST", headers=admin_h,
              body=[{"user_id": uid, "session_id": SESSION_ID, "event_type": t,
-                    "payload": pl, "created_at": ago(m)} for t, pl, m in p["events"]])
+                    "payload": pl, "created_at": ts} for t, pl, ts in p["events"]])
 
         if p["ratings"]:
             curl(f"{base}/rest/v1/prompt_feedback", method="POST", headers=admin_h,

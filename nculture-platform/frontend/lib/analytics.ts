@@ -26,7 +26,35 @@ export const analyticsEnabled = Boolean(ANALYTICS_URL && ANALYTICS_KEY);
 
 export type LearningEventType =
   | 'dwell' | 'prompt_input' | 'model_select' | 'style_select' | 'param_select'
-  | 'generate' | 'regenerate' | 'save' | 'publish' | 'apply_recommendation' | 'rate';
+  | 'generate' | 'regenerate' | 'save' | 'publish' | 'apply_recommendation' | 'rate'
+  | 'session_start' | 'session_end' | 'login' | 'logout' | 'video_seek' | 'tutor_question';
+
+/**
+ * 두 프롬프트의 편집 정도(0=그대로, 1=완전히 다름).
+ *
+ * 추천을 적용한 뒤 학생이 얼마나 고쳐 쓰는지가 추천 품질의 가장 정직한 신호다.
+ * 별점은 대부분 안 누르지만 이 값은 그냥 쌓인다. 프롬프트는 길어야 수백 자라
+ * 단순 Levenshtein 으로 충분하다(디바운스 후 1회 계산).
+ */
+export function editDistanceRatio(a: string, b: string): number {
+  if (a === b) return 0;
+  if (!a || !b) return 1;
+  const s = a.length > b.length ? b : a;
+  const l = a.length > b.length ? a : b;
+  let prev = Array.from({ length: s.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= l.length; i++) {
+    const cur = [i];
+    for (let j = 1; j <= s.length; j++) {
+      cur[j] = Math.min(
+        prev[j] + 1,
+        cur[j - 1] + 1,
+        prev[j - 1] + (l[i - 1] === s[j - 1] ? 0 : 1),
+      );
+    }
+    prev = cur;
+  }
+  return Math.min(1, prev[s.length] / l.length);
+}
 
 let client: SupabaseClient | null = null;
 
