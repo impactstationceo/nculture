@@ -674,8 +674,8 @@ const generateImage = (prompt: string, sessionId: number) => {
 // ============= Session Page =============
 const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, userPlan, onShowUpgradeModal, user, currentRole, isLoggedIn, onAuthClick }: any) => {
   const [activeTab, setActiveTab] = useState('create');
-  const [selectedService, setSelectedService] = useState('sora');
-  const [selectedTier, setSelectedTier] = useState('sora-2');
+  const [selectedService, setSelectedService] = useState('runway');
+  const [selectedTier, setSelectedTier] = useState('runway-gen4-turbo');
   const [services, setServices] = useState<any[]>(AI_SERVICES);
   const [prompt, setPrompt] = useState('');
   const [enhance, setEnhance] = useState(false);
@@ -844,8 +844,8 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
 
   const getPromptPlaceholder = () => {
     if (currentCategory === 'image') {
-      if (selectedService === 'dalle') return '생성하고 싶은 이미지를 자세히 설명하세요...';
-      if (selectedService === 'midjourney') return '예술적인 이미지 스타일과 내용을 설명하세요...';
+      if (selectedService === 'flux') return '생성하거나 편집할 이미지를 자세히 설명하세요...';
+      if (selectedService === 'ideogram') return '텍스트가 포함된 이미지 스타일을 설명하세요...';
       return '생성하고 싶은 이미지를 설명하세요...';
     }
     if (currentCategory === 'text') {
@@ -853,7 +853,7 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
       if (selectedService === 'claude') return '요청사항을 자세히 설명하세요...';
       return '텍스트 생성 요청을 입력하세요...';
     }
-    if (selectedService === 'sora') return '멀티샷 장면을 구체적으로 설명하세요...';
+    if (selectedService === 'runway') return '시네마틱한 장면을 구체적으로 설명하세요...';
     if (selectedService === 'veo') return '정밀한 비디오 설명을 입력하세요...';
     return '생성하고 싶은 영상을 설명하세요...';
   };

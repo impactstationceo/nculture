@@ -143,28 +143,49 @@ export const CURRICULUM: Record<string, any> = {
 
 // ============= AI 서비스 Mock 데이터 =============
 export const AI_SERVICES: any[] = [
-  // ============= 영상 생성 서비스 =============
+  // ============= 영상 생성 서비스 (PRD 기준, Midjourney 제외) =============
   {
-    id: 'sora',
-    name: 'OpenAI Sora',
+    id: 'runway',
+    name: 'Runway',
     category: 'video',
-    description: '사운드 포함 멀티샷 영상 생성',
-    icon: '🎵',
+    description: '시네마틱 연출과 정밀한 카메라 제어',
+    icon: '🎬',
     tiers: [
-      { id: 'sora-2', name: 'Sora 2', description: '표준 품질', specs: { resolution: '720p', duration: '5-10초', audio: true }, pricing: { multiplier: 1.0 }, maxResolution: '720p', maxDurationSec: 10, audioSupported: true },
-      { id: 'sora-2-pro', name: 'Sora 2 Pro', description: '고품질', specs: { resolution: '1080p', duration: '5-15초', audio: true }, pricing: { multiplier: 1.5 }, maxResolution: '1080p', maxDurationSec: 15, audioSupported: true },
-      { id: 'sora-2-max', name: 'Sora 2 Max', description: '최고 품질', specs: { resolution: '4K', duration: '5-20초', audio: true }, pricing: { multiplier: 2.0 }, maxResolution: '4K', maxDurationSec: 20, audioSupported: true }
+      { id: 'runway-gen4-turbo', name: 'Gen-4 Turbo', description: '빠른 생성', specs: { resolution: '720p', duration: '5-10초', audio: false }, pricing: { multiplier: 0.8 }, maxResolution: '720p', maxDurationSec: 10, audioSupported: false },
+      { id: 'runway-gen4', name: 'Gen-4', description: '고품질', specs: { resolution: '1080p', duration: '5-10초', audio: false }, pricing: { multiplier: 1.2 }, maxResolution: '1080p', maxDurationSec: 10, audioSupported: false }
+    ]
+  },
+  {
+    id: 'gemini-omni',
+    name: 'Gemini Omni',
+    category: 'video',
+    description: '구글 멀티모달 기반 영상 생성',
+    icon: '💎',
+    tiers: [
+      { id: 'gemini-omni-fast', name: 'Omni Fast', description: '빠른 생성', specs: { resolution: '720p', duration: '4-8초', audio: true }, pricing: { multiplier: 0.8 }, maxResolution: '720p', maxDurationSec: 8, audioSupported: true },
+      { id: 'gemini-omni-pro', name: 'Omni Pro', description: '고품질', specs: { resolution: '1080p', duration: '4-12초', audio: true }, pricing: { multiplier: 1.3 }, maxResolution: '1080p', maxDurationSec: 12, audioSupported: true }
     ]
   },
   {
     id: 'veo',
-    name: 'Google Veo',
+    name: 'Google Veo 3.1',
     category: 'video',
-    description: '정밀한 사운드 제어 영상',
+    description: '사운드 포함 사실적인 영상 생성',
     icon: '🎯',
     tiers: [
-      { id: 'veo-lite', name: 'Veo Lite', description: '빠른 생성', specs: { resolution: '720p', duration: '3-8초', audio: false }, pricing: { multiplier: 0.8 }, maxResolution: '720p', maxDurationSec: 8, audioSupported: false },
-      { id: 'veo-standard', name: 'Veo Standard', description: '균형 잡힌 품질', specs: { resolution: '1080p', duration: '4-12초', audio: true }, pricing: { multiplier: 1.2 }, maxResolution: '1080p', maxDurationSec: 12, audioSupported: true }
+      { id: 'veo-3-1-fast', name: 'Veo 3.1 Fast', description: '빠른 생성', specs: { resolution: '720p', duration: '4-8초', audio: true }, pricing: { multiplier: 0.9 }, maxResolution: '720p', maxDurationSec: 8, audioSupported: true },
+      { id: 'veo-3-1-pro', name: 'Veo 3.1', description: '최고 품질', specs: { resolution: '1080p', duration: '4-8초', audio: true }, pricing: { multiplier: 1.5 }, maxResolution: '1080p', maxDurationSec: 8, audioSupported: true }
+    ]
+  },
+  {
+    id: 'seedance',
+    name: 'Seedance 2',
+    category: 'video',
+    description: '멀티샷 내러티브와 자연스러운 모션',
+    icon: '🌊',
+    tiers: [
+      { id: 'seedance-2-lite', name: 'Seedance 2 Lite', description: '빠른 생성', specs: { resolution: '720p', duration: '5-10초', audio: false }, pricing: { multiplier: 0.7 }, maxResolution: '720p', maxDurationSec: 10, audioSupported: false },
+      { id: 'seedance-2-pro', name: 'Seedance 2 Pro', description: '고품질', specs: { resolution: '1080p', duration: '5-10초', audio: true }, pricing: { multiplier: 1.2 }, maxResolution: '1080p', maxDurationSec: 10, audioSupported: true }
     ]
   },
   {
@@ -174,13 +195,13 @@ export const AI_SERVICES: any[] = [
     description: '완벽한 모션과 고급 영상 제어',
     icon: '⚡',
     tiers: [
-      { id: 'kling-v1', name: 'Kling v1.0', description: '표준 모션', specs: { resolution: '1080p', duration: '5-10초', audio: false }, pricing: { multiplier: 1.0 }, maxResolution: '1080p', maxDurationSec: 10, audioSupported: false },
-      { id: 'kling-v2', name: 'Kling v2.0', description: '향상된 모션', specs: { resolution: '1080p', duration: '5-15초', audio: true }, pricing: { multiplier: 1.3 }, maxResolution: '1080p', maxDurationSec: 15, audioSupported: true }
+      { id: 'kling-std', name: 'Kling 2.1', description: '표준 모션', specs: { resolution: '1080p', duration: '5-10초', audio: false }, pricing: { multiplier: 1.0 }, maxResolution: '1080p', maxDurationSec: 10, audioSupported: false },
+      { id: 'kling-pro', name: 'Kling 2.5 Turbo', description: '향상된 모션', specs: { resolution: '1080p', duration: '5-15초', audio: true }, pricing: { multiplier: 1.3 }, maxResolution: '1080p', maxDurationSec: 15, audioSupported: true }
     ]
   },
   {
     id: 'minimax',
-    name: 'Minimax Hailuo',
+    name: 'MiniMax Hailuo',
     category: 'video',
     description: '고다이나믹, VFX 지원, 가장 빠르고 저렴함',
     icon: '🚀',
@@ -189,49 +210,17 @@ export const AI_SERVICES: any[] = [
       { id: 'minimax-quality', name: '퀄리티', description: '최고 품질', specs: { resolution: '1080p', duration: '5-12초', audio: true }, pricing: { multiplier: 1.0 }, maxResolution: '1080p', maxDurationSec: 12, audioSupported: true }
     ]
   },
-  // ============= 이미지 생성 서비스 =============
-  {
-    id: 'dalle',
-    name: 'DALL·E 3',
-    category: 'image',
-    description: '자연어 이해력이 뛰어난 이미지 생성',
-    icon: '🎨',
-    tiers: [
-      { id: 'dalle-standard', name: '스탠다드', description: '표준 품질', specs: { resolution: '1024x1024', style: '자연스러운' }, pricing: { multiplier: 1.0, base: 8 } },
-      { id: 'dalle-hd', name: 'HD', description: '고해상도', specs: { resolution: '1792x1024', style: '선명한' }, pricing: { multiplier: 1.5, base: 12 } }
-    ]
-  },
-  {
-    id: 'midjourney',
-    name: 'Midjourney',
-    category: 'image',
-    description: '예술적이고 창의적인 이미지 생성',
-    icon: '✨',
-    tiers: [
-      { id: 'mj-v6', name: 'v6.0', description: '최신 버전', specs: { resolution: '1024x1024', style: '예술적' }, pricing: { multiplier: 1.2, base: 10 } },
-      { id: 'mj-v6-raw', name: 'v6.0 RAW', description: '사실적 스타일', specs: { resolution: '1024x1024', style: '사실적' }, pricing: { multiplier: 1.3, base: 11 } }
-    ]
-  },
-  {
-    id: 'stable-diffusion',
-    name: 'Stable Diffusion 3',
-    category: 'image',
-    description: '빠르고 다양한 스타일 지원',
-    icon: '🖼️',
-    tiers: [
-      { id: 'sd3-turbo', name: 'Turbo', description: '빠른 생성', specs: { resolution: '1024x1024', style: '다양함' }, pricing: { multiplier: 0.6, base: 5 } },
-      { id: 'sd3-ultra', name: 'Ultra', description: '최고 품질', specs: { resolution: '2048x2048', style: '정교함' }, pricing: { multiplier: 1.0, base: 8 } }
-    ]
-  },
+  // ============= 이미지 생성 서비스 (PRD 기준, Midjourney 제외) =============
   {
     id: 'flux',
-    name: 'Flux',
+    name: 'FLUX.1 Kontext',
     category: 'image',
-    description: '텍스트 렌더링과 구도에 강점',
+    description: '문맥 기반 이미지 생성·편집',
     icon: '⚡',
     tiers: [
-      { id: 'flux-schnell', name: 'Schnell', description: '초고속 생성', specs: { resolution: '1024x1024', style: '빠른' }, pricing: { multiplier: 0.5, base: 4 } },
-      { id: 'flux-pro', name: 'Pro', description: '프로페셔널', specs: { resolution: '1440x1440', style: '전문가용' }, pricing: { multiplier: 1.2, base: 10 } }
+      { id: 'flux-kontext-dev', name: 'Kontext [dev]', description: '빠른 생성', specs: { resolution: '1024x1024', style: '표준' }, pricing: { multiplier: 0.6, base: 5 } },
+      { id: 'flux-kontext-pro', name: 'Kontext [pro]', description: '프로페셔널', specs: { resolution: '1024x1024', style: '전문가용' }, pricing: { multiplier: 1.0, base: 8 } },
+      { id: 'flux-kontext-max', name: 'Kontext [max]', description: '최고 품질', specs: { resolution: '1440x1440', style: '정교함' }, pricing: { multiplier: 1.4, base: 12 } }
     ]
   },
   {
@@ -241,8 +230,30 @@ export const AI_SERVICES: any[] = [
     description: '텍스트가 포함된 이미지에 특화',
     icon: '📝',
     tiers: [
-      { id: 'ideogram-v2', name: 'v2.0', description: '텍스트 특화', specs: { resolution: '1024x1024', style: '타이포그래피' }, pricing: { multiplier: 0.8, base: 7 } },
-      { id: 'ideogram-v2-turbo', name: 'v2.0 Turbo', description: '빠른 텍스트', specs: { resolution: '1024x1024', style: '빠른 타이포' }, pricing: { multiplier: 0.6, base: 5 } }
+      { id: 'ideogram-v3-turbo', name: 'v3 Turbo', description: '빠른 텍스트', specs: { resolution: '1024x1024', style: '빠른 타이포' }, pricing: { multiplier: 0.6, base: 5 } },
+      { id: 'ideogram-v3-quality', name: 'v3 Quality', description: '텍스트 특화', specs: { resolution: '1024x1024', style: '타이포그래피' }, pricing: { multiplier: 0.9, base: 7 } }
+    ]
+  },
+  {
+    id: 'stable-diffusion',
+    name: 'Stable Diffusion',
+    category: 'image',
+    description: '빠르고 다양한 스타일 지원',
+    icon: '🖼️',
+    tiers: [
+      { id: 'sd35-turbo', name: '3.5 Large Turbo', description: '빠른 생성', specs: { resolution: '1024x1024', style: '다양함' }, pricing: { multiplier: 0.6, base: 5 } },
+      { id: 'sd35-large', name: '3.5 Large', description: '최고 품질', specs: { resolution: '2048x2048', style: '정교함' }, pricing: { multiplier: 1.0, base: 8 } }
+    ]
+  },
+  {
+    id: 'nano-banana',
+    name: 'Nano Banana',
+    category: 'image',
+    description: '자연어 이해력이 뛰어난 이미지 생성·편집',
+    icon: '🍌',
+    tiers: [
+      { id: 'nano-banana-std', name: 'Nano Banana', description: '표준 품질', specs: { resolution: '1024x1024', style: '자연스러운' }, pricing: { multiplier: 0.8, base: 7 } },
+      { id: 'nano-banana-pro', name: 'Nano Banana Pro', description: '고해상도', specs: { resolution: '2048x2048', style: '선명한' }, pricing: { multiplier: 1.3, base: 11 } }
     ]
   },
   // ============= 텍스트 생성 서비스 =============

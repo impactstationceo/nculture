@@ -22,10 +22,10 @@ const EVENT_CAP = 5000;
 
 /** 온보딩 관심 콘텐츠 → 콜드스타트 기본 모델 (해당 모델이 없으면 추천 생략) */
 const CONTENT_TO_SERVICE: Record<string, string> = {
-  video: 'sora',
-  image: 'dalle',
+  video: 'runway',
+  image: 'flux',
   ads_shorts: 'minimax',
-  digital_human: 'sora',
+  digital_human: 'veo',
 };
 
 export async function POST(req: Request) {
