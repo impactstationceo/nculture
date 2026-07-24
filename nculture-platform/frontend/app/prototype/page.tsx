@@ -28,7 +28,6 @@ import {
   Award,
   RefreshCw,
   Eye,
-  MessageSquare,
   X,
   Upload,
   Check,
@@ -632,147 +631,6 @@ const VideoToolTabs = ({ activeTab, onTabChange }: any) => {
   );
 };
 
-// ============= Tutor Drawer =============
-// Gemini 대화형 튜터 — 방금 받은 채점 결과(grading)를 컨텍스트로 넣어
-// "내 영상 얘기"를 할 수 있게 한다. API 실패 시에도 대화는 죽지 않는다.
-const TutorDrawer = ({ isOpen, onClose, grading }: any) => {
-  const [msgs, setMsgs] = useState<Array<{ role: 'user' | 'model'; text: string }>>([]);
-  const [input, setInput] = useState('');
-  const [busy, setBusy] = useState(false);
-  const scrollRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    // 새 메시지·로딩 표시가 항상 보이게 아래로 붙인다
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
-  }, [msgs, busy, isOpen]);
-
-  if (!isOpen) return null;
-
-  const send = async () => {
-    const text = input.trim();
-    if (!text || busy) return;
-    setInput('');
-    const next = [...msgs, { role: 'user' as const, text }];
-    setMsgs(next);
-    setBusy(true);
-    // 어떤 질문이 들어오는지 자체가 학습 신호 — 구간이 아니라 질문 내용으로 기록
-    void logEvent('tutor_question', { question: text.slice(0, 200), has_grading: !!grading?.evaluation });
-    try {
-      const res = await fetch('/api/tutor', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          mode: 'chat',
-          messages: next,
-          context: grading
-            ? {
-                evaluation: grading.evaluation
-                  ? {
-                      score: grading.evaluation.score,
-                      criteria: grading.evaluation.criteria,
-                      feedbacks: grading.evaluation.feedbacks,
-                    }
-                  : null,
-                prompt: grading.prompt ?? null,
-                courseTitle: grading.courseRec?.courseTitle ?? null,
-              }
-            : null,
-        }),
-      });
-      const d = await res.json();
-      if (!res.ok || !d.reply) throw new Error(d?.error || '응답 없음');
-      setMsgs((prev) => [...prev, { role: 'model', text: d.reply }]);
-    } catch {
-      setMsgs((prev) => [
-        ...prev,
-        { role: 'model', text: '지금은 답변이 어려워요. 잠시 후 다시 시도해 주세요.' },
-      ]);
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex justify-end">
-      <div className="absolute inset-0 bg-black/20" onClick={onClose} />
-      <div className="relative w-96 bg-white shadow-2xl flex flex-col">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-200">
-          <div>
-            <h3 className="text-lg font-semibold text-neutral-900">AI 튜터</h3>
-            <p className="text-[11px] text-neutral-400">Gemini 기반 · 실습을 도와드려요</p>
-          </div>
-          <button onClick={onClose} className="text-neutral-500 hover:text-neutral-900">
-            <X className="w-6 h-6" />
-          </button>
-        </div>
-
-        <div ref={scrollRef} className="flex-1 p-4 overflow-y-auto space-y-3">
-          {/* 인사 + 채점 컨텍스트 안내 — 무엇을 물어볼 수 있는지 보여준다 */}
-          <div className="bg-neutral-100 rounded-2xl rounded-tl-sm p-3 max-w-[85%]">
-            <p className="text-sm text-neutral-800 leading-relaxed">
-              안녕하세요! 프롬프트 작성이나 생성 결과에 대해 무엇이든 물어보세요.
-              {grading?.evaluation && (
-                <span className="block mt-1 text-xs text-neutral-500">
-                  방금 받은 채점 결과({grading.evaluation.score}점)를 알고 있어요 —
-                  &ldquo;모션이 왜 어색하다는 거예요?&rdquo; 처럼 물어보셔도 됩니다.
-                </span>
-              )}
-            </p>
-          </div>
-          {msgs.map((m, i) =>
-            m.role === 'user' ? (
-              <div key={i} className="flex justify-end">
-                <div className="bg-indigo-600 text-white rounded-2xl rounded-tr-sm p-3 max-w-[85%]">
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{m.text}</p>
-                </div>
-              </div>
-            ) : (
-              <div key={i} className="bg-neutral-100 rounded-2xl rounded-tl-sm p-3 max-w-[85%]">
-                <p className="text-sm text-neutral-800 leading-relaxed whitespace-pre-wrap break-words">{m.text}</p>
-              </div>
-            ),
-          )}
-          {busy && (
-            <div className="bg-neutral-100 rounded-2xl rounded-tl-sm px-4 py-3 w-fit">
-              <span className="inline-flex gap-1">
-                {[0, 1, 2].map((d) => (
-                  <span
-                    key={d}
-                    className="w-1.5 h-1.5 rounded-full bg-neutral-400 animate-bounce"
-                    style={{ animationDelay: `${d * 0.15}s` }}
-                  />
-                ))}
-              </span>
-            </div>
-          )}
-        </div>
-
-        <div className="p-4 border-t border-neutral-200">
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.nativeEvent.isComposing) send();
-              }}
-              placeholder="질문을 입력하세요..."
-              className="flex-1 px-4 py-2.5 border border-neutral-300 rounded-xl text-sm focus:border-indigo-500 focus:outline-none"
-            />
-            <button
-              onClick={send}
-              disabled={busy || !input.trim()}
-              className="px-4 py-2.5 bg-indigo-600 text-white font-medium rounded-xl text-sm hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              전송
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 const generateImage = (prompt: string, sessionId: number) => {
   return createResult(sessionId);
 };
@@ -885,7 +743,6 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
   
   const [results, setResults] = useState<any[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [tutorOpen, setTutorOpen] = useState(false);
   const [modelPickerOpen, setModelPickerOpen] = useState(false);
   // 개인화 추천 (프로필 기반 생성 설정·구간·스타일)
   const [personalize, setPersonalize] = useState<any>(null);
@@ -2446,22 +2303,6 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
 
             </div>
 
-            <div className="flex-shrink-0 p-4 pt-3 border-t border-[#E5E8EB] flex justify-end">
-              <button
-                onClick={() => {
-                  setTutorOpen(true);
-                  // 막힌 지점 직접 신호 — 어느 구간에서 질문했는지가 중요
-                  void logEvent('tutor_question', {
-                    timecode: currentPrompt?.timecode ?? null,
-                    video_time: Math.round(videoTime),
-                  });
-                }}
-                className="px-4 py-2 bg-[#F2F4F6] text-[#6B7684] font-medium rounded-lg text-sm hover:bg-[#E5E8EB] transition-colors flex items-center gap-2"
-              >
-                <MessageSquare className="w-4 h-4" />
-                튜터에게 질문
-              </button>
-            </div>
           </div>
         </div>
       </div>
@@ -2512,12 +2353,6 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
         onShowUpgradeModal={onShowUpgradeModal}
       />
 
-      {/* 가장 최근 채점된 결과를 컨텍스트로 — 튜터가 '방금 그 영상' 얘기를 할 수 있다 */}
-      <TutorDrawer
-        isOpen={tutorOpen}
-        onClose={() => setTutorOpen(false)}
-        grading={[...results].reverse().find((r: any) => r.evaluation) || null}
-      />
         </div>
       </div>
     </div>

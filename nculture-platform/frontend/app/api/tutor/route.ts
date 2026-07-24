@@ -1,5 +1,5 @@
 /**
- * AI 튜터 — 채점 결과 기반 강의 추천 문구 생성 + 대화형 질의응답 (Gemini).
+ * AI 튜터 — 채점 결과 기반 강의 추천 문구 생성 (Gemini).
  *
  * 설계 원칙:
  *   - 강의 '선택'은 클라이언트의 결정적 로직(약점 축 → COURSE_BY_WEAK_AXIS)이 한다.
@@ -13,7 +13,6 @@ import { NextResponse } from 'next/server';
 export const maxDuration = 60;
 
 const GEMINI_MODEL = 'gemini-3.6-flash'; // /api/grade 와 동일 모델
-const MAX_CHAT_TURNS = 10; // 최근 대화만 유지 — 토큰과 응답 시간을 묶는다
 
 const RECOMMEND_SYSTEM = `너는 AI 크리에이터 교육 플랫폼 'Coming AI'의 AI 튜터다.
 학생이 방금 생성한 AI 영상의 채점 결과를 보고, 정해진 보완 강의를 자연스럽게 권유하는 짧은 메시지를 쓴다.
@@ -24,16 +23,6 @@ const RECOMMEND_SYSTEM = `너는 AI 크리에이터 교육 플랫폼 'Coming AI'
 - 강의는 주어진 강의만 언급한다. 다른 강의를 지어내지 않는다.
 - 선호 스타일이 주어지면 한 번만 가볍게 반영한다.
 - 말투는 격려하는 튜터 — 지적만 하지 말고 다음 행동(강의)으로 연결한다.`;
-
-const CHAT_SYSTEM = `너는 K-컬처 AI 크리에이터 교육 플랫폼 'Coming AI'의 AI 튜터다.
-학생의 AI 영상 생성 실습(프롬프트 작성, 모델·파라미터 선택, 생성 결과 개선)을 돕는다.
-
-규칙:
-- 한국어로 답하고, 2~5문장으로 간결하게. 필요할 때만 짧은 예시 프롬프트를 든다.
-- 마크다운 문법(**, ##, 리스트 기호 등) 없이 순수 텍스트로만 쓴다. 채팅 말풍선에 그대로 표시된다.
-- 채점 컨텍스트가 주어지면 그 실제 점수와 코멘트를 근거로 구체적으로 설명한다.
-- 커리큘럼 강의는 컨텍스트에 주어진 것만 언급한다. 강의명을 지어내지 않는다.
-- 모르는 것은 모른다고 말한다. 플랫폼 밖 주제(과금·계정 등)는 운영팀 문의를 안내한다.`;
 
 async function callGemini(body: any): Promise<string> {
   const key = process.env.GEMINI_API_KEY;
@@ -97,44 +86,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ message });
     }
 
-    // ── 2) 대화형 튜터 챗 ──────────────────────────────────────────
-    if (body.mode === 'chat') {
-      const msgs: Array<{ role: string; text: string }> = Array.isArray(body.messages)
-        ? body.messages.slice(-MAX_CHAT_TURNS)
-        : [];
-      if (!msgs.length || msgs[msgs.length - 1].role !== 'user') {
-        return NextResponse.json({ error: '마지막 user 메시지가 필요합니다.' }, { status: 400 });
-      }
-
-      // 채점·강의 컨텍스트는 시스템이 아니라 첫 user 턴 앞에 붙인다 — 대화가 길어져도 유지
-      const ctx = body.context || {};
-      const ctxLines = [
-        ctx.evaluation ? `방금 받은 영상 채점 결과:\n${gradingBrief(ctx.evaluation, ctx.prompt)}` : '',
-        ctx.courseTitle ? `학생에게 이미 추천된 보완 강의: 「${ctx.courseTitle}」` : '',
-        ctx.timecode ? `학생이 보고 있는 강의 구간: ${ctx.timecode}` : '',
-      ].filter(Boolean);
-
-      const contents = msgs.map((m, i) => ({
-        role: m.role === 'user' ? 'user' : 'model',
-        parts: [
-          {
-            text:
-              i === 0 && ctxLines.length && m.role === 'user'
-                ? `[컨텍스트]\n${ctxLines.join('\n\n')}\n\n[질문]\n${m.text}`
-                : m.text,
-          },
-        ],
-      }));
-
-      const reply = await callGemini({
-        systemInstruction: { parts: [{ text: CHAT_SYSTEM }] },
-        contents,
-        generationConfig: { temperature: 0.6, maxOutputTokens: 2048 },
-      });
-      return NextResponse.json({ reply: reply.trim() });
-    }
-
-    return NextResponse.json({ error: 'mode 는 recommend | chat 이어야 합니다.' }, { status: 400 });
+    return NextResponse.json({ error: 'mode 는 recommend 여야 합니다.' }, { status: 400 });
   } catch (e: any) {
     console.error('[tutor] 실패:', e?.message || e);
     return NextResponse.json({ error: e?.message || '튜터 응답 실패' }, { status: 502 });
