@@ -151,8 +151,9 @@ export default function InsightsPage() {
   const [monitorOpen, setMonitorOpen] = useState(true);
   // 합성 검증 섹션 — 수치의 근거를 물을 때만 펼친다 (기본 접힘)
   const [synOpen, setSynOpen] = useState(false);
-  // 합성 회원(label 'syn:')을 목록에서 걷어내고 실회원만 보기
-  const [hideSyn, setHideSyn] = useState(false);
+  // 합성 회원(label 'syn:')을 목록에서 걷어내고 실회원만 보기 — 평소엔 실회원이 기본,
+  // 합성 코호트는 검증 근거를 볼 때만 체크 해제로 꺼내 본다
+  const [hideSyn, setHideSyn] = useState(true);
   // 회원 상세 탭 — 카드 7개 세로 나열의 스크롤 피로를 줄인다
   const [tab, setTab] = useState<'overview' | 'activity' | 'results'>('overview');
   // 비교 모드 — "같은 강의, 다른 추천"을 한 화면에
@@ -180,7 +181,14 @@ export default function InsightsPage() {
 
       setData(d);
       setError(null);
-      setSelected((prev) => prev ?? d.members?.[0]?.userId ?? null);
+      // 기본 선택은 실회원 우선 — 합성 숨김이 기본이라 목록에 없는 회원이 선택되면 안 된다
+      setSelected(
+        (prev) =>
+          prev ??
+          d.members?.find((m: any) => !(m.label || '').startsWith('syn:'))?.userId ??
+          d.members?.[0]?.userId ??
+          null,
+      );
     } catch (e: any) {
       setError(e?.message || '오류');
     } finally {
@@ -243,6 +251,14 @@ export default function InsightsPage() {
         (m.account || '').toLowerCase().includes(needle),
     );
   }, [data, q, hideSyn]);
+
+  // 숨김이 켜진 채 합성 회원이 선택돼 있으면(자동 새로고침·토글 직후) 목록의 첫 회원으로 옮긴다
+  // — 목록엔 없는 회원의 상세가 떠 있는 어긋남 방지
+  useEffect(() => {
+    if (!hideSyn || !member || !isSyn(member)) return;
+    setSelected(filteredMembers[0]?.userId ?? null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hideSyn, member, filteredMembers]);
 
   // 비교 대상 — 기본은 최근 활동 상위 2명, 셀렉터로 교체 가능
   const [cmpA, cmpB] = useMemo(() => {
