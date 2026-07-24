@@ -10,8 +10,10 @@
  */
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { computeProfile, computeGlobalStats, rankPrompts } from '@/lib/personalization';
+import { computeProfile, computeGlobalStats, rankPrompts, matchArchetype } from '@/lib/personalization';
 import lectureIngest from '@/lib/ingest/2-3.ingest.json';
+// 합성 40명 + ground truth 오프라인 검증 결과 (eval-personalization.ts 가 생성)
+import evalSnapshot from '@/lib/personalization/eval-snapshot.json';
 
 export const dynamic = 'force-dynamic';
 
@@ -161,6 +163,13 @@ export async function GET() {
       // 추천기(rankPrompts)가 쓰는 것과 '같은 프로필' — insights 표시와 추천이 일치한다.
       const profile = computeProfile(mine as any, (persona?.seed as any) ?? null);
 
+      // 가장 닮은 합성 아키타입 — 그 유형의 검증 NDCG 를 '전이' 수치로 붙인다.
+      // 회원 실측이 아니므로 화면에서 반드시 '합성 검증 전이'로 라벨한다.
+      const arch = matchArchetype(profile);
+      const archEval = arch
+        ? evalSnapshot.perArchetype.find((a) => a.id === arch.id) || null
+        : null;
+
       // 예측 뷰: 프로필로 후보 프롬프트를 재정렬 (제너럴+개인화 믹스) → 상위 3개
       const recommendations = rankPrompts(profile, candidates, globalStats)
         .slice(0, 3)
@@ -255,6 +264,11 @@ export async function GET() {
             appliedRecommendation > 0
               ? Math.round((generatedFromRecommendation / appliedRecommendation) * 100)
               : null,
+          // 성공한 생성 중 추천에서 출발한 비율 — 추천이 창작의 몇 %를 이끄는가
+          recommendationShare:
+            generateCount > 0
+              ? Math.round((generatedFromRecommendation / generateCount) * 100)
+              : null,
           avgRating: stars.length ? Number((stars.reduce((a, b) => a + b, 0) / stars.length).toFixed(1)) : null,
           avgGradeScore: scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null,
         },
@@ -262,6 +276,15 @@ export async function GET() {
         profile,
         // 이 프로필로 지금 추천될 프롬프트 top3 (예측 뷰)
         recommendations,
+        // 가장 닮은 합성 아키타입 + 그 유형의 검증 성적 (전이 수치 — 실측 아님)
+        archetype: arch
+          ? {
+              ...arch,
+              ndcg: archEval
+                ? { personal: archEval.personal, general: archEval.general, n: archEval.n }
+                : null,
+            }
+          : null,
       };
     });
 
@@ -270,6 +293,11 @@ export async function GET() {
     return NextResponse.json({
       members,
       popularityTop, // 개인화 미적용(인기순) 추천 — 전/후 비교용
+      // 합성 검증 스냅샷 + 현재 DB 에 섞여 있는 합성 회원 수 (label 'syn:' 태그)
+      evaluation: {
+        ...evalSnapshot,
+        syntheticMembers: members.filter((m) => (m.label || '').startsWith('syn:')).length,
+      },
       recentEvents: events.slice(0, 40).map((e) => ({
         id: e.id,          // 화면에서 '방금 들어온 이벤트'를 가려내는 데 쓴다
         userId: e.user_id,

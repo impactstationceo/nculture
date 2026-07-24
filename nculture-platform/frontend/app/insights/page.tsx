@@ -9,7 +9,7 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { RefreshCw, Users, Activity, Star, Award, Clock, ArrowLeft } from 'lucide-react';
+import { RefreshCw, Users, Activity, Star, Award, Clock, ArrowLeft, FlaskConical } from 'lucide-react';
 import lectureIngest from '@/lib/ingest/2-3.ingest.json';
 
 const SEED_LABELS: Record<string, string> = {
@@ -147,6 +147,10 @@ export default function InsightsPage() {
     });
   // 실시간 모니터 접기 — 시연 땐 펼치고, 평소엔 접어서 회원 비교가 첫 화면에 오게
   const [monitorOpen, setMonitorOpen] = useState(true);
+  // 합성 검증 섹션 — 수치의 근거를 물을 때만 펼친다 (기본 접힘)
+  const [synOpen, setSynOpen] = useState(false);
+  // 합성 회원(label 'syn:')을 목록에서 걷어내고 실회원만 보기
+  const [hideSyn, setHideSyn] = useState(false);
   // 회원 상세 탭 — 카드 7개 세로 나열의 스크롤 피로를 줄인다
   const [tab, setTab] = useState<'overview' | 'activity' | 'results'>('overview');
   // 비교 모드 — "같은 강의, 다른 추천"을 한 화면에
@@ -224,8 +228,11 @@ export default function InsightsPage() {
     return { conv, avgStar: starN ? (starSum / starN).toFixed(1) : null };
   }, [data]);
 
+  const isSyn = (m: any) => (m.label || '').startsWith('syn:');
+
   const filteredMembers = useMemo(() => {
-    const ms: any[] = data?.members || [];
+    let ms: any[] = data?.members || [];
+    if (hideSyn) ms = ms.filter((m) => !isSyn(m));
     if (!q.trim()) return ms;
     const needle = q.trim().toLowerCase();
     return ms.filter(
@@ -233,7 +240,7 @@ export default function InsightsPage() {
         (m.label || '').toLowerCase().includes(needle) ||
         (m.account || '').toLowerCase().includes(needle),
     );
-  }, [data, q]);
+  }, [data, q, hideSyn]);
 
   // 비교 대상 — 기본은 최근 활동 상위 2명, 셀렉터로 교체 가능
   const [cmpA, cmpB] = useMemo(() => {
@@ -336,16 +343,94 @@ export default function InsightsPage() {
             value={kpi.avgStar ?? '—'}
           />
           {/* 합성 40명 + ground truth 오프라인 검증(NDCG@3) 결과 — 기술이 작동한다는 근거 */}
-          <div className="flex-1 bg-[#3182F6]/5 border border-[#3182F6]/25 rounded-2xl p-4">
+          <button
+            onClick={() => setSynOpen((v) => !v)}
+            className="flex-1 text-left bg-[#3182F6]/5 border border-[#3182F6]/25 rounded-2xl p-4 hover:bg-[#3182F6]/10 transition"
+          >
             <div className="flex items-center gap-1.5 text-xs text-[#1b64da] mb-1">
               <Award className="w-3.5 h-3.5" />개인화 추천 정확도
             </div>
             <div className="text-2xl font-bold text-[#1b64da] tabular-nums">
-              +133%
-              <span className="ml-1.5 text-[11px] font-normal text-neutral-500">인기순 대비 · 합성 검증</span>
+              {data?.evaluation ? `+${Math.round(data.evaluation.overall.liftPct)}%` : '—'}
+              <span className="ml-1.5 text-[11px] font-normal text-neutral-500">
+                인기순 대비 · 합성 검증 · 근거 보기 ▾
+              </span>
             </div>
-          </div>
+          </button>
         </div>
+
+        {/* 합성 데이터 검증 — "+134%"의 근거. 어떻게 만들었고 어떻게 측정했는지 그대로 편다 */}
+        {!!data?.evaluation && synOpen && (
+          <div className="mb-5 bg-white border border-[#3182F6]/25 rounded-2xl p-5">
+            <h2 className="text-sm font-semibold text-neutral-900 mb-1 flex items-center gap-1.5">
+              <FlaskConical className="w-3.5 h-3.5 text-[#3182F6]" />
+              합성 데이터 검증
+              <span className="text-neutral-400 font-normal">— 추천 정확도 수치의 근거</span>
+            </h2>
+            <p className="text-[11px] text-neutral-400 mb-4">
+              실학생 없이 추천기를 검증하기 위해, 진짜 취향(ground truth)을 아는 가상 수강생을 만들어
+              추천이 그 취향을 복원하는지 측정했습니다. 난수 seed {data.evaluation.randomSeed} 고정 — 언제든 재현 가능.
+            </p>
+
+            {/* 파이프라인 4단계 */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
+              {[
+                ['① 아키타입 8종', '유형별 잠재 취향 분포 정의 (스타일·모델·관심 구간)'],
+                ['② 오신고 노이즈', '온보딩 답변은 일부러 부정확하게 — 행동 학습을 강제'],
+                ['③ 행동 시뮬', `${data.evaluation.users}명 · ${data.evaluation.events}건 · ${data.evaluation.days}일치 확률 생성`],
+                ['④ 복원 평가', '추천 top3 가 진짜 관심과 일치하는지 NDCG@3 측정'],
+              ].map(([t, d]) => (
+                <div key={t} className="bg-neutral-50 rounded-xl p-3">
+                  <div className="text-[11px] font-semibold text-neutral-700 mb-0.5">{t}</div>
+                  <div className="text-[11px] text-neutral-500 leading-relaxed">{d}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* 전체 결과 비교 바 */}
+            <div className="rounded-xl border border-neutral-200 p-3 mb-4 space-y-1.5">
+              <AffBar label="개인화 (믹스 랭킹)" value={data.evaluation.overall.personal} />
+              <AffBar label="인기순 baseline" value={data.evaluation.overall.general} color="#8B95A1" />
+              <p className="text-[11px] text-neutral-500 pt-1">
+                NDCG@{data.evaluation.k} {data.evaluation.overall.personal.toFixed(3)} vs{' '}
+                {data.evaluation.overall.general.toFixed(3)} —{' '}
+                <b className="text-[#1b64da]">개인화가 {Math.round(data.evaluation.overall.liftPct)}% 더 정확</b>
+              </p>
+            </div>
+
+            {/* 아키타입별 — 인기순은 다수파에게만 통하고, 개인화는 소수 취향도 복원한다 */}
+            <div className="text-xs font-medium text-neutral-700 mb-2">
+              유형별 정확도 <span className="text-neutral-400 font-normal">— 소수 취향일수록 개인화의 가치가 크다</span>
+            </div>
+            <div className="border border-neutral-200 rounded-xl overflow-hidden">
+              {data.evaluation.perArchetype.map((a: any) => (
+                <div key={a.id} className="flex items-center gap-3 px-3 py-2 border-b border-neutral-100 last:border-0 text-xs">
+                  <span className="w-28 shrink-0 text-neutral-700 truncate" title={a.id}>{a.label}</span>
+                  <span className="w-8 shrink-0 text-neutral-400 tabular-nums">{a.n}명</span>
+                  <div className="flex-1 space-y-0.5">
+                    <div className="h-1.5 rounded-full bg-neutral-100 overflow-hidden">
+                      <div className="h-full rounded-full bg-[#3182F6]" style={{ width: pct(a.personal) }} />
+                    </div>
+                    <div className="h-1.5 rounded-full bg-neutral-100 overflow-hidden">
+                      <div className="h-full rounded-full bg-neutral-300" style={{ width: pct(a.general) }} />
+                    </div>
+                  </div>
+                  <span className="w-24 shrink-0 text-right tabular-nums text-neutral-600">
+                    {a.personal.toFixed(2)}
+                    <span className="text-neutral-400"> / {a.general === 0 ? '인기순 실패' : a.general.toFixed(2)}</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {data.evaluation.syntheticMembers > 0 && (
+              <p className="mt-3 text-[11px] text-neutral-400">
+                현재 DB 에 합성 회원 {data.evaluation.syntheticMembers}명이 포함되어 있습니다
+                (label &lsquo;syn:&rsquo; 태그 — 회원 목록에서 숨길 수 있고, 일괄 삭제도 가능합니다).
+              </p>
+            )}
+          </div>
+        )}
 
         {data?.members?.length === 0 && !loading && (
           <div className="bg-white border border-neutral-200 rounded-2xl p-10 text-center">
@@ -382,6 +467,18 @@ export default function InsightsPage() {
                   className="w-full mb-1 px-3 py-1.5 rounded-lg border border-neutral-200 text-xs focus:border-[#3182F6] focus:outline-none"
                 />
               )}
+              {/* 합성 회원이 섞여 있을 때만 — 실회원만 보고 싶은 순간이 반드시 온다 */}
+              {(data.members || []).some(isSyn) && (
+                <label className="flex items-center gap-1.5 px-2 pb-1 text-[11px] text-neutral-500 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={hideSyn}
+                    onChange={(e) => setHideSyn(e.target.checked)}
+                    className="accent-[#3182F6]"
+                  />
+                  합성 회원 숨기기
+                </label>
+              )}
               {filteredMembers.map((m: any) => {
                 const seedStyle = m.seed?.visualStyles?.[0] || topKeyOf(m.profile?.affinity?.style);
                 const stg = stageOf(m.profile?.confidence || 0);
@@ -399,6 +496,11 @@ export default function InsightsPage() {
                       <span className="text-sm font-medium text-neutral-900 truncate">
                         {m.label || `익명 ${m.userId.slice(0, 6)}`}
                       </span>
+                      {isSyn(m) && (
+                        <span className="shrink-0 px-1.5 py-px rounded-md bg-violet-50 text-[10px] text-violet-500">
+                          합성
+                        </span>
+                      )}
                       {seedStyle && (
                         <span className="shrink-0 px-1.5 py-px rounded-md bg-neutral-100 text-[10px] text-neutral-500">
                           {ko(STYLE_KO, seedStyle)}
@@ -731,6 +833,53 @@ export default function InsightsPage() {
                           </div>
                         );
                       })()}
+
+                      {/* 회원별 개인화 지표 — "이 회원의 추천은 얼마나 개인화됐나"를 숫자로 */}
+                      <div className="grid grid-cols-3 gap-2 mb-4">
+                        <div className="bg-neutral-50 rounded-xl px-3 py-2">
+                          <div className="text-[10px] text-neutral-500">행동 신호</div>
+                          <div className="text-sm font-bold text-neutral-900 tabular-nums">
+                            {member.profile.eventCount}건
+                          </div>
+                        </div>
+                        <div className="bg-neutral-50 rounded-xl px-3 py-2">
+                          <div className="text-[10px] text-neutral-500">개인화 반영도 α</div>
+                          <div className="text-sm font-bold text-neutral-900 tabular-nums">
+                            {member.recommendations?.[0] ? pct(member.recommendations[0].alpha) : '—'}
+                          </div>
+                        </div>
+                        <div className="bg-neutral-50 rounded-xl px-3 py-2">
+                          <div className="text-[10px] text-neutral-500">추천 기반 생성</div>
+                          <div className="text-sm font-bold text-neutral-900 tabular-nums">
+                            {member.derived.recommendationShare === null ? '—' : `${member.derived.recommendationShare}%`}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 닮은 검증 유형 — 합성 검증 성적을 '전이'해 붙인다 (실측 아님을 명시) */}
+                      {member.archetype && (
+                        <div className="mb-4 rounded-xl border border-violet-200 bg-violet-50/60 px-3 py-2">
+                          <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                            <span className="font-medium text-violet-700">
+                              유사 유형 · {member.archetype.label}
+                            </span>
+                            <span className="text-violet-500 tabular-nums">
+                              유사도 {pct(member.archetype.similarity)}
+                            </span>
+                            <span className="px-1.5 py-px rounded-md bg-white border border-violet-200 text-[10px] text-violet-500">
+                              합성 검증 전이
+                            </span>
+                          </div>
+                          {member.archetype.ndcg && (
+                            <p className="mt-1 text-[11px] text-neutral-500 leading-relaxed">
+                              이 유형의 검증 추천 정확도는 NDCG@3{' '}
+                              <b className="text-neutral-700 tabular-nums">{member.archetype.ndcg.personal.toFixed(3)}</b>
+                              <span className="tabular-nums"> (인기순 {member.archetype.ndcg.general.toFixed(3)} · 합성 {member.archetype.ndcg.n}명)</span>
+                              {' '}— 회원 실측치가 아니라 닮은 유형의 합성 검증 성적입니다.
+                            </p>
+                          )}
+                        </div>
+                      )}
 
                       <div className="grid md:grid-cols-2 gap-x-6 gap-y-4">
                         <div>
