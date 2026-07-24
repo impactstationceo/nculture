@@ -256,60 +256,47 @@ export const AI_SERVICES: any[] = [
       { id: 'nano-banana-pro', name: 'Nano Banana Pro', description: '고해상도', specs: { resolution: '2048x2048', style: '선명한' }, pricing: { multiplier: 1.3, base: 11 } }
     ]
   },
-  // ============= 텍스트 생성 서비스 =============
+  // ============= 텍스트 생성 서비스 (2026-07 최신 모델 기준) =============
   {
-    id: 'gpt4',
-    name: 'GPT-4o',
+    id: 'gpt',
+    name: 'OpenAI GPT',
     category: 'text',
-    description: '가장 강력한 멀티모달 언어 모델',
+    description: '코딩·지식 작업에 강한 최신 프론티어 모델',
     icon: '🧠',
     tiers: [
-      { id: 'gpt4o', name: 'GPT-4o', description: '최신 모델', specs: { context: '128K', speed: '빠름' }, pricing: { multiplier: 1.0, base: 3 } },
-      { id: 'gpt4o-mini', name: 'GPT-4o Mini', description: '경량 모델', specs: { context: '128K', speed: '매우 빠름' }, pricing: { multiplier: 0.3, base: 1 } }
+      { id: 'gpt-5-6-luna', name: 'GPT-5.6 Luna', description: '경량 모델', specs: { context: '400K', speed: '매우 빠름' }, pricing: { multiplier: 0.3, base: 1 } },
+      { id: 'gpt-5-6-terra', name: 'GPT-5.6 Terra', description: '균형 잡힌 성능', specs: { context: '400K', speed: '빠름' }, pricing: { multiplier: 0.7, base: 2 } },
+      { id: 'gpt-5-6-sol', name: 'GPT-5.6 Sol', description: '최고 성능', specs: { context: '400K', speed: '보통' }, pricing: { multiplier: 1.2, base: 4 } },
+      { id: 'gpt-5-5', name: 'GPT-5.5', description: '이전 세대 플래그십', specs: { context: '400K', speed: '보통' }, pricing: { multiplier: 0.9, base: 3 } },
+      { id: 'gpt-5-4', name: 'GPT-5.4', description: '이전 세대 모델', specs: { context: '400K', speed: '빠름' }, pricing: { multiplier: 0.6, base: 2 } }
     ]
   },
   {
     id: 'claude',
-    name: 'Claude 3.5',
+    name: 'Anthropic Claude',
     category: 'text',
     description: '안전하고 유용한 AI 어시스턴트',
     icon: '🤖',
     tiers: [
-      { id: 'claude-sonnet', name: 'Sonnet', description: '균형 잡힌 성능', specs: { context: '200K', speed: '빠름' }, pricing: { multiplier: 0.8, base: 2 } },
-      { id: 'claude-opus', name: 'Opus', description: '최고 성능', specs: { context: '200K', speed: '보통' }, pricing: { multiplier: 1.5, base: 5 } }
+      { id: 'claude-haiku-4-5', name: 'Haiku 4.5', description: '가장 빠르고 경제적', specs: { context: '200K', speed: '매우 빠름' }, pricing: { multiplier: 0.3, base: 1 } },
+      { id: 'claude-sonnet-5', name: 'Sonnet 5', description: '균형 잡힌 최신 모델', specs: { context: '1M', speed: '빠름' }, pricing: { multiplier: 0.8, base: 2 } },
+      { id: 'claude-opus-4-8', name: 'Opus 4.8', description: '최고 성능', specs: { context: '1M', speed: '보통' }, pricing: { multiplier: 1.2, base: 4 } },
+      { id: 'claude-fable-5', name: 'Fable 5', description: '가장 강력한 플래그십', specs: { context: '1M', speed: '보통' }, pricing: { multiplier: 2.0, base: 6 } }
     ]
   },
   {
     id: 'gemini',
-    name: 'Gemini Pro',
+    name: 'Google Gemini',
     category: 'text',
     description: '구글의 최신 멀티모달 AI',
     icon: '💎',
     tiers: [
-      { id: 'gemini-pro', name: 'Pro', description: '표준 모델', specs: { context: '1M', speed: '빠름' }, pricing: { multiplier: 0.7, base: 2 } },
-      { id: 'gemini-ultra', name: 'Ultra', description: '최고 성능', specs: { context: '1M', speed: '보통' }, pricing: { multiplier: 1.2, base: 4 } }
-    ]
-  },
-  {
-    id: 'llama',
-    name: 'Llama 3.1',
-    category: 'text',
-    description: '오픈소스 기반 강력한 모델',
-    icon: '🦙',
-    tiers: [
-      { id: 'llama-70b', name: '70B', description: '대형 모델', specs: { context: '128K', speed: '보통' }, pricing: { multiplier: 0.5, base: 2 } },
-      { id: 'llama-405b', name: '405B', description: '초대형 모델', specs: { context: '128K', speed: '느림' }, pricing: { multiplier: 1.0, base: 3 } }
-    ]
-  },
-  {
-    id: 'mistral',
-    name: 'Mistral Large',
-    category: 'text',
-    description: '유럽 기반 고성능 모델',
-    icon: '🌬️',
-    tiers: [
-      { id: 'mistral-medium', name: 'Medium', description: '중형 모델', specs: { context: '32K', speed: '빠름' }, pricing: { multiplier: 0.4, base: 1 } },
-      { id: 'mistral-large', name: 'Large', description: '대형 모델', specs: { context: '128K', speed: '보통' }, pricing: { multiplier: 0.8, base: 3 } }
+      { id: 'gemini-3-5-flash-lite', name: '3.5 Flash-Lite', description: '가장 저렴한 경량 모델', specs: { context: '1M', speed: '매우 빠름' }, pricing: { multiplier: 0.2, base: 1 } },
+      { id: 'gemini-3-6-flash', name: '3.6 Flash', description: '최신 주력 모델', specs: { context: '1M', speed: '빠름' }, pricing: { multiplier: 0.6, base: 2 } },
+      { id: 'gemini-3-pro', name: '3 Pro', description: '최고 성능', specs: { context: '1M', speed: '보통' }, pricing: { multiplier: 1.0, base: 3 } },
+      { id: 'gemini-3-flash', name: '3 Flash', description: '이전 세대 고속 모델', specs: { context: '1M', speed: '매우 빠름' }, pricing: { multiplier: 0.4, base: 1 } },
+      { id: 'gemini-2-5-pro', name: '2.5 Pro', description: '이전 세대 최고 성능', specs: { context: '1M', speed: '보통' }, pricing: { multiplier: 0.8, base: 3 } },
+      { id: 'gemini-2-5-flash', name: '2.5 Flash', description: '이전 세대 표준 모델', specs: { context: '1M', speed: '빠름' }, pricing: { multiplier: 0.3, base: 1 } }
     ]
   }
 ];

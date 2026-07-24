@@ -633,40 +633,140 @@ const VideoToolTabs = ({ activeTab, onTabChange }: any) => {
 };
 
 // ============= Tutor Drawer =============
-const TutorDrawer = ({ isOpen, onClose }: any) => {
+// Gemini 대화형 튜터 — 방금 받은 채점 결과(grading)를 컨텍스트로 넣어
+// "내 영상 얘기"를 할 수 있게 한다. API 실패 시에도 대화는 죽지 않는다.
+const TutorDrawer = ({ isOpen, onClose, grading }: any) => {
+  const [msgs, setMsgs] = useState<Array<{ role: 'user' | 'model'; text: string }>>([]);
+  const [input, setInput] = useState('');
+  const [busy, setBusy] = useState(false);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    // 새 메시지·로딩 표시가 항상 보이게 아래로 붙인다
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
+  }, [msgs, busy, isOpen]);
+
   if (!isOpen) return null;
+
+  const send = async () => {
+    const text = input.trim();
+    if (!text || busy) return;
+    setInput('');
+    const next = [...msgs, { role: 'user' as const, text }];
+    setMsgs(next);
+    setBusy(true);
+    // 어떤 질문이 들어오는지 자체가 학습 신호 — 구간이 아니라 질문 내용으로 기록
+    void logEvent('tutor_question', { question: text.slice(0, 200), has_grading: !!grading?.evaluation });
+    try {
+      const res = await fetch('/api/tutor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: 'chat',
+          messages: next,
+          context: grading
+            ? {
+                evaluation: grading.evaluation
+                  ? {
+                      score: grading.evaluation.score,
+                      criteria: grading.evaluation.criteria,
+                      feedbacks: grading.evaluation.feedbacks,
+                    }
+                  : null,
+                prompt: grading.prompt ?? null,
+                courseTitle: grading.courseRec?.courseTitle ?? null,
+              }
+            : null,
+        }),
+      });
+      const d = await res.json();
+      if (!res.ok || !d.reply) throw new Error(d?.error || '응답 없음');
+      setMsgs((prev) => [...prev, { role: 'model', text: d.reply }]);
+    } catch {
+      setMsgs((prev) => [
+        ...prev,
+        { role: 'model', text: '지금은 답변이 어려워요. 잠시 후 다시 시도해 주세요.' },
+      ]);
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
       <div className="absolute inset-0 bg-black/20" onClick={onClose} />
       <div className="relative w-96 bg-white shadow-2xl flex flex-col">
-        <div className="flex items-center justify-between p-6 border-b border-neutral-200">
-          <h3 className="text-xl font-semibold text-neutral-900">튜터에게 질문하기</h3>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-200">
+          <div>
+            <h3 className="text-lg font-semibold text-neutral-900">AI 튜터</h3>
+            <p className="text-[11px] text-neutral-400">Gemini 기반 · 실습을 도와드려요</p>
+          </div>
           <button onClick={onClose} className="text-neutral-500 hover:text-neutral-900">
             <X className="w-6 h-6" />
           </button>
         </div>
-        
-        <div className="flex-1 p-6 overflow-y-auto">
-          <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mb-4">
-            <p className="text-sm text-neutral-700">튜터가 곧 응답할 예정입니다.</p>
+
+        <div ref={scrollRef} className="flex-1 p-4 overflow-y-auto space-y-3">
+          {/* 인사 + 채점 컨텍스트 안내 — 무엇을 물어볼 수 있는지 보여준다 */}
+          <div className="bg-neutral-100 rounded-2xl rounded-tl-sm p-3 max-w-[85%]">
+            <p className="text-sm text-neutral-800 leading-relaxed">
+              안녕하세요! 프롬프트 작성이나 생성 결과에 대해 무엇이든 물어보세요.
+              {grading?.evaluation && (
+                <span className="block mt-1 text-xs text-neutral-500">
+                  방금 받은 채점 결과({grading.evaluation.score}점)를 알고 있어요 —
+                  &ldquo;모션이 왜 어색하다는 거예요?&rdquo; 처럼 물어보셔도 됩니다.
+                </span>
+              )}
+            </p>
           </div>
-          <div className="space-y-3">
-            <div className="bg-neutral-100 rounded-lg p-3">
-              <p className="text-sm">👨‍🏫 안녕하세요! 무엇을 도와드릴까요?</p>
+          {msgs.map((m, i) =>
+            m.role === 'user' ? (
+              <div key={i} className="flex justify-end">
+                <div className="bg-indigo-600 text-white rounded-2xl rounded-tr-sm p-3 max-w-[85%]">
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{m.text}</p>
+                </div>
+              </div>
+            ) : (
+              <div key={i} className="bg-neutral-100 rounded-2xl rounded-tl-sm p-3 max-w-[85%]">
+                <p className="text-sm text-neutral-800 leading-relaxed whitespace-pre-wrap break-words">{m.text}</p>
+              </div>
+            ),
+          )}
+          {busy && (
+            <div className="bg-neutral-100 rounded-2xl rounded-tl-sm px-4 py-3 w-fit">
+              <span className="inline-flex gap-1">
+                {[0, 1, 2].map((d) => (
+                  <span
+                    key={d}
+                    className="w-1.5 h-1.5 rounded-full bg-neutral-400 animate-bounce"
+                    style={{ animationDelay: `${d * 0.15}s` }}
+                  />
+                ))}
+              </span>
             </div>
-          </div>
+          )}
         </div>
 
-        <div className="p-6 border-t border-neutral-200">
-          <input
-            type="text"
-            placeholder="질문을 입력하세요..."
-            className="w-full px-4 py-3 border border-neutral-300 rounded-lg mb-3"
-          />
-          <button className="w-full py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700">
-            전송
-          </button>
+        <div className="p-4 border-t border-neutral-200">
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.nativeEvent.isComposing) send();
+              }}
+              placeholder="질문을 입력하세요..."
+              className="flex-1 px-4 py-2.5 border border-neutral-300 rounded-xl text-sm focus:border-indigo-500 focus:outline-none"
+            />
+            <button
+              onClick={send}
+              disabled={busy || !input.trim()}
+              className="px-4 py-2.5 bg-indigo-600 text-white font-medium rounded-xl text-sm hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              전송
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -758,7 +858,10 @@ const recommendCourseFor = (evaluation: any, personalize: any) => {
   return {
     courseId: base.id,
     courseTitle: course.title,
+    // 템플릿 문구 — Gemini 문구 생성이 실패해도 이 문구로 항상 나간다
     message: `이번 영상은 「${weakest.axis}」(${weakest.score}점)가 아쉬웠어요. ${base.reason}.${styleNote}`,
+    reason: base.reason,          // LLM 프롬프트 컨텍스트용
+    topStyle: topStyle || null,   // LLM 프롬프트 컨텍스트용
   };
 };
 
@@ -1166,7 +1269,7 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
       return '생성하고 싶은 이미지를 설명하세요...';
     }
     if (currentCategory === 'text') {
-      if (selectedService === 'gpt4') return '질문이나 작업 내용을 입력하세요...';
+      if (selectedService === 'gpt') return '질문이나 작업 내용을 입력하세요...';
       if (selectedService === 'claude') return '요청사항을 자세히 설명하세요...';
       return '텍스트 생성 요청을 입력하세요...';
     }
@@ -1418,15 +1521,39 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
             .then((ev) => {
               // 실채점 실패 시에도 데모가 비어 보이지 않게 기존 목업 채점표로 폴백
               const finalEv = ev || (sd2Grade as any);
-              // 약점 축 기반 보완 클래스 추천 — 오버레이가 아니라 평가 카드 바로 아래에 함께 표시
+              // 약점 축 기반 보완 클래스 추천 — 강의 '선택'은 여기(결정적 매핑)서 끝낸다
               const courseRec = recommendCourseFor(finalEv, personalize);
+              // 채점표를 먼저 보여주고, 추천 카드는 문구가 준비되는 대로 뒤따라 붙는다
               setResults((prev) =>
                 prev.map((r: any) =>
-                  r.id === resultId
-                    ? { ...r, evaluation: finalEv, gradingPending: false, courseRec }
-                    : r,
+                  r.id === resultId ? { ...r, evaluation: finalEv, gradingPending: false } : r,
                 ),
               );
+              if (!courseRec) return;
+              const showRec = (rec: any) =>
+                setResults((prev) =>
+                  prev.map((r: any) => (r.id === resultId ? { ...r, courseRec: rec } : r)),
+                );
+              // Gemini 가 채점 코멘트를 인용한 자연스러운 권유문을 쓴다.
+              // 실패하면 recommendCourseFor 의 템플릿 문구 그대로 — 추천은 항상 나간다.
+              fetch('/api/tutor', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  mode: 'recommend',
+                  evaluation: {
+                    score: finalEv.score,
+                    criteria: finalEv.criteria,
+                    feedbacks: finalEv.feedbacks,
+                  },
+                  prompt: gradedPrompt,
+                  topStyle: courseRec.topStyle,
+                  course: { title: courseRec.courseTitle, reason: courseRec.reason },
+                }),
+              })
+                .then((res) => (res.ok ? res.json() : Promise.reject(new Error(String(res.status)))))
+                .then((d) => showRec({ ...courseRec, message: d.message || courseRec.message }))
+                .catch(() => showRec(courseRec));
             });
         }
       } catch (error: any) {
@@ -2385,7 +2512,12 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
         onShowUpgradeModal={onShowUpgradeModal}
       />
 
-      <TutorDrawer isOpen={tutorOpen} onClose={() => setTutorOpen(false)} />
+      {/* 가장 최근 채점된 결과를 컨텍스트로 — 튜터가 '방금 그 영상' 얘기를 할 수 있다 */}
+      <TutorDrawer
+        isOpen={tutorOpen}
+        onClose={() => setTutorOpen(false)}
+        grading={[...results].reverse().find((r: any) => r.evaluation) || null}
+      />
         </div>
       </div>
     </div>
