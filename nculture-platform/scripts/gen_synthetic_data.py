@@ -51,17 +51,21 @@ CONTENT_TYPES = ["video", "image", "digital_human", "ads_shorts"]
 VISUAL_STYLES = ["cinematic", "anime", "photoreal", "minimal", "experimental", "vintage"]
 PURPOSES = ["hobby", "commercial", "branding", "education"]
 EXPERIENCES = ["beginner", "intermediate", "pro"]
-# 영상 서비스/티어 (lib/data.ts AI_SERVICES 기준)
+# 영상 서비스/티어 (lib/data.ts AI_SERVICES 기준 — PRD 라인업)
 SERVICE_TIERS = {
-    "sora": ["sora-2", "sora-2-pro", "sora-2-max"],
-    "veo": ["veo-lite", "veo-standard"],
-    "kling": ["kling-v1", "kling-v2"],
+    "runway": ["runway-gen4-turbo", "runway-gen4"],
+    "gemini-omni": ["gemini-omni-fast", "gemini-omni-pro"],
+    "veo": ["veo-3-1-fast", "veo-3-1-pro"],
+    "seedance": ["seedance-2-lite", "seedance-2-pro"],
+    "kling": ["kling-std", "kling-pro"],
     "minimax": ["minimax-fast", "minimax-quality"],
 }
 RES_BY_TIER = {  # 티어별 대표 파라미터 (generate payload 용)
-    "sora-2": ("720p", "10초"), "sora-2-pro": ("1080p", "10초"), "sora-2-max": ("4K", "15초"),
-    "veo-lite": ("720p", "8초"), "veo-standard": ("1080p", "10초"),
-    "kling-v1": ("1080p", "5초"), "kling-v2": ("1080p", "10초"),
+    "runway-gen4-turbo": ("720p", "10초"), "runway-gen4": ("1080p", "10초"),
+    "gemini-omni-fast": ("720p", "8초"), "gemini-omni-pro": ("1080p", "10초"),
+    "veo-3-1-fast": ("720p", "8초"), "veo-3-1-pro": ("1080p", "8초"),
+    "seedance-2-lite": ("720p", "10초"), "seedance-2-pro": ("1080p", "10초"),
+    "kling-std": ("1080p", "5초"), "kling-pro": ("1080p", "10초"),
     "minimax-fast": ("720p", "5초"), "minimax-quality": ("1080p", "6초"),
 }
 
@@ -71,7 +75,7 @@ RES_BY_TIER = {  # 티어별 대표 파라미터 (generate payload 용)
 ARCHETYPES = [
     {"id": "cine_hobbyist", "label": "시네마틱 취미러",
      "content": {"video": 3, "image": 1}, "style": {"cinematic": 4, "photoreal": 1},
-     "service": {"sora": 3, "veo": 2}, "purpose": "hobby", "experience": "beginner",
+     "service": {"runway": 3, "veo": 2}, "purpose": "hobby", "experience": "beginner",
      "sections": {"10:41": 3, "15:31": 2, "01:14": 1}, "prevalence": 3, "activity": 1.4, "rate_bias": 0.75},
     {"id": "ads_pro", "label": "광고쇼츠 실무자",
      "content": {"ads_shorts": 3, "video": 1}, "style": {"vintage": 3, "minimal": 2},
@@ -83,23 +87,23 @@ ARCHETYPES = [
      "sections": {"16:19": 3, "18:21": 2, "19:48": 2}, "prevalence": 2, "activity": 1.8, "rate_bias": 0.6},
     {"id": "anime_creator", "label": "애니 크리에이터",
      "content": {"image": 3, "video": 1}, "style": {"anime": 4, "experimental": 1},
-     "service": {"kling": 2, "sora": 1}, "purpose": "hobby", "experience": "intermediate",
+     "service": {"kling": 2, "seedance": 1}, "purpose": "hobby", "experience": "intermediate",
      "sections": {"02:12": 3, "12:33": 2}, "prevalence": 2, "activity": 1.6, "rate_bias": 0.7},
     {"id": "edu_researcher", "label": "교육/연구자",
      "content": {"video": 2, "digital_human": 2}, "style": {"minimal": 2, "photoreal": 2},
-     "service": {"veo": 2, "sora": 1}, "purpose": "education", "experience": "pro",
+     "service": {"veo": 2, "gemini-omni": 1}, "purpose": "education", "experience": "pro",
      "sections": {"10:41": 2, "12:33": 3, "15:31": 2}, "prevalence": 2, "activity": 1.5, "rate_bias": 0.65},
     {"id": "experimental_artist", "label": "실험 아티스트",
      "content": {"video": 2, "image": 2}, "style": {"experimental": 4, "cinematic": 1},
-     "service": {"sora": 2, "kling": 2}, "purpose": "hobby", "experience": "intermediate",
+     "service": {"seedance": 2, "kling": 2}, "purpose": "hobby", "experience": "intermediate",
      "sections": {"02:12": 2, "19:48": 2, "20:17": 1}, "prevalence": 1, "activity": 2.0, "rate_bias": 0.5},
     {"id": "digital_human_pro", "label": "디지털휴먼 실무",
      "content": {"digital_human": 4, "video": 1}, "style": {"photoreal": 4, "minimal": 1},
-     "service": {"veo": 3, "sora": 1}, "purpose": "commercial", "experience": "pro",
+     "service": {"veo": 3, "runway": 1}, "purpose": "commercial", "experience": "pro",
      "sections": {"16:19": 2, "18:21": 3}, "prevalence": 1, "activity": 1.7, "rate_bias": 0.6},
     {"id": "novice_explorer", "label": "입문 탐색러",
      "content": {"video": 2, "image": 2, "ads_shorts": 1}, "style": {"cinematic": 1, "minimal": 1, "photoreal": 1},
-     "service": {"minimax": 2, "sora": 1, "veo": 1}, "purpose": "hobby", "experience": "beginner",
+     "service": {"minimax": 2, "runway": 1, "veo": 1}, "purpose": "hobby", "experience": "beginner",
      "sections": {"01:14": 2, "10:41": 1, "18:53": 1}, "prevalence": 3, "activity": 1.1, "rate_bias": 0.8},
 ]
 
@@ -324,11 +328,13 @@ def push(users, now):
 
     pushed = 0
     for u in users:
-        code, res = curl(f"{base}/auth/v1/signup", method="POST",
-                         headers={"apikey": anon, "Content-Type": "application/json"}, body={})
-        uid = (res or {}).get("user", {}).get("id")
+        # 익명 signup 은 시간당 rate limit(429)에 걸린다 → admin API 로 생성 (제한 없음)
+        syn_email = u["key"].replace(":", ".").replace("#", ".") + "@synthetic.local"
+        code, res = curl(f"{base}/auth/v1/admin/users", method="POST", headers=admin_h,
+                         body={"email": syn_email, "email_confirm": True})
+        uid = (res or {}).get("id")
         if not uid:
-            print(f"  [건너뜀] {u['key']} 익명 생성 실패: {code}")
+            print(f"  [건너뜀] {u['key']} 유저 생성 실패: {code} {res}")
             continue
         curl(f"{base}/rest/v1/user_persona", method="POST",
              headers={**admin_h, "Prefer": "resolution=merge-duplicates"},

@@ -50,7 +50,9 @@ const CONTENT_KO: Record<string, string> = {
   video: '영상', image: '이미지', digital_human: '디지털 휴먼', ads_shorts: '광고·쇼츠',
 };
 const SERVICE_KO: Record<string, string> = {
-  sora: 'Sora', veo: 'Google Veo', kling: 'Kling', minimax: 'MiniMax Hailuo',
+  runway: 'Runway', 'gemini-omni': 'Gemini Omni', veo: 'Google Veo', seedance: 'Seedance',
+  kling: 'Kling', minimax: 'MiniMax Hailuo',
+  sora: 'Sora (구)', // 라인업 개편 전 이벤트가 남아 있어 라벨은 유지한다
 };
 const ko = (map: Record<string, string>, k: string) => map[k] || k;
 
