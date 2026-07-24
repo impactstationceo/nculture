@@ -849,7 +849,7 @@ const SessionPageContent = ({ sessionId, wallet, setWallet, addLedgerEntry, user
       return '생성하고 싶은 이미지를 설명하세요...';
     }
     if (currentCategory === 'text') {
-      if (selectedService === 'gpt4') return '질문이나 작업 내용을 입력하세요...';
+      if (selectedService === 'gpt') return '질문이나 작업 내용을 입력하세요...';
       if (selectedService === 'claude') return '요청사항을 자세히 설명하세요...';
       return '텍스트 생성 요청을 입력하세요...';
     }
