@@ -389,6 +389,16 @@ export default function InsightsPage() {
               ))}
             </div>
 
+            {/* 왜 40명인가 — 데모 채우기가 아니라 검증이 성립하는 최소 집단 표본 */}
+            <p className="text-[11px] text-neutral-500 bg-neutral-50 rounded-xl px-3 py-2.5 mb-4 leading-relaxed">
+              <b className="text-neutral-700">왜 {data.evaluation.users}명인가?</b>{' '}
+              유형별 정확도를 재려면 아키타입 8종마다 최소 수 명의 표본이 필요합니다({data.evaluation.users}명 ≈ 유형당 5명).
+              1~2명뿐이면 한 명의 우연한 행동 패턴이 유형 점수를 좌우해 수치가 노이즈가 되고, 활동량이
+              파워로(소수 파워유저 + 다수 라이트유저) 분포라 데이터가 적은 콜드 유저 구간도 표본에 잡혀야 합니다.
+              비교 대상인 &lsquo;인기순 baseline&rsquo; 역시 집단의 이벤트 집계로 만들어지므로,
+              {' '}{data.evaluation.users}명은 이 검증이 통계적으로 성립하는 <b className="text-neutral-700">최소 집단 표본</b>입니다.
+            </p>
+
             {/* 전체 결과 비교 바 */}
             <div className="rounded-xl border border-neutral-200 p-3 mb-4 space-y-1.5">
               <AffBar label="개인화 (믹스 랭킹)" value={data.evaluation.overall.personal} />
@@ -419,7 +429,19 @@ export default function InsightsPage() {
                   </div>
                   <span className="w-24 shrink-0 text-right tabular-nums text-neutral-600">
                     {a.personal.toFixed(2)}
-                    <span className="text-neutral-400"> / {a.general === 0 ? '인기순 실패' : a.general.toFixed(2)}</span>
+                    <span className="text-neutral-400">
+                      {' / '}
+                      {a.general === 0 ? (
+                        <span
+                          className="underline decoration-dotted cursor-help"
+                          title={`인기순은 모든 회원에게 같은 '전체 인기 top3' 구간만 보여줍니다. 인기 순위는 다수파·파워유저의 이벤트가 지배하기 때문에, ${a.label} 유형의 진짜 관심 구간은 top3에 하나도 들지 못했고(겹침 0) NDCG@3 가 0.000 이 됩니다. 소수 취향을 구조적으로 버리는 인기순의 한계 — 개인화가 필요한 정량적 근거입니다.`}
+                        >
+                          인기순 실패
+                        </span>
+                      ) : (
+                        a.general.toFixed(2)
+                      )}
+                    </span>
                   </span>
                 </div>
               ))}
