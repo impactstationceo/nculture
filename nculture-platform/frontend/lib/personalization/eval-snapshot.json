@@ -1,0 +1,71 @@
+{
+  "k": 3,
+  "users": 40,
+  "events": 616,
+  "randomSeed": 42,
+  "days": 21,
+  "generatedAt": "2026-07-23T06:21:22.864142+00:00",
+  "overall": {
+    "personal": 0.8471,
+    "general": 0.3629,
+    "liftPct": 133.5
+  },
+  "perArchetype": [
+    {
+      "id": "novice_explorer",
+      "label": "입문 탐색러",
+      "personal": 0.936,
+      "general": 0.84,
+      "n": 8
+    },
+    {
+      "id": "ads_pro",
+      "label": "광고쇼츠 실무자",
+      "personal": 0.954,
+      "general": 0.556,
+      "n": 6
+    },
+    {
+      "id": "cine_hobbyist",
+      "label": "시네마틱 취미러",
+      "personal": 0.785,
+      "general": 0.503,
+      "n": 6
+    },
+    {
+      "id": "edu_researcher",
+      "label": "교육/연구자",
+      "personal": 0.755,
+      "general": 0.24,
+      "n": 6
+    },
+    {
+      "id": "anime_creator",
+      "label": "애니 크리에이터",
+      "personal": 0.883,
+      "general": 0,
+      "n": 4
+    },
+    {
+      "id": "experimental_artist",
+      "label": "실험 아티스트",
+      "personal": 0.808,
+      "general": 0,
+      "n": 4
+    },
+    {
+      "id": "brand_designer",
+      "label": "브랜딩 디자이너",
+      "personal": 0.833,
+      "general": 0,
+      "n": 3
+    },
+    {
+      "id": "digital_human_pro",
+      "label": "디지털휴먼 실무",
+      "personal": 0.724,
+      "general": 0,
+      "n": 3
+    }
+  ]
+}

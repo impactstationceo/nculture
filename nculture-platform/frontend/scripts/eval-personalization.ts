@@ -18,6 +18,8 @@ import {
 
 const OUT = path.join(__dirname, '..', '..', 'scripts', 'out', 'synthetic');
 const read = (f: string) => JSON.parse(fs.readFileSync(path.join(OUT, f), 'utf-8'));
+// 검증 결과는 인사이트 페이지(합성 검증 섹션)가 그대로 보여준다 — 재실행하면 갱신됨
+const SNAPSHOT = path.join(__dirname, '..', 'lib', 'personalization', 'eval-snapshot.json');
 
 function ndcg(order: string[], relevance: Record<string, number>, k: number): number {
   const dcg = (arr: string[]) =>
@@ -53,7 +55,7 @@ function main() {
   let sumPers = 0,
     sumGen = 0,
     n = 0;
-  const perArch: Record<string, { p: number; g: number; n: number }> = {};
+  const perArch: Record<string, { label: string; p: number; g: number; n: number }> = {};
 
   for (const u of users) {
     const gt = ground[u.key];
@@ -66,7 +68,7 @@ function main() {
     sumGen += genNdcg;
     n++;
     const a = gt.archetype;
-    perArch[a] ||= { p: 0, g: 0, n: 0 };
+    perArch[a] ||= { label: gt.label || a, p: 0, g: 0, n: 0 };
     perArch[a].p += persNdcg;
     perArch[a].g += genNdcg;
     perArch[a].n++;
@@ -85,6 +87,33 @@ function main() {
       `    ${a.padEnd(20)} ${(r.p / r.n).toFixed(3)} / ${(r.g / r.n).toFixed(3)}  (${r.n}명)`,
     );
   }
+
+  // 스냅샷 저장 — 인사이트 페이지 '합성 검증' 섹션이 이 파일을 그대로 읽는다
+  const meta = read('run_meta.json');
+  const snapshot = {
+    k: K,
+    users: n,
+    events: meta.events,
+    randomSeed: meta.seed,
+    days: meta.days,
+    generatedAt: meta.generated_at,
+    overall: {
+      personal: +pers.toFixed(4),
+      general: +gen.toFixed(4),
+      liftPct: +(((pers - gen) / gen) * 100).toFixed(1),
+    },
+    perArchetype: Object.entries(perArch)
+      .map(([id, r]) => ({
+        id,
+        label: r.label,
+        personal: +(r.p / r.n).toFixed(3),
+        general: +(r.g / r.n).toFixed(3),
+        n: r.n,
+      }))
+      .sort((a, b) => b.n - a.n),
+  };
+  fs.writeFileSync(SNAPSHOT, JSON.stringify(snapshot, null, 2) + '\n');
+  console.log(`\n  스냅샷 저장 → ${path.relative(process.cwd(), SNAPSHOT)}`);
 
   // 샘플 1명: 추천 상위 vs 진짜 관심 구간
   const sample = users.find((u) => ground[u.key]?.archetype === 'ads_pro');
